@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manitra - Dashboard Financier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .stat-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 rgba(59, 130, 246, 0.2);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- HEADER -->
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-3xl font-bold gradient-text">Manitra Finance</h1>
+                <p class="text-slate-400 text-sm">Synchronisation automatique avec Drive</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div id="sync-status"
+                    class="flex items-center text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
+                    Synchronisé
+                </div>
+                <button onclick="fetchFinancialData()" class="p-2 hover:bg-white/10 rounded-full transition-colors">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN KPIS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- TRESORERIE -->
+            <div class="glass-card p-6 stat-card border-l-4 border-blue-500">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 bg-blue-500/20 rounded-2xl text-blue-400">
+                        <i class="fas fa-wallet text-xl"></i>
+                    </div>
+                    <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Trésorerie</span>
+                </div>
+                <div id="kpi-cash" class="text-3xl font-bold mb-1">-- €</div>
+                <p class="text-xs text-slate-400">Solde réel disponible</p>
+            </div>
+
+            <!-- REVENUS -->
+            <div class="glass-card p-6 stat-card border-l-4 border-emerald-500">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 bg-emerald-500/20 rounded-2xl text-emerald-400">
+                        <i class="fas fa-arrow-trend-up text-xl"></i>
+                    </div>
+                    <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Chiffre
+                        d'Affaires</span>
+                </div>
+                <div id="kpi-revenue" class="text-3xl font-bold mb-1">-- €</div>
+                <p class="text-xs text-slate-400">Total facturé (YTD)</p>
+            </div>
+
+            <!-- ACHATS -->
+            <div class="glass-card p-6 stat-card border-l-4 border-rose-500">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 bg-rose-500/20 rounded-2xl text-rose-400">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                    </div>
+                    <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Achats</span>
+                </div>
+                <div id="kpi-expenses" class="text-3xl font-bold mb-1">-- €</div>
+                <p id="kpi-pending" class="text-xs text-rose-400">-- € en attente</p>
+            </div>
+        </div>
+
+        <!-- CHARTS SECTION -->
+        <div class="grid grid-cols-12 gap-6">
+            <div class="col-span-12 lg:col-span-8 glass-card p-8 h-[450px]">
+                <h3 class="text-lg font-bold mb-6 flex items-center">
+                    <i class="fas fa-chart-area mr-3 text-blue-500"></i> Évolution de la Trésorerie
+                </h3>
+                <div class="h-[320px]">
+                    <canvas id="cashFlowChart"></canvas>
+                </div>
+            </div>
+
+            <div class="col-span-12 lg:col-span-4 glass-card p-8 h-[450px]">
+                <h3 class="text-lg font-bold mb-6 flex items-center">
+                    <i class="fas fa-chart-pie mr-3 text-emerald-500"></i> Répartition Mensuelle (Achats)
+                </h3>
+                <div class="h-[320px]">
+                    <canvas id="expensesPieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURATION : Collez ici l'URL de votre script Google Apps Script déployé
+        const API_URL = "https://script.google.com/macros/s/AKfycbxwlNp4nFB6TFMgfCBeoWzCgsw98KJrkm8iR9NoQHAtCB9DUsDSmuwYJErsHx21h3tM/exec";
+
+        let cashChart = null;
+        let expenseChart = null;
+
+        /**
+         * Récupération des données via JSONP (pour éviter les soucis de CORS)
+         */
+        function fetchFinancialData() {
+            document.getElementById('sync-status').innerHTML = '<span class="w-2 h-2 bg-amber-500 rounded-full mr-2 animate-ping"></span>Chargement...';
+
+            const callbackName = "cb_manitra_" + Date.now();
+            window[callbackName] = function (data) {
+                updateUI(data);
+                document.getElementById('sync-status').innerHTML = '<span class="w-2 h-2 bg-emerald-500 rounded-full mr-2"></span>Synchronisé';
+                delete window[callbackName];
+                const scriptTag = document.getElementById(callbackName);
+                if (scriptTag) scriptTag.remove();
+            };
+
+            const script = document.createElement("script");
+            script.id = callbackName;
+            script.src = API_URL + "?action=getFinancialSummary&callback=" + callbackName;
+            document.body.appendChild(script);
+        }
+
+        function updateUI(data) {
+            if (!data) return;
+
+            // Mise à jour des nombres
+            document.getElementById('kpi-cash').textContent = (data.tresorerie.soldeActuel || 0).toLocaleString('fr-FR') + " €";
+            document.getElementById('kpi-revenue').textContent = (data.facturation.totalCA || 0).toLocaleString('fr-FR') + " €";
+            document.getElementById('kpi-expenses').textContent = (data.achats.totalDepenses || 0).toLocaleString('fr-FR') + " €";
+            document.getElementById('kpi-pending').textContent = (data.facturation.enAttente || 0).toLocaleString('fr-FR') + " € en attente de paiement";
+
+            initCharts(data);
+        }
+
+        function initCharts(data) {
+            const months = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.font.family = 'Jakarta Plus Sans';
+
+            // 1. Graphique Trésorerie (Ligne)
+            const ctxLine = document.getElementById('cashFlowChart').getContext('2d');
+            if (cashChart) cashChart.destroy();
+
+            const gradient = ctxLine.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+            gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+
+            cashChart = new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Solde (€)',
+                        data: data.tresorerie.evolutionMensuelle || [],
+                        borderColor: '#3b82f6',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#3b82f6',
+                        pointBorderColor: '#0f172a',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        fill: true,
+                        backgroundColor: gradient,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // 2. Graphique Dépenses (Doughnut)
+            const ctxPie = document.getElementById('expensesPieChart').getContext('2d');
+            if (expenseChart) expenseChart.destroy();
+            expenseChart = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: months.slice(0, 6),
+                    datasets: [{
+                        data: data.achats.depensesMensuelles ? data.achats.depensesMensuelles.slice(0, 6) : [],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'],
+                        borderWidth: 0,
+                        hoverOffset: 20
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
+                    }
+                }
+            });
+        }
+
+        // Chargement initial
+        window.onload = fetchFinancialData;
+    </script>
+</body>
+
+</html>
