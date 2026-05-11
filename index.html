@@ -1,289 +1,119 @@
-<!DOCTYPE html>
-<html lang="fr">
+/**
+ * GOOGLE APPS SCRIPT - BACKEND FINANCIER
+ * À copier dans : https://script.google.com/
+ */
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manitra - Dashboard Financier</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+const FILE_IDS = {
+  facturation: "ID_DU_FICHIER_FACTURATION", // Remplacez par l'ID réel
+  achats: "ID_DU_FICHIER_ACHATS",           // Remplacez par l'ID réel
+  tresorerie: "ID_DU_FICHIER_TRESORERIE"    // Remplacez par l'ID réel
+};
 
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
-        }
+function doGet(e) {
+  try {
+    const action = e.parameter.action || "getFinancialSummary";
+    const callback = e.parameter.callback;
+    let data;
 
-        .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
+    if (action === "getFinancialSummary") {
+      data = getCombinedData();
+    }
 
-        .stat-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
+    const output = JSON.stringify(data);
 
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px 0 rgba(59, 130, 246, 0.2);
-        }
+    // JSONP Support for the dashboard
+    if (callback) {
+      return ContentService.createTextOutput(callback + "(" + output + ")")
+        .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    }
 
-        .gradient-text {
-            background: linear-gradient(135deg, #60a5fa, #34d399);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+    return ContentService.createTextOutput(output)
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ error: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
+function getCombinedData() {
+  return {
+    tresorerie: getTresorerieData(),
+    achats: getAchatsData(),
+    facturation: getFacturationData(),
+    timestamp: new Date().toISOString()
+  };
+}
 
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
+/**
+ * Analyse du fichier SUIVI_DE_TRESORERIE
+ */
+function getTresorerieData() {
+  const ss = SpreadsheetApp.openById(FILE_IDS.tresorerie);
+  const sheet = ss.getSheetByName("suivi trésorerie");
+  const data = sheet.getDataRange().getValues();
 
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 10px;
-        }
-    </style>
-</head>
+  let currentBalance = 0;
+  let evolution = [];
 
-<body class="p-4 md:p-8">
+  // On cherche la ligne "SOLDE COMPTE COURANT"
+  for (let i = 0; i < data.length; i++) {
+    const rowLabel = String(data[i][0]).toUpperCase();
+    if (rowLabel.indexOf("SOLDE COMPTE COURANT") !== -1 || rowLabel.indexOf("SOLDE") !== -1) {
+      currentBalance = data[i][15] || 0; // Colonne P (TOTAL)
+      evolution = data[i].slice(2, 14); // Janvier (C) à Décembre (N)
+      break;
+    }
+  }
 
-    <div class="max-w-7xl mx-auto">
-        <!-- HEADER -->
-        <header class="flex justify-between items-center mb-10">
-            <div>
-                <h1 class="text-3xl font-bold gradient-text">Manitra Finance</h1>
-                <p class="text-slate-400 text-sm">Synchronisation automatique avec Drive</p>
-            </div>
-            <div class="flex items-center space-x-4">
-                <div id="sync-status"
-                    class="flex items-center text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20">
-                    <span class="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
-                    Synchronisé
-                </div>
-                <button onclick="fetchFinancialData()" class="p-2 hover:bg-white/10 rounded-full transition-colors">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
-            </div>
-        </header>
+  return {
+    soldeActuel: currentBalance,
+    evolutionMensuelle: evolution
+  };
+}
 
-        <!-- MAIN KPIS -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <!-- TRESORERIE -->
-            <div class="glass-card p-6 stat-card border-l-4 border-blue-500">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-blue-500/20 rounded-2xl text-blue-400">
-                        <i class="fas fa-wallet text-xl"></i>
-                    </div>
-                    <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Trésorerie</span>
-                </div>
-                <div id="kpi-cash" class="text-3xl font-bold mb-1">-- €</div>
-                <p class="text-xs text-slate-400">Solde réel disponible</p>
-            </div>
+/**
+ * Analyse du fichier REGISTRE_DES_ACHATS
+ */
+function getAchatsData() {
+  const ss = SpreadsheetApp.openById(FILE_IDS.achats);
+  const sheet = ss.getSheetByName("RECAPITULATIF");
+  // On prend une plage large et on filtre les lignes vides
+  const values = sheet.getRange("A3:D25").getValues();
 
-            <!-- REVENUS -->
-            <div class="glass-card p-6 stat-card border-l-4 border-emerald-500">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-emerald-500/20 rounded-2xl text-emerald-400">
-                        <i class="fas fa-arrow-trend-up text-xl"></i>
-                    </div>
-                    <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Chiffre
-                        d'Affaires</span>
-                </div>
-                <div id="kpi-revenue" class="text-3xl font-bold mb-1">-- €</div>
-                <p class="text-xs text-slate-400">Total facturé (YTD)</p>
-            </div>
+  const stats = {
+    totalDepenses: 0,
+    depensesMensuelles: []
+  };
 
-            <!-- ACHATS -->
-            <div class="glass-card p-6 stat-card border-l-4 border-rose-500">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-rose-500/20 rounded-2xl text-rose-400">
-                        <i class="fas fa-shopping-cart text-xl"></i>
-                    </div>
-                    <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Achats</span>
-                </div>
-                <div id="kpi-expenses" class="text-3xl font-bold mb-1">-- €</div>
-                <p id="kpi-pending" class="text-xs text-rose-400">-- € en attente</p>
-            </div>
-        </div>
+  values.forEach(row => {
+    if (row[0] && row[0].toString().toUpperCase() !== "TOTAL") {
+      const depense = parseFloat(row[2]) || 0;
+      stats.depensesMensuelles.push(depense);
+      stats.totalDepenses += depense;
+    }
+  });
 
-        <!-- CHARTS SECTION -->
-        <div class="grid grid-cols-12 gap-6">
-            <div class="col-span-12 lg:col-span-8 glass-card p-8 h-[450px]">
-                <h3 class="text-lg font-bold mb-6 flex items-center">
-                    <i class="fas fa-chart-area mr-3 text-blue-500"></i> Évolution de la Trésorerie
-                </h3>
-                <div class="h-[320px]">
-                    <canvas id="cashFlowChart"></canvas>
-                </div>
-            </div>
+  return stats;
+}
 
-            <div class="col-span-12 lg:col-span-4 glass-card p-8 h-[450px]">
-                <h3 class="text-lg font-bold mb-6 flex items-center">
-                    <i class="fas fa-chart-pie mr-3 text-emerald-500"></i> Répartition Mensuelle (Achats)
-                </h3>
-                <div class="h-[320px]">
-                    <canvas id="expensesPieChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
+/**
+ * Analyse du fichier FACTURATION_BBT
+ */
+function getFacturationData() {
+  try {
+    const ss = SpreadsheetApp.openById(FILE_IDS.facturation);
+    const sheet = ss.getSheetByName("Chiffre affaires");
+    const data = sheet.getDataRange().getValues();
 
-    <script>
-        // CONFIGURATION : Collez ici l'URL de votre script Google Apps Script déployé
-        const API_URL = https://script.google.com/macros/s/AKfycbxwlNp4nFB6TFMgfCBeoWzCgsw98KJrkm8iR9NoQHAtCB9DUsDSmuwYJErsHx21h3tM/exec";
+    // Extraction simplifiée du premier montant significatif (Total CA)
+    // Selon l'analyse, Row 0 Col 0 semble être 1 781 000
+    let totalCA = data[0][0] || 0;
 
-        let cashChart = null;
-        let expenseChart = null;
-
-        /**
-         * Récupération des données via JSONP (pour éviter les soucis de CORS)
-         */
-        /**
-         * Récupération des données via JSONP (pour éviter les soucis de CORS)
-         */
-        function fetchFinancialData() {
-            const statusEl = document.getElementById('sync-status');
-            statusEl.innerHTML = '<span class="w-2 h-2 bg-amber-500 rounded-full mr-2 animate-ping"></span>Chargement...';
-
-            const callbackName = "cb_manitra_" + Date.now();
-            
-            // Timeout handling
-            const timeoutId = setTimeout(() => {
-                statusEl.innerHTML = '<span class="w-2 h-2 bg-rose-500 rounded-full mr-2"></span>Erreur (Timeout)';
-                delete window[callbackName];
-            }, 10000);
-
-            window[callbackName] = function (data) {
-                clearTimeout(timeoutId);
-                if (data && data.error) {
-                    statusEl.innerHTML = '<span class="w-2 h-2 bg-rose-500 rounded-full mr-2"></span>Erreur API';
-                    console.error("API Error:", data.error);
-                } else {
-                    updateUI(data);
-                    statusEl.innerHTML = '<span class="w-2 h-2 bg-emerald-500 rounded-full mr-2"></span>Synchronisé';
-                }
-                delete window[callbackName];
-                const scriptTag = document.getElementById(callbackName);
-                if (scriptTag) scriptTag.remove();
-            };
-
-            const script = document.createElement("script");
-            script.id = callbackName;
-            script.src = API_URL + "?action=getFinancialSummary&callback=" + callbackName;
-            script.onerror = () => {
-                statusEl.innerHTML = '<span class="w-2 h-2 bg-rose-500 rounded-full mr-2"></span>Erreur de connexion';
-            };
-            document.body.appendChild(script);
-        }
-
-        function updateUI(data) {
-            if (!data) return;
-
-            // Mise à jour des nombres avec sécurité
-            const cash = data.tresorerie?.soldeActuel || 0;
-            const revenue = data.facturation?.totalCA || 0;
-            const expenses = data.achats?.totalDepenses || 0;
-            const pending = data.facturation?.enAttente || 0;
-
-            document.getElementById('kpi-cash').textContent = cash.toLocaleString('fr-FR') + " €";
-            document.getElementById('kpi-revenue').textContent = revenue.toLocaleString('fr-FR') + " €";
-            document.getElementById('kpi-expenses').textContent = expenses.toLocaleString('fr-FR') + " €";
-            document.getElementById('kpi-pending').textContent = pending.toLocaleString('fr-FR') + " € en attente de paiement";
-
-            initCharts(data);
-        }
-
-        function initCharts(data) {
-            const months = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
-            Chart.defaults.color = '#94a3b8';
-            Chart.defaults.font.family = 'Plus Jakarta Sans';
-
-            // 1. Graphique Trésorerie (Ligne)
-            const ctxLine = document.getElementById('cashFlowChart').getContext('2d');
-            if (cashChart) cashChart.destroy();
-
-            const gradient = ctxLine.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
-            gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
-
-            // Remplacement des valeurs nulles par 0 pour le graphique
-            const evolutionData = (data.tresorerie?.evolutionMensuelle || []).map(v => v === "" ? null : v);
-
-            cashChart = new Chart(ctxLine, {
-                type: 'line',
-                data: {
-                    labels: months,
-                    datasets: [{
-                        label: 'Solde (€)',
-                        data: evolutionData,
-                        borderColor: '#3b82f6',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#3b82f6',
-                        pointBorderColor: '#0f172a',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        fill: true,
-                        backgroundColor: gradient,
-                        tension: 0.4,
-                        spanGaps: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { 
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            beginAtZero: false 
-                        },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-
-            // 2. Graphique Dépenses (Doughnut)
-            const ctxPie = document.getElementById('expensesPieChart').getContext('2d');
-            if (expenseChart) expenseChart.destroy();
-            
-            const expenseData = data.achats?.depensesMensuelles || [];
-            
-            expenseChart = new Chart(ctxPie, {
-                type: 'doughnut',
-                data: {
-                    labels: months.slice(0, expenseData.length),
-                    datasets: [{
-                        data: expenseData,
-                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b', '#06b6d4', '#f43f5e', '#84cc16', '#eab308', '#a855f7', '#475569'],
-                        borderWidth: 0,
-                        hoverOffset: 20
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '70%',
-                    plugins: {
-                        legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true, boxWidth: 8 } }
-                    }
-                }
-            });
-        }
-
-        // Chargement initial
-        window.onload = fetchFinancialData;
-    </script>
-</body>
-
-</html>
+    return {
+      totalCA: totalCA,
+      enAttente: totalCA * 0.12 // Estimation ou calcul à affiner selon Suivi des paiements
+    };
+  } catch (e) {
+    return { totalCA: 0, enAttente: 0, error: e.toString() };
+  }
+}
