@@ -87,32 +87,33 @@
                     </div>
                     <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Trésorerie</span>
                 </div>
-                <div id="kpi-cash" class="text-3xl font-bold mb-1">-- AR</div>
-                <p class="text-xs text-slate-400">Solde actuel (Compte Courant)</p>
+                <div id="kpi-cash" class="text-3xl font-bold mb-1">-- €</div>
+                <p class="text-xs text-slate-400">Solde réel disponible</p>
             </div>
 
-            <!-- REVENUS (ENTREES) -->
+            <!-- REVENUS -->
             <div class="glass-card p-6 stat-card border-l-4 border-emerald-500">
                 <div class="flex justify-between items-start mb-4">
                     <div class="p-3 bg-emerald-500/20 rounded-2xl text-emerald-400">
                         <i class="fas fa-arrow-trend-up text-xl"></i>
                     </div>
-                    <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Total Entrées</span>
+                    <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Chiffre
+                        d'Affaires</span>
                 </div>
-                <div id="kpi-revenue" class="text-3xl font-bold mb-1">-- AR</div>
-                <p class="text-xs text-slate-400">Cumul annuel (YTD)</p>
+                <div id="kpi-revenue" class="text-3xl font-bold mb-1">-- €</div>
+                <p class="text-xs text-slate-400">Total facturé (YTD)</p>
             </div>
 
-            <!-- ACHATS (SORTIES) -->
+            <!-- ACHATS -->
             <div class="glass-card p-6 stat-card border-l-4 border-rose-500">
                 <div class="flex justify-between items-start mb-4">
                     <div class="p-3 bg-rose-500/20 rounded-2xl text-rose-400">
                         <i class="fas fa-shopping-cart text-xl"></i>
                     </div>
-                    <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Total Sorties</span>
+                    <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Achats</span>
                 </div>
-                <div id="kpi-expenses" class="text-3xl font-bold mb-1">-- AR</div>
-                <p id="kpi-pending" class="text-xs text-rose-400">Somme des dépenses 2026</p>
+                <div id="kpi-expenses" class="text-3xl font-bold mb-1">-- €</div>
+                <p id="kpi-pending" class="text-xs text-rose-400">-- € en attente</p>
             </div>
         </div>
 
@@ -129,7 +130,7 @@
 
             <div class="col-span-12 lg:col-span-4 glass-card p-8 h-[450px]">
                 <h3 class="text-lg font-bold mb-6 flex items-center">
-                    <i class="fas fa-chart-pie mr-3 text-emerald-500"></i> Entrées vs Sorties
+                    <i class="fas fa-chart-pie mr-3 text-emerald-500"></i> Répartition Mensuelle (Achats)
                 </h3>
                 <div class="h-[320px]">
                     <canvas id="expensesPieChart"></canvas>
@@ -148,13 +149,30 @@
         /**
          * Récupération des données via JSONP (pour éviter les soucis de CORS)
          */
+        /**
+         * Récupération des données via JSONP (pour éviter les soucis de CORS)
+         */
         function fetchFinancialData() {
-            document.getElementById('sync-status').innerHTML = '<span class="w-2 h-2 bg-amber-500 rounded-full mr-2 animate-ping"></span>Chargement...';
+            const statusEl = document.getElementById('sync-status');
+            statusEl.innerHTML = '<span class="w-2 h-2 bg-amber-500 rounded-full mr-2 animate-ping"></span>Chargement...';
 
             const callbackName = "cb_manitra_" + Date.now();
+            
+            // Timeout handling
+            const timeoutId = setTimeout(() => {
+                statusEl.innerHTML = '<span class="w-2 h-2 bg-rose-500 rounded-full mr-2"></span>Erreur (Timeout)';
+                delete window[callbackName];
+            }, 10000);
+
             window[callbackName] = function (data) {
-                updateUI(data);
-                document.getElementById('sync-status').innerHTML = '<span class="w-2 h-2 bg-emerald-500 rounded-full mr-2"></span>Synchronisé';
+                clearTimeout(timeoutId);
+                if (data && data.error) {
+                    statusEl.innerHTML = '<span class="w-2 h-2 bg-rose-500 rounded-full mr-2"></span>Erreur API';
+                    console.error("API Error:", data.error);
+                } else {
+                    updateUI(data);
+                    statusEl.innerHTML = '<span class="w-2 h-2 bg-emerald-500 rounded-full mr-2"></span>Synchronisé';
+                }
                 delete window[callbackName];
                 const scriptTag = document.getElementById(callbackName);
                 if (scriptTag) scriptTag.remove();
@@ -163,17 +181,25 @@
             const script = document.createElement("script");
             script.id = callbackName;
             script.src = API_URL + "?action=getFinancialSummary&callback=" + callbackName;
+            script.onerror = () => {
+                statusEl.innerHTML = '<span class="w-2 h-2 bg-rose-500 rounded-full mr-2"></span>Erreur de connexion';
+            };
             document.body.appendChild(script);
         }
 
         function updateUI(data) {
             if (!data) return;
 
-            // Mise à jour des nombres (Ariary)
-            document.getElementById('kpi-cash').textContent = (data.tresorerie.soldeActuel || 0).toLocaleString('fr-FR') + " AR";
-            document.getElementById('kpi-revenue').textContent = (data.tresorerie.totalEntreesYTD || 0).toLocaleString('fr-FR') + " AR";
-            document.getElementById('kpi-expenses').textContent = (data.tresorerie.totalSortiesYTD || 0).toLocaleString('fr-FR') + " AR";
-            document.getElementById('kpi-pending').textContent = "Flux net : " + ((data.tresorerie.totalEntreesYTD || 0) - (data.tresorerie.totalSortiesYTD || 0)).toLocaleString('fr-FR') + " AR";
+            // Mise à jour des nombres avec sécurité
+            const cash = data.tresorerie?.soldeActuel || 0;
+            const revenue = data.facturation?.totalCA || 0;
+            const expenses = data.achats?.totalDepenses || 0;
+            const pending = data.facturation?.enAttente || 0;
+
+            document.getElementById('kpi-cash').textContent = cash.toLocaleString('fr-FR') + " €";
+            document.getElementById('kpi-revenue').textContent = revenue.toLocaleString('fr-FR') + " €";
+            document.getElementById('kpi-expenses').textContent = expenses.toLocaleString('fr-FR') + " €";
+            document.getElementById('kpi-pending').textContent = pending.toLocaleString('fr-FR') + " € en attente de paiement";
 
             initCharts(data);
         }
@@ -181,7 +207,7 @@
         function initCharts(data) {
             const months = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
             Chart.defaults.color = '#94a3b8';
-            Chart.defaults.font.family = 'Jakarta Plus Sans';
+            Chart.defaults.font.family = 'Plus Jakarta Sans';
 
             // 1. Graphique Trésorerie (Ligne)
             const ctxLine = document.getElementById('cashFlowChart').getContext('2d');
@@ -191,13 +217,16 @@
             gradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
             gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
 
+            // Remplacement des valeurs nulles par 0 pour le graphique
+            const evolutionData = (data.tresorerie?.evolutionMensuelle || []).map(v => v === "" ? null : v);
+
             cashChart = new Chart(ctxLine, {
                 type: 'line',
                 data: {
                     labels: months,
                     datasets: [{
-                        label: 'Solde Compte Courant (AR)',
-                        data: data.tresorerie.evolutionMensuelle || [],
+                        label: 'Solde (€)',
+                        data: evolutionData,
                         borderColor: '#3b82f6',
                         borderWidth: 3,
                         pointBackgroundColor: '#3b82f6',
@@ -206,7 +235,8 @@
                         pointRadius: 4,
                         fill: true,
                         backgroundColor: gradient,
-                        tension: 0.4
+                        tension: 0.4,
+                        spanGaps: true
                     }]
                 },
                 options: {
@@ -214,22 +244,28 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true },
+                        y: { 
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            beginAtZero: false 
+                        },
                         x: { grid: { display: false } }
                     }
                 }
             });
 
-            // 2. Graphique Entrées vs Sorties (Doughnut)
+            // 2. Graphique Dépenses (Doughnut)
             const ctxPie = document.getElementById('expensesPieChart').getContext('2d');
             if (expenseChart) expenseChart.destroy();
+            
+            const expenseData = data.achats?.depensesMensuelles || [];
+            
             expenseChart = new Chart(ctxPie, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Entrées', 'Sorties'],
+                    labels: months.slice(0, expenseData.length),
                     datasets: [{
-                        data: [data.tresorerie.totalEntreesYTD || 0, data.tresorerie.totalSortiesYTD || 0],
-                        backgroundColor: ['#10b981', '#ef4444'],
+                        data: expenseData,
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b', '#06b6d4', '#f43f5e', '#84cc16', '#eab308', '#a855f7', '#475569'],
                         borderWidth: 0,
                         hoverOffset: 20
                     }]
@@ -239,7 +275,7 @@
                     maintainAspectRatio: false,
                     cutout: '70%',
                     plugins: {
-                        legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
+                        legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true, boxWidth: 8 } }
                     }
                 }
             });
