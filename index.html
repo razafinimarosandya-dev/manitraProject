@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manitra - Contrôle Total ERP</title>
+    <title>Manitra ERP - TOTAL CONTROL V5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,403 +11,260 @@
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #0b0f1a; color: #e2e8f0; overflow-x: hidden; }
         .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .sidebar-item { transition: all 0.3s ease; border-radius: 12px; margin-bottom: 4px; }
+        .sidebar-item { transition: all 0.3s ease; border-radius: 12px; margin-bottom: 4px; color: #94a3b8; cursor: pointer; }
         .sidebar-item:hover, .sidebar-item.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
-        .stat-card { transition: transform 0.3s ease; }
-        .stat-card:hover { transform: translateY(-5px); }
-        .gradient-border { position: relative; border-radius: 24px; background: #1e293b; padding: 1px; }
-        .gradient-border::before { content: ""; position: absolute; inset: 0; border-radius: 24px; padding: 1px; background: linear-gradient(135deg, #3b82f6, #10b981); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+        .btn-action { transition: all 0.2s; }
+        .btn-action:hover { transform: scale(1.1); }
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        #loading-overlay { display: none; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
+    <!-- OVERLAY DE CHARGEMENT -->
+    <div id="loading-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[200] flex items-center justify-center">
+        <div class="text-center">
+            <i class="fas fa-circle-notch animate-spin text-4xl text-blue-500 mb-4"></i>
+            <p class="text-xs font-bold tracking-widest uppercase">Synchronisation Base de Données...</p>
+        </div>
+    </div>
+
     <!-- SIDEBAR -->
     <aside class="w-72 glass border-r border-slate-800 flex flex-col p-6 z-50">
         <div class="flex items-center gap-3 mb-10 px-2">
-            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <i class="fas fa-cube text-white text-xl"></i>
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <i class="fas fa-shield-alt text-white text-xl"></i>
             </div>
-            <h1 class="text-xl font-bold tracking-tight">Manitra <span class="text-blue-500">ERP</span></h1>
+            <h1 class="text-xl font-bold tracking-tight">Manitra <span class="text-blue-500 text-xs">ULTIMATE</span></h1>
         </div>
 
-        <nav class="flex-1 custom-scroll overflow-y-auto">
-            <p class="text-[10px] uppercase font-bold text-slate-500 mb-4 px-2 tracking-widest">Menu Principal</p>
-            <a href="#" onclick="showSection('dashboard', this)" class="sidebar-item active flex items-center gap-4 px-4 py-3 text-sm">
-                <i class="fas fa-th-large w-5"></i> Dashboard
-            </a>
-            <a href="#" onclick="showSection('collaborateurs', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm text-slate-400">
-                <i class="fas fa-users w-5"></i> Collaborateurs
-            </a>
-            <a href="#" onclick="showSection('workflow', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm text-slate-400">
-                <i class="fas fa-project-diagram w-5"></i> Flux Opérationnel
-            </a>
-            <a href="#" onclick="showSection('finance', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm text-slate-400">
-                <i class="fas fa-wallet w-5"></i> Trésorerie
-            </a>
+        <nav class="flex-1 custom-scroll overflow-y-auto space-y-1">
+            <p class="text-[10px] uppercase font-bold text-slate-500 mb-4 px-2 tracking-widest">Contrôle Total</p>
+            <div onclick="showSection('dashboard', this)" class="sidebar-item active flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-th-large w-5"></i> Dashboard</div>
+            <div onclick="showSection('collaborateurs', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-user-friends w-5"></i> Partenaires</div>
+            <div onclick="showSection('workflow', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-project-diagram w-5"></i> Workflow</div>
+            <div onclick="showSection('stocks', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-boxes w-5"></i> Inventaire</div>
+            <div onclick="showSection('finance', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-wallet w-5"></i> Trésorerie</div>
             
-            <p class="text-[10px] uppercase font-bold text-slate-500 mt-8 mb-4 px-2 tracking-widest">Action Rapide</p>
-            <button onclick="openModal('invoice')" class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-3 text-sm font-semibold transition-all mb-2">
-                + Nouvelle Facture
-            </button>
-            <button onclick="openModal('expense')" class="w-full bg-slate-800 hover:bg-slate-700 text-white rounded-xl py-3 text-sm font-semibold transition-all">
-                + Nouvel Achat
-            </button>
+            <p class="text-[10px] uppercase font-bold text-slate-500 mt-8 mb-4 px-2 tracking-widest">Saisies Rapides</p>
+            <button onclick="openModal('invoice')" class="w-full bg-blue-600/20 border border-blue-500/30 text-blue-400 py-3 rounded-xl text-xs font-bold mb-2 hover:bg-blue-600 hover:text-white transition-all">+ Facture Vente</button>
+            <button onclick="openModal('expense')" class="w-full bg-amber-600/20 border border-amber-500/30 text-amber-400 py-3 rounded-xl text-xs font-bold mb-2 hover:bg-amber-600 hover:text-white transition-all">+ Achat / Charge</button>
+            <button onclick="openModal('cash')" class="w-full bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 py-3 rounded-xl text-xs font-bold hover:bg-emerald-600 hover:text-white transition-all">+ Mouvement Cash</button>
         </nav>
-
-        <div class="mt-auto pt-6 border-t border-slate-800">
-            <div class="flex items-center gap-3 px-2">
-                <div class="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center">
-                    <i class="fas fa-user text-xs"></i>
-                </div>
-                <div>
-                    <p class="text-xs font-bold">Admin Manitra</p>
-                    <p class="text-[10px] text-slate-500">Connecté</p>
-                </div>
-            </div>
-        </div>
     </aside>
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 flex flex-col relative overflow-hidden">
-        
-        <!-- NAVBAR -->
-        <header class="h-20 flex items-center justify-between px-8 border-b border-slate-800 glass z-40">
+    <!-- MAIN -->
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-20 glass border-b border-slate-800 flex items-center justify-between px-8">
             <div class="flex items-center gap-4">
-                <div id="sync-status" class="flex items-center gap-2 text-[10px] font-bold bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">
-                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> SYSTEM OK
-                </div>
-                <h2 id="section-title" class="text-lg font-semibold ml-4">Vue d'ensemble</h2>
+                <h2 id="section-title" class="text-lg font-bold">Tableau de Bord</h2>
+                <select id="period-selector" onchange="fetchData()" class="bg-slate-900 border border-slate-800 rounded-lg text-[10px] px-3 py-1 outline-none font-bold uppercase tracking-wider text-blue-400">
+                    <option value="Janvier">Janvier 2026</option><option value="Février">Février 2026</option>
+                    <option value="Mars">Mars 2026</option><option value="Avril">Avril 2026</option>
+                    <option value="Mai" selected>Mai 2026</option>
+                </select>
             </div>
-            <div class="flex items-center gap-6">
-                <div class="relative">
-                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-                    <input type="text" placeholder="Rechercher projet..." class="bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs focus:outline-none focus:border-blue-500 w-64">
-                </div>
-                <button onclick="fetchData()" class="text-slate-400 hover:text-white transition-colors">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
+            <div class="flex items-center gap-4">
+                <div class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">LIVE CLOUD SYNC</div>
             </div>
         </header>
 
-        <!-- DASHBOARD CONTENT -->
-        <div id="content-area" class="flex-1 overflow-y-auto p-8 custom-scroll">
+        <div id="content-area" class="flex-1 p-8 overflow-y-auto custom-scroll">
             
             <!-- SECTION : DASHBOARD -->
             <section id="section-dashboard" class="space-y-8">
-                <!-- KPI CARDS -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div class="glass p-6 rounded-3xl stat-card border-b-2 border-blue-500">
-                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Chiffre d'Affaires</p>
-                        <h3 id="kpi-revenue" class="text-2xl font-bold">0 Ar</h3>
-                        <p class="text-[10px] text-emerald-400 mt-1"><i class="fas fa-arrow-up mr-1"></i> +12.5% vs mois dernier</p>
-                    </div>
-                    <div class="glass p-6 rounded-3xl stat-card border-b-2 border-amber-500">
-                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Impayés / Retards</p>
-                        <h3 id="kpi-overdue" class="text-2xl font-bold">0 Ar</h3>
-                        <p class="text-[10px] text-rose-400 mt-1"><i class="fas fa-exclamation-triangle mr-1"></i> 4 Factures critiques</p>
-                    </div>
-                    <div class="glass p-6 rounded-3xl stat-card border-b-2 border-rose-500">
-                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Dépenses (Achats)</p>
-                        <h3 id="kpi-expenses" class="text-2xl font-bold">0 Ar</h3>
-                        <p class="text-[10px] text-slate-500 mt-1">Frais fixes & variables</p>
-                    </div>
-                    <div class="glass p-6 rounded-3xl stat-card border-b-2 border-emerald-500">
-                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Trésorerie Réelle</p>
-                        <h3 id="kpi-cash" class="text-2xl font-bold">0 Ar</h3>
-                        <p class="text-[10px] text-emerald-400 mt-1">Solde banque consolidé</p>
-                    </div>
+                <div class="grid grid-cols-4 gap-6">
+                    <div class="glass p-6 rounded-3xl"><p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Ventes Mois</p><h3 id="kpi-revenue" class="text-2xl font-bold">0 Ar</h3></div>
+                    <div class="glass p-6 rounded-3xl"><p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Restes à Encaisser</p><h3 id="kpi-pending" class="text-2xl font-bold text-amber-500">0 Ar</h3></div>
+                    <div class="glass p-6 rounded-3xl"><p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Dépenses Mois</p><h3 id="kpi-expenses" class="text-2xl font-bold text-rose-500">0 Ar</h3></div>
+                    <div class="glass p-6 rounded-3xl"><p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Disponibilité</p><h3 id="kpi-cash" class="text-2xl font-bold text-emerald-400">0 Ar</h3></div>
                 </div>
-
-                <!-- CHARTS & LISTS -->
-                <div class="grid grid-cols-12 gap-6">
-                    <div class="col-span-12 lg:col-span-8 glass p-8 rounded-3xl h-[450px]">
-                        <div class="flex justify-between items-center mb-6">
-                            <h4 class="font-bold">Évolution de l'Activité</h4>
-                            <select class="bg-slate-800 border-none rounded-lg text-[10px] px-3 py-1.5 focus:outline-none">
-                                <option>Année 2026</option>
-                                <option>Année 2025</option>
-                            </select>
-                        </div>
-                        <div class="h-[320px]">
-                            <canvas id="mainChart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <div class="col-span-12 lg:col-span-4 glass p-8 rounded-3xl h-[450px]">
-                        <h4 class="font-bold mb-6">Pipeline Opérationnel</h4>
-                        <div class="space-y-6">
-                            <div>
-                                <div class="flex justify-between text-xs mb-2">
-                                    <span class="text-slate-400">Commandes En Cours</span>
-                                    <span id="workflow-ordered" class="font-bold">0</span>
-                                </div>
-                                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                                    <div class="bg-blue-500 h-full w-[80%]"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs mb-2">
-                                    <span class="text-slate-400">Achats Validés</span>
-                                    <span id="workflow-purchased" class="font-bold">0</span>
-                                </div>
-                                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                                    <div class="bg-amber-500 h-full w-[60%]"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs mb-2">
-                                    <span class="text-slate-400">Ventes Finalisées</span>
-                                    <span id="workflow-sold" class="font-bold">0</span>
-                                </div>
-                                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                                    <div class="bg-emerald-500 h-full w-[45%]"></div>
-                                </div>
-                            </div>
-                            <div class="pt-4 border-t border-slate-800 mt-4">
-                                <p class="text-[10px] text-slate-500 text-center italic">Cycle moyen : 14 jours entre Achat et Vente</p>
-                            </div>
-                        </div>
-                    </div>
+                <div class="glass p-8 rounded-3xl h-[400px]">
+                    <canvas id="mainChart"></canvas>
                 </div>
             </section>
 
             <!-- SECTION : COLLABORATEURS -->
             <section id="section-collaborateurs" class="hidden space-y-8">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-bold">Analyse des Entreprises Partenaires</h3>
-                    <div class="flex gap-2">
-                        <button class="bg-slate-800 px-4 py-2 rounded-xl text-xs hover:bg-slate-700 transition-all">Exporter PDF</button>
-                    </div>
-                </div>
-                <div class="glass rounded-3xl overflow-hidden">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-800/50">
-                            <tr>
-                                <th class="p-6 font-semibold">Entreprise</th>
-                                <th class="p-6 font-semibold">Total Invoqué</th>
-                                <th class="p-6 font-semibold">Total Payé</th>
-                                <th class="p-6 font-semibold">Reste à Payer</th>
-                                <th class="p-6 font-semibold">Statut</th>
-                                <th class="p-6 font-semibold">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="company-table-body">
-                            <!-- Data will be injected here -->
-                        </tbody>
-                    </table>
-                </div>
+                <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Partenaires Commerciaux</h3></div>
+                <div class="glass rounded-3xl overflow-hidden border border-white/5"><table class="w-full text-left text-sm"><thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px] tracking-widest"><tr><th class="p-6">Entreprise</th><th class="p-6">Type</th><th class="p-6">Cumul Transactions</th><th class="p-6">Solde en cours</th><th class="p-6">Statut</th></tr></thead><tbody id="company-table-body"></tbody></table></div>
             </section>
 
+            <!-- SECTION : WORKFLOW -->
+            <section id="section-workflow" class="hidden space-y-8">
+                <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Suivi Opérationnel</h3></div>
+                <div class="glass rounded-3xl overflow-hidden"><table class="w-full text-left text-sm"><thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]"><tr><th class="p-6">Dossier</th><th class="p-6">Client</th><th class="p-6">Achat</th><th class="p-6">Vente</th><th class="p-6">Marge Net</th><th class="p-6">Actions</th></tr></thead><tbody id="workflow-table-body"></tbody></table></div>
+            </section>
+
+            <!-- SECTION : STOCKS -->
+            <section id="section-stocks" class="hidden space-y-8">
+                <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Inventaire</h3><button onclick="openModal('stock-add')" class="bg-blue-600 px-4 py-2 rounded-xl text-xs font-bold">+ Créer Article</button></div>
+                <div id="stock-alerts" class="grid grid-cols-3 gap-4"></div>
+                <div class="glass rounded-3xl overflow-hidden"><table class="w-full text-left text-sm"><thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]"><tr><th class="p-6">Article</th><th class="p-6">Quantité</th><th class="p-6">Unité</th><th class="p-6">État</th><th class="p-6">Ajuster</th></tr></thead><tbody id="stock-table-body"></tbody></table></div>
+            </section>
+
+            <!-- SECTION : FINANCE -->
+            <section id="section-finance" class="hidden space-y-8">
+                <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Historique Bancaire & Cash</h3></div>
+                <div class="glass rounded-3xl overflow-hidden"><table class="w-full text-left text-sm"><thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]"><tr><th class="p-6">Date</th><th class="p-6">Opération</th><th class="p-6">Flux</th><th class="p-6">Solde</th><th class="p-6">Action</th></tr></thead><tbody id="finance-table-body"></tbody></table></div>
+            </section>
         </div>
     </main>
 
-    <!-- MODAL : NOUVELLE FACTURE -->
+    <!-- MODALS (Standardisés) -->
     <div id="modal-invoice" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
-        <div class="glass w-full max-w-xl rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 duration-200">
-            <div class="flex justify-between items-center mb-8">
-                <h4 class="text-xl font-bold">Nouvelle Facture de Vente</h4>
-                <button onclick="closeModal()" class="text-slate-500 hover:text-white"><i class="fas fa-times"></i></button>
-            </div>
-            <form class="space-y-6">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[10px] uppercase font-bold text-slate-500 mb-2">Client</label>
-                        <select class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none">
-                            <option>Sélectionner un client...</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] uppercase font-bold text-slate-500 mb-2">Date</label>
-                        <input type="date" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-2">Montant TTC (Ar)</label>
-                    <input type="number" placeholder="0.00" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none">
-                </div>
-                <div class="pt-4">
-                    <button type="submit" class="w-full bg-blue-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/20 hover:bg-blue-700 transition-all">Enregistrer la Facture</button>
-                </div>
+        <div class="glass w-full max-w-xl rounded-3xl p-8 border border-blue-500/20 shadow-2xl">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-file-invoice text-blue-500"></i> Nouvelle Facture</h4>
+            <form onsubmit="submitInvoice(event)" class="space-y-4">
+                <input type="text" placeholder="Client" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500">
+                <input type="number" placeholder="Montant TTC (Ar)" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500">
+                <button type="submit" class="w-full bg-blue-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/20">Enregistrer dans la Base</button>
+                <button type="button" onclick="closeModal('invoice')" class="w-full text-slate-500 text-xs py-2">Fermer sans enregistrer</button>
             </form>
         </div>
     </div>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbxwlNp4nFB6TFMgfCBeoWzCgsw98KJrkm8iR9NoQHAtCB9DUsDSmuwYJErsHx21h3tM/exec";
-
-        /**
-         * Envoi d'une nouvelle facture
-         */
-        async function submitInvoice(event) {
-            event.preventDefault();
-            const btn = event.target.querySelector('button');
-            btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Envoi...';
-            
-            const formData = {
-                action: "addInvoice",
-                data: [
-                    "FAC-" + Date.now().toString().slice(-4), // N° Auto
-                    new Date().toLocaleDateString(),
-                    event.target[0].value, // Client
-                    0, 0, // HT, TVA
-                    parseFloat(event.target[2].value), // TTC
-                    "En attente"
-                ]
-            };
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(formData)
-                });
-                alert("Facture enregistrée !");
-                closeModal();
-                fetchData();
-            } catch (e) {
-                console.error(e);
-                alert("Erreur lors de l'enregistrement. Vérifiez l'URL de votre script.");
-            } finally {
-                btn.innerHTML = 'Enregistrer la Facture';
-            }
-        }
         let mainChart = null;
 
-        /**
-         * Navigation entre les sections
-         */
-        function showSection(id, element) {
+        function showLoading(show) { document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none'; }
+
+        function showSection(id, el) {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            const target = document.getElementById('section-' + id);
-            if (target) target.classList.remove('hidden');
-            
-            document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active', 'text-blue-500'));
-            if (element) element.classList.add('active', 'text-blue-500');
-            
-            const titles = { 'dashboard': 'Vue d\'ensemble', 'collaborateurs': 'Suivi Entreprises', 'workflow': 'Flux Opérationnel', 'finance': 'Trésorerie' };
-            document.getElementById('section-title').textContent = titles[id];
-
-            if (id === 'collaborateurs') fetchCompanies();
+            document.getElementById('section-'+id).classList.remove('hidden');
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            if(el) el.classList.add('active');
+            if(id === 'collaborateurs') fetchCompanies();
+            if(id === 'workflow') fetchWorkflow();
+            if(id === 'stocks') fetchStocks();
+            if(id === 'finance') fetchFinance();
         }
 
-        /**
-         * Modals
-         */
-        function openModal(type) { document.getElementById('modal-invoice').classList.remove('hidden'); }
-        function closeModal() { document.getElementById('modal-invoice').classList.add('hidden'); }
+        function openModal(id) { document.getElementById('modal-'+id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById('modal-'+id).classList.add('hidden'); }
 
-        /**
-         * Récupération des données globales
-         */
-        function fetchData() {
-            const statusEl = document.getElementById('sync-status');
-            statusEl.innerHTML = '<span class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping"></span> REFRESHING...';
-
-            const callbackName = "cb_erp_" + Date.now();
-            window[callbackName] = function(data) {
-                updateDashboardUI(data);
-                statusEl.innerHTML = '<span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> SYSTEM OK';
-                delete window[callbackName];
-                document.getElementById(callbackName).remove();
+        async function fetchData() {
+            const month = document.getElementById('period-selector').value;
+            const cb = "cb_"+Date.now();
+            window[cb] = function(data) {
+                document.getElementById('kpi-revenue').textContent = (data.kpis.revenue||0).toLocaleString() + " Ar";
+                document.getElementById('kpi-pending').textContent = (data.kpis.pending||0).toLocaleString() + " Ar";
+                document.getElementById('kpi-expenses').textContent = (data.kpis.expenses||0).toLocaleString() + " Ar";
+                document.getElementById('kpi-cash').textContent = (data.kpis.cash||0).toLocaleString() + " Ar";
+                initChart(data.cashFlow);
+                delete window[cb];
             };
-
-            const script = document.createElement("script");
-            script.id = callbackName;
-            script.src = API_URL + "?action=getDashboardData&callback=" + callbackName;
-            document.body.appendChild(script);
+            const s = document.createElement("script");
+            s.src = API_URL + "?action=getDashboardData&month=" + month + "&callback=" + cb;
+            document.body.appendChild(s);
         }
 
-        /**
-         * Récupération des entreprises
-         */
-        function fetchCompanies() {
-            const callbackName = "cb_comp_" + Date.now();
-            window[callbackName] = function(data) {
-                renderCompanyTable(data);
-                delete window[callbackName];
-                document.getElementById(callbackName).remove();
+        async function updateStatus(file, sheet, id, newStatus, colIndex) {
+            showLoading(true);
+            const params = { action: "updateStatus", file, sheet, id, newStatus, colIndex };
+            try {
+                await fetch(API_URL, { method: 'POST', body: JSON.stringify(params) });
+                fetchData();
+                if(sheet === 'Base facturation') fetchWorkflow();
+                if(sheet === 'suivi trésorerie') fetchFinance();
+            } catch(e) { alert("Erreur de synchronisation"); }
+            finally { showLoading(false); }
+        }
+
+        async function deleteRow(file, sheet, id) {
+            if(!confirm("Supprimer définitivement cette ligne du fichier Excel ?")) return;
+            showLoading(true);
+            const params = { action: "deleteRow", file, sheet, id };
+            try {
+                await fetch(API_URL, { method: 'POST', body: JSON.stringify(params) });
+                fetchData();
+                showSection(document.querySelector('.sidebar-item.active').getAttribute('onclick').match(/'([^']+)'/)[1]);
+            } catch(e) { alert("Erreur"); }
+            finally { showLoading(false); }
+        }
+
+        function fetchWorkflow() {
+            const cb = "cb_w_"+Date.now();
+            window[cb] = function(data) {
+                document.getElementById('workflow-table-body').innerHTML = data.map(w => `
+                    <tr class="border-t border-slate-800">
+                        <td class="p-6 font-mono text-xs text-blue-400">${w.id}</td>
+                        <td class="p-6 font-bold">${w.project}</td>
+                        <td class="p-6"><span class="text-[10px] bg-slate-800 px-2 py-1 rounded">${w.phaseAchat}</span></td>
+                        <td class="p-6">
+                            <button onclick="updateStatus('facturation','Base facturation','${w.id}','Payé',6)" class="text-[10px] ${w.phaseVente==='Payé'?'bg-emerald-500/10 text-emerald-400':'bg-amber-500/10 text-amber-400'} px-2 py-1 rounded font-bold">
+                                ${w.phaseVente}
+                            </button>
+                        </td>
+                        <td class="p-6 text-emerald-400 font-bold">${(w.margin||0).toLocaleString()} Ar</td>
+                        <td class="p-6 flex gap-3">
+                            <i onclick="deleteRow('facturation','Base facturation','${w.id}')" class="fas fa-trash text-slate-600 hover:text-rose-500 cursor-pointer btn-action"></i>
+                        </td>
+                    </tr>
+                `).join('');
+                delete window[cb];
             };
-            const script = document.createElement("script");
-            script.id = callbackName;
-            script.src = API_URL + "?action=getCompanies&callback=" + callbackName;
-            document.body.appendChild(script);
+            const s = document.createElement("script");
+            s.src = API_URL + "?action=getWorkflow&callback=" + cb;
+            document.body.appendChild(s);
         }
 
-        function updateDashboardUI(data) {
-            if (!data || data.error) return;
-
-            const format = (v) => (parseFloat(v) || 0).toLocaleString('fr-FR') + " Ar";
-            
-            document.getElementById('kpi-revenue').textContent = format(data.kpis.revenue);
-            document.getElementById('kpi-overdue').textContent = format(data.kpis.overdue);
-            document.getElementById('kpi-expenses').textContent = format(data.kpis.expenses);
-            document.getElementById('kpi-cash').textContent = format(data.kpis.cash);
-
-            document.getElementById('workflow-ordered').textContent = data.workflow.ordered;
-            document.getElementById('workflow-purchased').textContent = data.workflow.purchased;
-            document.getElementById('workflow-sold').textContent = data.workflow.sold;
-
-            initChart(data.cashFlow);
+        function fetchStocks() {
+            const cb = "cb_s_"+Date.now();
+            window[cb] = function(data) {
+                document.getElementById('stock-table-body').innerHTML = data.map(s => `
+                    <tr class="border-t border-slate-800">
+                        <td class="p-6 font-semibold">${s.name}</td>
+                        <td class="p-6 font-bold text-lg">${s.current}</td>
+                        <td class="p-6 text-xs text-slate-500">${s.unit}</td>
+                        <td class="p-6"><span class="px-2 py-1 rounded-md text-[10px] font-bold ${s.current<=s.alert?'bg-rose-500/10 text-rose-400':'bg-emerald-500/10 text-emerald-400'}">${s.current<=s.alert?'CRITIQUE':'OK'}</span></td>
+                        <td class="p-6 flex gap-2">
+                            <button onclick="adjustStock('${s.id}', 1)" class="bg-slate-800 w-8 h-8 rounded-lg">+</button>
+                            <button onclick="adjustStock('${s.id}', -1)" class="bg-slate-800 w-8 h-8 rounded-lg">-</button>
+                        </td>
+                    </tr>
+                `).join('');
+                delete window[cb];
+            };
+            const s = document.createElement("script");
+            s.src = API_URL + "?action=getStocks&callback=" + cb;
+            document.body.appendChild(s);
         }
 
-        function renderCompanyTable(data) {
-            const tbody = document.getElementById('company-table-body');
-            tbody.innerHTML = data.map(c => `
-                <tr class="border-t border-slate-800 hover:bg-slate-800/20 transition-colors">
-                    <td class="p-6 font-semibold">${c.name}</td>
-                    <td class="p-6">${c.totalInvoiced.toLocaleString()} Ar</td>
-                    <td class="p-6 text-emerald-400">${c.totalPaid.toLocaleString()} Ar</td>
-                    <td class="p-6 text-amber-500">${c.pending.toLocaleString()} Ar</td>
-                    <td class="p-6">
-                        <span class="px-2 py-1 rounded-md text-[10px] font-bold ${c.status === 'OK' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">
-                            ${c.status}
-                        </span>
-                    </td>
-                    <td class="p-6">
-                        <button class="text-blue-500 hover:underline text-xs">Détails</button>
-                    </td>
-                </tr>
-            `).join('');
+        async function adjustStock(id, qty) {
+            showLoading(true);
+            const params = { action: "updateStock", data: { id, qty, type: qty > 0 ? "IN" : "OUT" } };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(params) }); fetchStocks(); }
+            finally { showLoading(false); }
         }
 
-        function initChart(chartData) {
+        function fetchFinance() {
+            const cb = "cb_f_"+Date.now();
+            window[cb] = function(data) {
+                document.getElementById('finance-table-body').innerHTML = data.history.map(h => `
+                    <tr class="border-t border-slate-800">
+                        <td class="p-6 text-xs text-slate-500">${new Date(h.date).toLocaleDateString()}</td>
+                        <td class="p-6 font-semibold">${h.label}</td>
+                        <td class="p-6 ${h.in>0?'text-emerald-400':'text-rose-400'} font-bold">${h.in>0?'+':'-'}${Math.max(h.in,h.out).toLocaleString()} Ar</td>
+                        <td class="p-6 font-bold text-blue-400">${(h.balance||0).toLocaleString()} Ar</td>
+                        <td class="p-6"><i onclick="deleteRow('tresorerie','suivi trésorerie','${h.id||''}')" class="fas fa-trash text-slate-700 cursor-pointer"></i></td>
+                    </tr>
+                `).reverse().join('');
+                delete window[cb];
+            };
+            const s = document.createElement("script");
+            s.src = API_URL + "?action=getFinance&callback=" + cb;
+            document.body.appendChild(s);
+        }
+
+        function initChart(data) {
             const ctx = document.getElementById('mainChart').getContext('2d');
             if (mainChart) mainChart.destroy();
-
-            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
-            gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
-
-            mainChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'],
-                    datasets: [{
-                        label: 'Cash Flow',
-                        data: chartData,
-                        borderColor: '#3b82f6',
-                        borderWidth: 4,
-                        fill: true,
-                        backgroundColor: gradient,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        pointHoverRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { font: { size: 10 } } },
-                        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
-                    }
-                }
-            });
+            mainChart = new Chart(ctx, { type: 'line', data: { labels: ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'], datasets: [{ label: 'Performance', data: data, borderColor: '#3b82f6', borderWidth: 4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.05)', tension: 0.4, pointRadius: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.02)' } }, x: { grid: { display: false } } } } });
         }
 
-        // Init
         window.onload = fetchData;
     </script>
 </body>
