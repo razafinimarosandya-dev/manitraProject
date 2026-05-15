@@ -34,16 +34,16 @@
 
         <nav class="flex-1 custom-scroll overflow-y-auto">
             <p class="text-[10px] uppercase font-bold text-slate-500 mb-4 px-2 tracking-widest">Menu Principal</p>
-            <a href="#" onclick="showSection('dashboard')" class="sidebar-item active flex items-center gap-4 px-4 py-3 text-sm">
+            <a href="#" onclick="showSection('dashboard', this)" class="sidebar-item active flex items-center gap-4 px-4 py-3 text-sm">
                 <i class="fas fa-th-large w-5"></i> Dashboard
             </a>
-            <a href="#" onclick="showSection('collaborateurs')" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm text-slate-400">
+            <a href="#" onclick="showSection('collaborateurs', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm text-slate-400">
                 <i class="fas fa-users w-5"></i> Collaborateurs
             </a>
-            <a href="#" onclick="showSection('workflow')" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm text-slate-400">
+            <a href="#" onclick="showSection('workflow', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm text-slate-400">
                 <i class="fas fa-project-diagram w-5"></i> Flux Opérationnel
             </a>
-            <a href="#" onclick="showSection('finance')" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm text-slate-400">
+            <a href="#" onclick="showSection('finance', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm text-slate-400">
                 <i class="fas fa-wallet w-5"></i> Trésorerie
             </a>
             
@@ -277,12 +277,13 @@
         /**
          * Navigation entre les sections
          */
-        function showSection(id) {
+        function showSection(id, element) {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.getElementById('section-' + id).classList.remove('hidden');
+            const target = document.getElementById('section-' + id);
+            if (target) target.classList.remove('hidden');
             
             document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active', 'text-blue-500'));
-            event.currentTarget.classList.add('active', 'text-blue-500');
+            if (element) element.classList.add('active', 'text-blue-500');
             
             const titles = { 'dashboard': 'Vue d\'ensemble', 'collaborateurs': 'Suivi Entreprises', 'workflow': 'Flux Opérationnel', 'finance': 'Trésorerie' };
             document.getElementById('section-title').textContent = titles[id];
