@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manitra ERP - TOTAL CONTROL V5</title>
+    <title>Manitra ERP - TOTAL CONTROL V6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -22,11 +22,13 @@
 </head>
 <body class="flex h-screen overflow-hidden">
 
+    <datalist id="collab-list"></datalist>
+
     <!-- OVERLAY DE CHARGEMENT -->
     <div id="loading-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[200] flex items-center justify-center">
         <div class="text-center">
             <i class="fas fa-circle-notch animate-spin text-4xl text-blue-500 mb-4"></i>
-            <p class="text-xs font-bold tracking-widest uppercase">Synchronisation Base de Données...</p>
+            <p class="text-xs font-bold tracking-widest uppercase">Synchronisation Cloud...</p>
         </div>
     </div>
 
@@ -36,7 +38,7 @@
             <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <i class="fas fa-shield-alt text-white text-xl"></i>
             </div>
-            <h1 class="text-xl font-bold tracking-tight">Manitra <span class="text-blue-500 text-xs">ULTIMATE</span></h1>
+            <h1 class="text-xl font-bold tracking-tight">Manitra <span class="text-blue-500 text-xs">ERP V6</span></h1>
         </div>
 
         <nav class="flex-1 custom-scroll overflow-y-auto space-y-1">
@@ -46,11 +48,14 @@
             <div onclick="showSection('workflow', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-project-diagram w-5"></i> Workflow</div>
             <div onclick="showSection('stocks', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-boxes w-5"></i> Inventaire</div>
             <div onclick="showSection('finance', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-wallet w-5"></i> Trésorerie</div>
+            <div onclick="showSection('investissements', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-chart-pie w-5"></i> Investissements</div>
             
             <p class="text-[10px] uppercase font-bold text-slate-500 mt-8 mb-4 px-2 tracking-widest">Saisies Rapides</p>
-            <button onclick="openModal('invoice')" class="w-full bg-blue-600/20 border border-blue-500/30 text-blue-400 py-3 rounded-xl text-xs font-bold mb-2 hover:bg-blue-600 hover:text-white transition-all">+ Facture Vente</button>
-            <button onclick="openModal('expense')" class="w-full bg-amber-600/20 border border-amber-500/30 text-amber-400 py-3 rounded-xl text-xs font-bold mb-2 hover:bg-amber-600 hover:text-white transition-all">+ Achat / Charge</button>
-            <button onclick="openModal('cash')" class="w-full bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 py-3 rounded-xl text-xs font-bold hover:bg-emerald-600 hover:text-white transition-all">+ Mouvement Cash</button>
+            <button onclick="openModal('invoice')" class="w-full bg-blue-600/20 border border-blue-500/30 text-blue-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-blue-600 hover:text-white transition-all">+ Vente</button>
+            <button onclick="openModal('expense')" class="w-full bg-amber-600/20 border border-amber-500/30 text-amber-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-amber-600 hover:text-white transition-all">+ Achat</button>
+            <button onclick="openModal('cash')" class="w-full bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-emerald-600 hover:text-white transition-all">+ Mouvement Cash</button>
+            <button onclick="openModal('collaborator')" class="w-full bg-purple-600/20 border border-purple-500/30 text-purple-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-purple-600 hover:text-white transition-all">+ Partenaire</button>
+            <button onclick="openModal('investment')" class="w-full bg-rose-600/20 border border-rose-500/30 text-rose-400 py-2 rounded-xl text-xs font-bold hover:bg-rose-600 hover:text-white transition-all">+ Investissement</button>
         </nav>
     </aside>
 
@@ -88,7 +93,7 @@
             <!-- SECTION : COLLABORATEURS -->
             <section id="section-collaborateurs" class="hidden space-y-8">
                 <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Partenaires Commerciaux</h3></div>
-                <div class="glass rounded-3xl overflow-hidden border border-white/5"><table class="w-full text-left text-sm"><thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px] tracking-widest"><tr><th class="p-6">Entreprise</th><th class="p-6">Type</th><th class="p-6">Cumul Transactions</th><th class="p-6">Solde en cours</th><th class="p-6">Statut</th></tr></thead><tbody id="company-table-body"></tbody></table></div>
+                <div class="glass rounded-3xl overflow-hidden border border-white/5"><table class="w-full text-left text-sm"><thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px] tracking-widest"><tr><th class="p-6">Entreprise</th><th class="p-6">Type</th><th class="p-6">Contact</th><th class="p-6">Cumul</th><th class="p-6">Solde en cours</th><th class="p-6">Statut</th></tr></thead><tbody id="company-table-body"></tbody></table></div>
             </section>
 
             <!-- SECTION : WORKFLOW -->
@@ -109,19 +114,140 @@
                 <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Historique Bancaire & Cash</h3></div>
                 <div class="glass rounded-3xl overflow-hidden"><table class="w-full text-left text-sm"><thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]"><tr><th class="p-6">Date</th><th class="p-6">Opération</th><th class="p-6">Flux</th><th class="p-6">Solde</th><th class="p-6">Action</th></tr></thead><tbody id="finance-table-body"></tbody></table></div>
             </section>
+
+            <!-- SECTION : INVESTISSEMENTS -->
+            <section id="section-investissements" class="hidden space-y-8">
+                <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Suivi des Investissements</h3></div>
+                <div class="grid grid-cols-3 gap-6 mb-6">
+                    <div class="glass p-6 rounded-3xl"><p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Total Investi</p><h3 id="kpi-inv-total" class="text-2xl font-bold text-blue-400">0 Ar</h3></div>
+                    <div class="glass p-6 rounded-3xl"><p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Sorties d'Investissements</p><h3 id="kpi-inv-out" class="text-2xl font-bold text-rose-400">0 Ar</h3></div>
+                    <div class="glass p-6 rounded-3xl"><p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Retours (ROI / Remboursements)</p><h3 id="kpi-inv-return" class="text-2xl font-bold text-emerald-400">0 Ar</h3></div>
+                </div>
+                <div class="glass rounded-3xl overflow-hidden"><table class="w-full text-left text-sm"><thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]"><tr><th class="p-6">Date</th><th class="p-6">Investisseur</th><th class="p-6">Type</th><th class="p-6">Montant</th><th class="p-6">Détails</th><th class="p-6">Échéance Retour</th><th class="p-6">Statut</th><th class="p-6">Action</th></tr></thead><tbody id="invest-table-body"></tbody></table></div>
+            </section>
         </div>
     </main>
 
-    <!-- MODALS (Standardisés) -->
+    <!-- MODALS -->
+    
+    <!-- Modal Invoice -->
     <div id="modal-invoice" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
         <div class="glass w-full max-w-xl rounded-3xl p-8 border border-blue-500/20 shadow-2xl">
-            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-file-invoice text-blue-500"></i> Nouvelle Facture</h4>
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-file-invoice text-blue-500"></i> Nouvelle Facture de Vente</h4>
             <form onsubmit="submitInvoice(event)" class="space-y-4">
-                <input type="text" placeholder="Client" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500">
-                <input type="number" placeholder="Montant TTC (Ar)" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500">
-                <button type="submit" class="w-full bg-blue-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/20">Enregistrer dans la Base</button>
-                <button type="button" onclick="closeModal('invoice')" class="w-full text-slate-500 text-xs py-2">Fermer sans enregistrer</button>
+                <input type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <input type="text" list="collab-list" placeholder="Client (Collaborateur)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <input type="text" placeholder="Projet / Description" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <input type="number" placeholder="Montant TTC (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <button type="submit" class="w-full bg-blue-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/20">Enregistrer la Vente</button>
+                <button type="button" onclick="closeModal('invoice')" class="w-full text-slate-500 text-xs py-2">Fermer</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Expense -->
+    <div id="modal-expense" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-xl rounded-3xl p-8 border border-amber-500/20 shadow-2xl">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-shopping-cart text-amber-500"></i> Nouvel Achat / Charge</h4>
+            <form onsubmit="submitExpense(event)" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                    <select class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                        <option value="Janvier">Janvier</option><option value="Février">Février</option>
+                        <option value="Mars">Mars</option><option value="Avril">Avril</option>
+                        <option value="Mai" selected>Mai</option><option value="Juin">Juin</option>
+                        <option value="Juillet">Juillet</option><option value="Août">Août</option>
+                        <option value="Septembre">Septembre</option><option value="Octobre">Octobre</option>
+                        <option value="Novembre">Novembre</option><option value="Décembre">Décembre</option>
+                    </select>
+                </div>
+                <input type="text" list="collab-list" placeholder="Fournisseur / Collaborateur" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                <input type="text" placeholder="Détails de l'achat" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                <div class="grid grid-cols-2 gap-4">
+                    <select class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                        <option>Matières Premières</option><option>Logistique</option><option>Salaires</option><option>Loyer/Charges</option><option>Divers</option>
+                    </select>
+                    <input type="number" placeholder="Montant (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date d'échéance de paiement</label>
+                    <input type="date" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                </div>
+                <button type="submit" class="w-full bg-amber-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-amber-500/20">Enregistrer l'Achat</button>
+                <button type="button" onclick="closeModal('expense')" class="w-full text-slate-500 text-xs py-2">Fermer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Cash -->
+    <div id="modal-cash" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-xl rounded-3xl p-8 border border-emerald-500/20 shadow-2xl">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-money-bill text-emerald-500"></i> Mouvement de Trésorerie</h4>
+            <form onsubmit="submitCash(event)" class="space-y-4">
+                <input type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
+                <input type="text" placeholder="Libellé de l'opération" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
+                <select class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
+                    <option>Opération Courante</option><option>Encaissement Client</option><option>Paiement Fournisseur</option>
+                </select>
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" placeholder="Entrée (+)" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
+                    <input type="number" placeholder="Sortie (-)" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-emerald-500/20">Valider l'Opération</button>
+                <button type="button" onclick="closeModal('cash')" class="w-full text-slate-500 text-xs py-2">Fermer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Collaborator -->
+    <div id="modal-collaborator" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-xl rounded-3xl p-8 border border-purple-500/20 shadow-2xl">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-handshake text-purple-500"></i> Nouveau Partenaire</h4>
+            <form onsubmit="submitCollaborator(event)" class="space-y-4">
+                <input type="text" placeholder="Nom de l'entreprise ou du contact" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
+                <select class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
+                    <option value="Client">Client</option>
+                    <option value="Fournisseur">Fournisseur</option>
+                    <option value="Investisseur">Investisseur</option>
+                </select>
+                <input type="text" placeholder="Contact (Téléphone, Email...)" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
+                <button type="submit" class="w-full bg-purple-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-purple-500/20">Ajouter Collaborateur</button>
+                <button type="button" onclick="closeModal('collaborator')" class="w-full text-slate-500 text-xs py-2">Fermer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Investment -->
+    <div id="modal-investment" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-xl rounded-3xl p-8 border border-rose-500/20 shadow-2xl">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-chart-line text-rose-500"></i> Mouvement d'Investissement</h4>
+            <form onsubmit="submitInvestment(event)" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                    <select class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                        <option value="Entrée (Apport)">Entrée (Apport en capital)</option>
+                        <option value="Sortie (Utilisation)">Sortie (Utilisation du fonds)</option>
+                        <option value="Retour (Remboursement)">Retour (Remboursement)</option>
+                    </select>
+                </div>
+                <input type="text" list="collab-list" placeholder="Investisseur / Collaborateur" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <input type="number" placeholder="Montant (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <input type="text" placeholder="Détails (ex: Matériel acheté, ROI...)" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date d'échéance du retour</label>
+                    <input type="date" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                </div>
+                <button type="submit" class="w-full bg-rose-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-rose-500/20">Valider l'Investissement</button>
+                <button type="button" onclick="closeModal('investment')" class="w-full text-slate-500 text-xs py-2">Fermer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Project Detail (Drill-down) -->
+    <div id="modal-project-detail" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-4xl rounded-3xl p-10">
+            <div class="flex justify-between items-center mb-8"><h4 class="text-2xl font-bold">Détails du Dossier</h4><button onclick="closeModal('project-detail')" class="text-2xl hover:text-rose-500">&times;</button></div>
+            <div id="project-detail-content"></div>
         </div>
     </div>
 
@@ -140,6 +266,7 @@
             if(id === 'workflow') fetchWorkflow();
             if(id === 'stocks') fetchStocks();
             if(id === 'finance') fetchFinance();
+            if(id === 'investissements') fetchInvestments();
         }
 
         function openModal(id) { document.getElementById('modal-'+id).classList.remove('hidden'); }
@@ -159,16 +286,152 @@
             const s = document.createElement("script");
             s.src = API_URL + "?action=getDashboardData&month=" + month + "&callback=" + cb;
             document.body.appendChild(s);
+            
+            // Populate datalist in background
+            fetchCompaniesList();
         }
 
+        function fetchCompaniesList() {
+            const cb = "cb_clist_"+Date.now();
+            window[cb] = function(data) {
+                const list = document.getElementById('collab-list');
+                list.innerHTML = data.map(c => `<option value="${c.name}">`).join('');
+                delete window[cb];
+            };
+            const s = document.createElement("script");
+            s.src = API_URL + "?action=getCompanies&callback=" + cb;
+            document.body.appendChild(s);
+        }
+
+        function fetchCompanies() {
+            const cb = "cb_c_"+Date.now();
+            window[cb] = function(data) {
+                document.getElementById('company-table-body').innerHTML = data.map(c => `
+                    <tr class="border-t border-slate-800">
+                        <td class="p-6 font-bold text-blue-400">${c.name}</td>
+                        <td class="p-6 text-xs">${c.type}</td>
+                        <td class="p-6 text-xs text-slate-400">${c.contact || '-'}</td>
+                        <td class="p-6">${(c.total||0).toLocaleString()} Ar</td>
+                        <td class="p-6 text-amber-500 font-bold">${(c.pending||0).toLocaleString()} Ar</td>
+                        <td class="p-6"><span class="px-2 py-1 rounded bg-slate-800 text-[10px]">${c.status}</span></td>
+                    </tr>`).join('');
+                delete window[cb];
+            };
+            const s = document.createElement("script");
+            s.src = API_URL + "?action=getCompanies&callback=" + cb;
+            document.body.appendChild(s);
+        }
+
+        function fetchInvestments() {
+            const cb = "cb_inv_"+Date.now();
+            window[cb] = function(data) {
+                let totalInvest = 0, totalOut = 0, totalRet = 0;
+                
+                document.getElementById('invest-table-body').innerHTML = data.map(inv => {
+                    if(inv.type.includes('Apport')) totalInvest += parseFloat(inv.amount)||0;
+                    if(inv.type.includes('Sortie')) totalOut += parseFloat(inv.amount)||0;
+                    if(inv.type.includes('Retour')) totalRet += parseFloat(inv.amount)||0;
+                    
+                    let delayStatus = inv.status;
+                    if(inv.deadline && new Date(inv.deadline) < new Date() && !inv.status.includes('Payé')) {
+                        delayStatus = "EN RETARD";
+                    }
+
+                    return `
+                    <tr class="border-t border-slate-800">
+                        <td class="p-6 text-xs text-slate-500">${new Date(inv.date).toLocaleDateString()}</td>
+                        <td class="p-6 font-bold text-rose-400">${inv.investor}</td>
+                        <td class="p-6 text-xs">${inv.type}</td>
+                        <td class="p-6 font-bold">${(inv.amount||0).toLocaleString()} Ar</td>
+                        <td class="p-6 text-xs text-slate-400">${inv.details || '-'}</td>
+                        <td class="p-6 text-xs">${inv.deadline ? new Date(inv.deadline).toLocaleDateString() : '-'}</td>
+                        <td class="p-6"><span class="px-2 py-1 rounded text-[10px] font-bold ${delayStatus==='EN RETARD'?'bg-rose-500/20 text-rose-500':'bg-slate-800'}">${delayStatus}</span></td>
+                        <td class="p-6 flex gap-3"><i onclick="deleteRow('tresorerie','Investissements','${inv.id}')" class="fas fa-trash text-slate-600 hover:text-rose-500 cursor-pointer btn-action"></i></td>
+                    </tr>`;
+                }).join('');
+                
+                document.getElementById('kpi-inv-total').textContent = totalInvest.toLocaleString() + " Ar";
+                document.getElementById('kpi-inv-out').textContent = totalOut.toLocaleString() + " Ar";
+                document.getElementById('kpi-inv-return').textContent = totalRet.toLocaleString() + " Ar";
+                
+                delete window[cb];
+            };
+            const s = document.createElement("script");
+            s.src = API_URL + "?action=getInvestments&callback=" + cb;
+            document.body.appendChild(s);
+        }
+
+        async function submitInvoice(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button'); btn.innerHTML = "...";
+            const formData = { action: "addInvoice", data: ["FAC-"+Date.now().toString().slice(-4), e.target[0].value, e.target[1].value, 0, 0, parseFloat(e.target[3].value), "En attente"] };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('invoice'); fetchData(); fetchWorkflow(); } catch(e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer la Vente"; }
+        }
+
+        async function submitExpense(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button'); btn.innerHTML = "...";
+            const formData = { 
+                action: "addExpense", 
+                month: e.target[1].value,
+                data: [
+                    e.target[0].value, // Date
+                    e.target[2].value, // Collaborateur / Fournisseur
+                    e.target[4].value, // Catégorie
+                    parseFloat(e.target[5].value), // Montant
+                    "Espèces", // Mode par défaut
+                    "En attente", // Statut
+                    e.target[3].value, // Détails
+                    e.target[2].value, // Collaborateur copié
+                    e.target[6].value  // Echéance
+                ] 
+            };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('expense'); fetchData(); } catch(e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer l'Achat"; }
+        }
+
+        async function submitCash(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button'); btn.innerHTML = "...";
+            const formData = { action: "addCash", data: [e.target[0].value, e.target[1].value, e.target[2].value, parseFloat(e.target[3].value)||0, parseFloat(e.target[4].value)||0, 0] };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('cash'); fetchFinance(); fetchData(); } catch(e) { alert("Erreur"); } finally { btn.innerHTML = "Valider l'Opération"; }
+        }
+
+        async function submitCollaborator(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button'); btn.innerHTML = "...";
+            const formData = { action: "addCollaborator", data: [e.target[0].value, e.target[1].value, e.target[2].value] };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('collaborator'); fetchCompaniesList(); fetchCompanies(); } catch(e) { alert("Erreur"); } finally { btn.innerHTML = "Ajouter Collaborateur"; }
+        }
+
+        async function submitInvestment(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button'); btn.innerHTML = "...";
+            const formData = { 
+                action: "addInvestment", 
+                data: [
+                    "INV-"+Date.now().toString().slice(-4), // ID
+                    e.target[0].value, // Date
+                    e.target[2].value, // Investisseur
+                    e.target[1].value, // Type
+                    parseFloat(e.target[3].value)||0, // Montant
+                    e.target[4].value, // Details
+                    e.target[5].value, // Echéance
+                    "En cours" // Statut
+                ] 
+            };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('investment'); fetchInvestments(); } catch(e) { alert("Erreur"); } finally { btn.innerHTML = "Valider l'Investissement"; }
+        }
+
+        // Rest of unchanged UI logic functions
         async function updateStatus(file, sheet, id, newStatus, colIndex) {
             showLoading(true);
             const params = { action: "updateStatus", file, sheet, id, newStatus, colIndex };
             try {
                 await fetch(API_URL, { method: 'POST', body: JSON.stringify(params) });
-                fetchData();
                 if(sheet === 'Base facturation') fetchWorkflow();
                 if(sheet === 'suivi trésorerie') fetchFinance();
+                if(sheet === 'Investissements') fetchInvestments();
+                fetchData();
             } catch(e) { alert("Erreur de synchronisation"); }
             finally { showLoading(false); }
         }
@@ -191,7 +454,7 @@
                 document.getElementById('workflow-table-body').innerHTML = data.map(w => `
                     <tr class="border-t border-slate-800">
                         <td class="p-6 font-mono text-xs text-blue-400">${w.id}</td>
-                        <td class="p-6 font-bold">${w.project}</td>
+                        <td class="p-6 font-bold cursor-pointer hover:text-blue-500" onclick="viewProjectDetail('${w.id}')">${w.project}</td>
                         <td class="p-6"><span class="text-[10px] bg-slate-800 px-2 py-1 rounded">${w.phaseAchat}</span></td>
                         <td class="p-6">
                             <button onclick="updateStatus('facturation','Base facturation','${w.id}','Payé',6)" class="text-[10px] ${w.phaseVente==='Payé'?'bg-emerald-500/10 text-emerald-400':'bg-amber-500/10 text-amber-400'} px-2 py-1 rounded font-bold">
@@ -208,6 +471,20 @@
             };
             const s = document.createElement("script");
             s.src = API_URL + "?action=getWorkflow&callback=" + cb;
+            document.body.appendChild(s);
+        }
+
+        function viewProjectDetail(id) {
+            openModal('project-detail');
+            const cont = document.getElementById('project-detail-content');
+            cont.innerHTML = "<div class='flex justify-center p-10'><i class='fas fa-spinner animate-spin text-2xl text-blue-500'></i></div>";
+            const cb = "cb_pd_"+Date.now();
+            window[cb] = function(data) {
+                cont.innerHTML = `<div class="grid grid-cols-2 gap-8"><div><h5 class="text-xs font-bold text-slate-500 uppercase mb-4">Revenus</h5><div class="space-y-2">${data.invoices.map(i => `<div class="bg-slate-900/50 p-3 rounded-xl flex justify-between text-xs"><span>${i[0]}</span><span class="font-bold">${(i[5]||0).toLocaleString()} Ar</span></div>`).join('')}</div></div><div><h5 class="text-xs font-bold text-slate-500 uppercase mb-4">Coûts</h5><div class="space-y-2">${data.costs.map(c => `<div class="bg-rose-500/5 p-3 rounded-xl flex justify-between text-xs"><span>${c[1]}</span><span class="font-bold text-rose-400">-${(c[3]||0).toLocaleString()} Ar</span></div>`).join('')}</div></div></div>`;
+                delete window[cb];
+            };
+            const s = document.createElement("script");
+            s.src = API_URL + "?action=getProjectDetail&id=" + id + "&callback=" + cb;
             document.body.appendChild(s);
         }
 
@@ -249,7 +526,7 @@
                         <td class="p-6 font-semibold">${h.label}</td>
                         <td class="p-6 ${h.in>0?'text-emerald-400':'text-rose-400'} font-bold">${h.in>0?'+':'-'}${Math.max(h.in,h.out).toLocaleString()} Ar</td>
                         <td class="p-6 font-bold text-blue-400">${(h.balance||0).toLocaleString()} Ar</td>
-                        <td class="p-6"><i onclick="deleteRow('tresorerie','suivi trésorerie','${h.id||''}')" class="fas fa-trash text-slate-700 cursor-pointer"></i></td>
+                        <td class="p-6"><i onclick="deleteRow('tresorerie','suivi trésorerie','${h.id||''}')" class="fas fa-trash text-slate-700 cursor-pointer btn-action"></i></td>
                     </tr>
                 `).reverse().join('');
                 delete window[cb];
