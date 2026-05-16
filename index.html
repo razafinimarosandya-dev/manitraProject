@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,23 +10,63 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Outfit', sans-serif; background-color: #0b0f1a; color: #e2e8f0; overflow-x: hidden; }
-        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .sidebar-item { transition: all 0.3s ease; border-radius: 12px; margin-bottom: 4px; color: #94a3b8; cursor: pointer; }
-        .sidebar-item:hover, .sidebar-item.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
-        .btn-action { transition: all 0.2s; }
-        .btn-action:hover { transform: scale(1.1); }
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        #loading-overlay { display: none; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #0b0f1a;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-item {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            margin-bottom: 4px;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+
+        .sidebar-item:hover,
+        .sidebar-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+        }
+
+        .btn-action {
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            transform: scale(1.1);
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+
+        #loading-overlay {
+            display: none;
+        }
     </style>
 </head>
+
 <body class="flex h-screen overflow-hidden">
 
     <datalist id="collab-list"></datalist>
 
     <!-- OVERLAY DE CHARGEMENT -->
-    <div id="loading-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[200] flex items-center justify-center">
+    <div id="loading-overlay"
+        class="fixed inset-0 bg-black/60 backdrop-blur-md z-[200] flex items-center justify-center">
         <div class="text-center">
             <i class="fas fa-circle-notch animate-spin text-4xl text-blue-500 mb-4"></i>
             <p class="text-xs font-bold tracking-widest uppercase">Synchronisation Cloud...</p>
@@ -35,7 +76,8 @@
     <!-- SIDEBAR -->
     <aside class="w-72 glass border-r border-slate-800 flex flex-col p-6 z-50">
         <div class="flex items-center gap-3 mb-10 px-2">
-            <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <div
+                class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <i class="fas fa-shield-alt text-white text-xl"></i>
             </div>
             <h1 class="text-xl font-bold tracking-tight">Manitra <span class="text-blue-500 text-xs">ERP V6</span></h1>
@@ -43,19 +85,39 @@
 
         <nav class="flex-1 custom-scroll overflow-y-auto space-y-1">
             <p class="text-[10px] uppercase font-bold text-slate-500 mb-4 px-2 tracking-widest">Contrôle Total</p>
-            <div onclick="showSection('dashboard', this)" class="sidebar-item active flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-th-large w-5"></i> Dashboard</div>
-            <div onclick="showSection('collaborateurs', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-user-friends w-5"></i> Partenaires</div>
-            <div onclick="showSection('workflow', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-project-diagram w-5"></i> Workflow</div>
-            <div onclick="showSection('stocks', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-boxes w-5"></i> Inventaire</div>
-            <div onclick="showSection('finance', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-wallet w-5"></i> Trésorerie</div>
-            <div onclick="showSection('investissements', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-chart-pie w-5"></i> Investissements</div>
-            
+            <div onclick="showSection('dashboard', this)"
+                class="sidebar-item active flex items-center gap-4 px-4 py-3 text-sm"><i
+                    class="fas fa-th-large w-5"></i> Dashboard</div>
+            <div onclick="showSection('collaborateurs', this)"
+                class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-user-friends w-5"></i>
+                Partenaires</div>
+            <div onclick="showSection('workflow', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm">
+                <i class="fas fa-project-diagram w-5"></i> Workflow</div>
+            <div onclick="showSection('stocks', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i
+                    class="fas fa-boxes w-5"></i> Inventaire</div>
+            <div onclick="showSection('finance', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm">
+                <i class="fas fa-wallet w-5"></i> Trésorerie</div>
+            <div onclick="showSection('investissements', this)"
+                class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-chart-pie w-5"></i>
+                Investissements</div>
+
             <p class="text-[10px] uppercase font-bold text-slate-500 mt-8 mb-4 px-2 tracking-widest">Saisies Rapides</p>
-            <button onclick="openModal('invoice')" class="w-full bg-blue-600/20 border border-blue-500/30 text-blue-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-blue-600 hover:text-white transition-all">+ Vente</button>
-            <button onclick="openModal('expense')" class="w-full bg-amber-600/20 border border-amber-500/30 text-amber-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-amber-600 hover:text-white transition-all">+ Achat</button>
-            <button onclick="openModal('cash')" class="w-full bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-emerald-600 hover:text-white transition-all">+ Mouvement Cash</button>
-            <button onclick="openModal('collaborator')" class="w-full bg-purple-600/20 border border-purple-500/30 text-purple-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-purple-600 hover:text-white transition-all">+ Partenaire</button>
-            <button onclick="openModal('investment')" class="w-full bg-rose-600/20 border border-rose-500/30 text-rose-400 py-2 rounded-xl text-xs font-bold hover:bg-rose-600 hover:text-white transition-all">+ Investissement</button>
+            <button onclick="openModal('proforma')" class="w-full bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-indigo-600 hover:text-white transition-all">+ Proforma / Devis</button>
+            <button onclick="openModal('invoice')"
+                class="w-full bg-blue-600/20 border border-blue-500/30 text-blue-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-blue-600 hover:text-white transition-all">+
+                Vente</button>
+            <button onclick="openModal('expense')"
+                class="w-full bg-amber-600/20 border border-amber-500/30 text-amber-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-amber-600 hover:text-white transition-all">+
+                Achat</button>
+            <button onclick="openModal('cash')"
+                class="w-full bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-emerald-600 hover:text-white transition-all">+
+                Mouvement Cash</button>
+            <button onclick="openModal('collaborator')"
+                class="w-full bg-purple-600/20 border border-purple-500/30 text-purple-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-purple-600 hover:text-white transition-all">+
+                Partenaire</button>
+            <button onclick="openModal('investment')"
+                class="w-full bg-rose-600/20 border border-rose-500/30 text-rose-400 py-2 rounded-xl text-xs font-bold hover:bg-rose-600 hover:text-white transition-all">+
+                Investissement</button>
         </nav>
     </aside>
 
@@ -64,79 +126,212 @@
         <header class="h-20 glass border-b border-slate-800 flex items-center justify-between px-8">
             <div class="flex items-center gap-4">
                 <h2 id="section-title" class="text-lg font-bold">Tableau de Bord</h2>
-                <select id="period-selector" onchange="fetchData()" class="bg-slate-900 border border-slate-800 rounded-lg text-[10px] px-3 py-1 outline-none font-bold uppercase tracking-wider text-blue-400">
-                    <option value="Janvier">Janvier 2026</option><option value="Février">Février 2026</option>
-                    <option value="Mars">Mars 2026</option><option value="Avril">Avril 2026</option>
+                <select id="period-selector" onchange="fetchData()"
+                    class="bg-slate-900 border border-slate-800 rounded-lg text-[10px] px-3 py-1 outline-none font-bold uppercase tracking-wider text-blue-400">
+                    <option value="Janvier">Janvier 2026</option>
+                    <option value="Février">Février 2026</option>
+                    <option value="Mars">Mars 2026</option>
+                    <option value="Avril">Avril 2026</option>
                     <option value="Mai" selected>Mai 2026</option>
                 </select>
             </div>
             <div class="flex items-center gap-4">
-                <div class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">LIVE CLOUD SYNC</div>
+                <div
+                    class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                    LIVE CLOUD SYNC</div>
             </div>
         </header>
 
         <div id="content-area" class="flex-1 p-8 overflow-y-auto custom-scroll">
-            
+
             <!-- SECTION : DASHBOARD -->
             <section id="section-dashboard" class="space-y-8">
-                <div class="grid grid-cols-4 gap-6">
-                    <div class="glass p-6 rounded-3xl"><p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Ventes Mois</p><h3 id="kpi-revenue" class="text-2xl font-bold">0 Ar</h3></div>
-                    <div class="glass p-6 rounded-3xl"><p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Restes à Encaisser</p><h3 id="kpi-pending" class="text-2xl font-bold text-amber-500">0 Ar</h3></div>
-                    <div class="glass p-6 rounded-3xl"><p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Dépenses Mois</p><h3 id="kpi-expenses" class="text-2xl font-bold text-rose-500">0 Ar</h3></div>
-                    <div class="glass p-6 rounded-3xl"><p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Disponibilité</p><h3 id="kpi-cash" class="text-2xl font-bold text-emerald-400">0 Ar</h3></div>
+                <div class="grid grid-cols-5 gap-6">
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Ventes Mois</p>
+                        <h3 id="kpi-revenue" class="text-2xl font-bold">0 Ar</h3>
+                    </div>
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Restes à Encaisser</p>
+                        <h3 id="kpi-pending" class="text-2xl font-bold text-amber-500">0 Ar</h3>
+                    </div>
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Dépenses Mois</p>
+                        <h3 id="kpi-expenses" class="text-2xl font-bold text-rose-500">0 Ar</h3>
+                    </div>
+                    <div class="glass p-6 rounded-3xl border border-blue-500/30 bg-blue-900/10 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
+                        <p class="text-[10px] text-blue-400 font-bold uppercase mb-2">Bénéfice Net</p>
+                        <h3 id="kpi-profit" class="text-2xl font-bold">0 Ar</h3>
+                    </div>
+                    <div class="glass p-6 rounded-3xl border border-emerald-500/30 bg-emerald-900/10 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+                        <p class="text-[10px] text-emerald-400 font-bold uppercase mb-2">Disponibilité</p>
+                        <h3 id="kpi-cash" class="text-2xl font-bold text-white">0 Ar</h3>
+                    </div>
                 </div>
-                <div class="glass p-8 rounded-3xl h-[400px]">
-                    <canvas id="mainChart"></canvas>
+
+                <div class="grid grid-cols-3 gap-6 mt-6">
+                    <div class="col-span-2 glass p-8 rounded-3xl h-[400px]">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                    <div class="col-span-1 space-y-6">
+                        <!-- Alertes -->
+                        <div class="glass p-6 rounded-3xl h-[188px] overflow-y-auto custom-scroll">
+                            <h4 class="text-sm font-bold text-rose-500 mb-4 flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i> Alertes & Urgences</h4>
+                            <div id="dashboard-alerts" class="space-y-3">
+                                <p class="text-xs text-slate-400 italic">Analyse en cours...</p>
+                            </div>
+                        </div>
+                        <!-- Top Projets -->
+                        <div class="glass p-6 rounded-3xl h-[188px] overflow-y-auto custom-scroll">
+                            <h4 class="text-sm font-bold text-blue-400 mb-4 flex items-center gap-2"><i class="fas fa-trophy"></i> Top Dossiers</h4>
+                            <div id="dashboard-top-projects" class="space-y-3">
+                                <p class="text-xs text-slate-400 italic">Analyse en cours...</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
             <!-- SECTION : COLLABORATEURS -->
             <section id="section-collaborateurs" class="hidden space-y-8">
-                <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Partenaires Commerciaux</h3></div>
-                <div class="glass rounded-3xl overflow-hidden border border-white/5"><table class="w-full text-left text-sm"><thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px] tracking-widest"><tr><th class="p-6">Entreprise</th><th class="p-6">Type</th><th class="p-6">Contact</th><th class="p-6">Cumul</th><th class="p-6">Solde en cours</th><th class="p-6">Statut</th></tr></thead><tbody id="company-table-body"></tbody></table></div>
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold">Partenaires Commerciaux</h3>
+                </div>
+                <div class="glass rounded-3xl overflow-hidden border border-white/5">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px] tracking-widest">
+                            <tr>
+                                <th class="p-6">Entreprise</th>
+                                <th class="p-6">Type</th>
+                                <th class="p-6">Contact</th>
+                                <th class="p-6">Cumul</th>
+                                <th class="p-6">Solde en cours</th>
+                                <th class="p-6">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="company-table-body"></tbody>
+                    </table>
+                </div>
             </section>
 
             <!-- SECTION : WORKFLOW -->
             <section id="section-workflow" class="hidden space-y-8">
-                <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Suivi Opérationnel</h3></div>
-                <div class="glass rounded-3xl overflow-hidden"><table class="w-full text-left text-sm"><thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]"><tr><th class="p-6">Dossier</th><th class="p-6">Client</th><th class="p-6">Achat</th><th class="p-6">Vente</th><th class="p-6">Marge Net</th><th class="p-6">Actions</th></tr></thead><tbody id="workflow-table-body"></tbody></table></div>
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold">Suivi Opérationnel</h3>
+                </div>
+                <div class="glass rounded-3xl overflow-hidden">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]">
+                            <tr>
+                                <th class="p-6">Dossier</th>
+                                <th class="p-6">Client</th>
+                                <th class="p-6">Achat</th>
+                                <th class="p-6">Vente</th>
+                                <th class="p-6">Marge Net</th>
+                                <th class="p-6">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workflow-table-body"></tbody>
+                    </table>
+                </div>
             </section>
 
             <!-- SECTION : STOCKS -->
             <section id="section-stocks" class="hidden space-y-8">
-                <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Inventaire</h3><button onclick="openModal('stock-add')" class="bg-blue-600 px-4 py-2 rounded-xl text-xs font-bold">+ Créer Article</button></div>
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold">Inventaire</h3><button onclick="openModal('stock-add')"
+                        class="bg-blue-600 px-4 py-2 rounded-xl text-xs font-bold">+ Créer Article</button>
+                </div>
                 <div id="stock-alerts" class="grid grid-cols-3 gap-4"></div>
-                <div class="glass rounded-3xl overflow-hidden"><table class="w-full text-left text-sm"><thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]"><tr><th class="p-6">Article</th><th class="p-6">Quantité</th><th class="p-6">Unité</th><th class="p-6">État</th><th class="p-6">Ajuster</th></tr></thead><tbody id="stock-table-body"></tbody></table></div>
+                <div class="glass rounded-3xl overflow-hidden">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]">
+                            <tr>
+                                <th class="p-6">Article</th>
+                                <th class="p-6">Quantité</th>
+                                <th class="p-6">Unité</th>
+                                <th class="p-6">État</th>
+                                <th class="p-6">Ajuster</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stock-table-body"></tbody>
+                    </table>
+                </div>
             </section>
 
             <!-- SECTION : FINANCE -->
             <section id="section-finance" class="hidden space-y-8">
-                <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Historique Bancaire & Cash</h3></div>
-                <div class="glass rounded-3xl overflow-hidden"><table class="w-full text-left text-sm"><thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]"><tr><th class="p-6">Date</th><th class="p-6">Opération</th><th class="p-6">Flux</th><th class="p-6">Solde</th><th class="p-6">Action</th></tr></thead><tbody id="finance-table-body"></tbody></table></div>
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold">Historique Bancaire & Cash</h3>
+                </div>
+                <div class="glass rounded-3xl overflow-hidden">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]">
+                            <tr>
+                                <th class="p-6">Date</th>
+                                <th class="p-6">Opération</th>
+                                <th class="p-6">Flux</th>
+                                <th class="p-6">Solde</th>
+                                <th class="p-6">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="finance-table-body"></tbody>
+                    </table>
+                </div>
             </section>
 
             <!-- SECTION : INVESTISSEMENTS -->
             <section id="section-investissements" class="hidden space-y-8">
-                <div class="flex justify-between items-center"><h3 class="text-xl font-bold">Suivi des Investissements</h3></div>
-                <div class="grid grid-cols-3 gap-6 mb-6">
-                    <div class="glass p-6 rounded-3xl"><p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Total Investi</p><h3 id="kpi-inv-total" class="text-2xl font-bold text-blue-400">0 Ar</h3></div>
-                    <div class="glass p-6 rounded-3xl"><p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Sorties d'Investissements</p><h3 id="kpi-inv-out" class="text-2xl font-bold text-rose-400">0 Ar</h3></div>
-                    <div class="glass p-6 rounded-3xl"><p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Retours (ROI / Remboursements)</p><h3 id="kpi-inv-return" class="text-2xl font-bold text-emerald-400">0 Ar</h3></div>
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold">Suivi des Investissements</h3>
                 </div>
-                <div class="glass rounded-3xl overflow-hidden"><table class="w-full text-left text-sm"><thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]"><tr><th class="p-6">Date</th><th class="p-6">Investisseur</th><th class="p-6">Type</th><th class="p-6">Montant</th><th class="p-6">Détails</th><th class="p-6">Échéance Retour</th><th class="p-6">Statut</th><th class="p-6">Action</th></tr></thead><tbody id="invest-table-body"></tbody></table></div>
+                <div class="grid grid-cols-3 gap-6 mb-6">
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Total Investi</p>
+                        <h3 id="kpi-inv-total" class="text-2xl font-bold text-blue-400">0 Ar</h3>
+                    </div>
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Sorties d'Investissements</p>
+                        <h3 id="kpi-inv-out" class="text-2xl font-bold text-rose-400">0 Ar</h3>
+                    </div>
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Retours (ROI / Remboursements)
+                        </p>
+                        <h3 id="kpi-inv-return" class="text-2xl font-bold text-emerald-400">0 Ar</h3>
+                    </div>
+                </div>
+                <div class="glass rounded-3xl overflow-hidden">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]">
+                            <tr>
+                                <th class="p-6">Date</th>
+                                <th class="p-6">Investisseur</th>
+                                <th class="p-6">Type</th>
+                                <th class="p-6">Montant</th>
+                                <th class="p-6">Détails</th>
+                                <th class="p-6">Échéance Retour</th>
+                                <th class="p-6">Statut</th>
+                                <th class="p-6">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invest-table-body"></tbody>
+                    </table>
+                </div>
             </section>
         </div>
     </main>
 
     <!-- MODALS -->
-    
+
     <!-- Modal Invoice -->
     <div id="modal-invoice" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
         <div class="glass w-full max-w-xl rounded-3xl p-8 border border-blue-500/20 shadow-2xl">
             <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-file-invoice text-blue-500"></i> Nouvelle Facture de Vente</h4>
             <form onsubmit="submitInvoice(event)" class="space-y-4">
                 <input type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
-                <input type="text" list="collab-list" placeholder="Client (Collaborateur)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <select id="invoice-collab" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                    <option value="">Sélectionnez un Client / Collaborateur...</option>
+                </select>
                 <input type="text" placeholder="Projet / Description" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
                 <input type="number" placeholder="Montant TTC (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
                 <button type="submit" class="w-full bg-blue-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/20">Enregistrer la Vente</button>
@@ -145,108 +340,184 @@
         </div>
     </div>
 
+    <!-- Modal Proforma -->
+    <div id="modal-proforma" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-xl rounded-3xl p-8 border border-indigo-500/20 shadow-2xl">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-file-alt text-indigo-500"></i> Nouveau Proforma / Devis</h4>
+            <form onsubmit="submitProforma(event)" class="space-y-4">
+                <input type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm">
+                <select id="proforma-collab" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm">
+                    <option value="">Sélectionnez un Client...</option>
+                </select>
+                <input type="text" placeholder="Projet / Description" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm">
+                <input type="number" placeholder="Montant TTC Estimé (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm">
+                <button type="submit" class="w-full bg-indigo-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-indigo-500/20">Enregistrer le Proforma</button>
+                <button type="button" onclick="closeModal('proforma')" class="w-full text-slate-500 text-xs py-2">Fermer</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal Expense -->
-    <div id="modal-expense" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <div id="modal-expense"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
         <div class="glass w-full max-w-xl rounded-3xl p-8 border border-amber-500/20 shadow-2xl">
-            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-shopping-cart text-amber-500"></i> Nouvel Achat / Charge</h4>
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i
+                    class="fas fa-shopping-cart text-amber-500"></i> Nouvel Achat / Charge</h4>
             <form onsubmit="submitExpense(event)" class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
-                    <select class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
-                        <option value="Janvier">Janvier</option><option value="Février">Février</option>
-                        <option value="Mars">Mars</option><option value="Avril">Avril</option>
-                        <option value="Mai" selected>Mai</option><option value="Juin">Juin</option>
-                        <option value="Juillet">Juillet</option><option value="Août">Août</option>
-                        <option value="Septembre">Septembre</option><option value="Octobre">Octobre</option>
-                        <option value="Novembre">Novembre</option><option value="Décembre">Décembre</option>
+                    <input type="date" required
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                    <select
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                        <option value="Janvier">Janvier</option>
+                        <option value="Février">Février</option>
+                        <option value="Mars">Mars</option>
+                        <option value="Avril">Avril</option>
+                        <option value="Mai" selected>Mai</option>
+                        <option value="Juin">Juin</option>
+                        <option value="Juillet">Juillet</option>
+                        <option value="Août">Août</option>
+                        <option value="Septembre">Septembre</option>
+                        <option value="Octobre">Octobre</option>
+                        <option value="Novembre">Novembre</option>
+                        <option value="Décembre">Décembre</option>
                     </select>
                 </div>
-                <input type="text" list="collab-list" placeholder="Fournisseur / Collaborateur" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
-                <input type="text" placeholder="Détails de l'achat" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                <input type="text" list="collab-list" placeholder="Fournisseur / Collaborateur" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                <input type="text" placeholder="Détails de l'achat"
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
                 <div class="grid grid-cols-2 gap-4">
-                    <select class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
-                        <option>Matières Premières</option><option>Logistique</option><option>Salaires</option><option>Loyer/Charges</option><option>Divers</option>
+                    <select
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                        <option>Matières Premières</option>
+                        <option>Logistique</option>
+                        <option>Salaires</option>
+                        <option>Loyer/Charges</option>
+                        <option>Divers</option>
                     </select>
-                    <input type="number" placeholder="Montant (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                    <input type="number" placeholder="Montant (Ar)" required
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
                 </div>
                 <div>
-                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date d'échéance de paiement</label>
-                    <input type="date" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date d'échéance de
+                        paiement</label>
+                    <input type="date"
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
                 </div>
-                <button type="submit" class="w-full bg-amber-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-amber-500/20">Enregistrer l'Achat</button>
-                <button type="button" onclick="closeModal('expense')" class="w-full text-slate-500 text-xs py-2">Fermer</button>
+                <button type="submit"
+                    class="w-full bg-amber-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-amber-500/20">Enregistrer
+                    l'Achat</button>
+                <button type="button" onclick="closeModal('expense')"
+                    class="w-full text-slate-500 text-xs py-2">Fermer</button>
             </form>
         </div>
     </div>
 
     <!-- Modal Cash -->
-    <div id="modal-cash" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <div id="modal-cash"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
         <div class="glass w-full max-w-xl rounded-3xl p-8 border border-emerald-500/20 shadow-2xl">
-            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-money-bill text-emerald-500"></i> Mouvement de Trésorerie</h4>
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i
+                    class="fas fa-money-bill text-emerald-500"></i> Mouvement de Trésorerie</h4>
             <form onsubmit="submitCash(event)" class="space-y-4">
-                <input type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
-                <input type="text" placeholder="Libellé de l'opération" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
-                <select class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
-                    <option>Opération Courante</option><option>Encaissement Client</option><option>Paiement Fournisseur</option>
+                <input type="date" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
+                <input type="text" placeholder="Libellé de l'opération" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
+                <select
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
+                    <option>Opération Courante</option>
+                    <option>Encaissement Client</option>
+                    <option>Paiement Fournisseur</option>
                 </select>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="number" placeholder="Entrée (+)" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
-                    <input type="number" placeholder="Sortie (-)" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
+                    <input type="number" placeholder="Entrée (+)"
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
+                    <input type="number" placeholder="Sortie (-)"
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
                 </div>
-                <button type="submit" class="w-full bg-emerald-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-emerald-500/20">Valider l'Opération</button>
-                <button type="button" onclick="closeModal('cash')" class="w-full text-slate-500 text-xs py-2">Fermer</button>
+                <button type="submit"
+                    class="w-full bg-emerald-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-emerald-500/20">Valider
+                    l'Opération</button>
+                <button type="button" onclick="closeModal('cash')"
+                    class="w-full text-slate-500 text-xs py-2">Fermer</button>
             </form>
         </div>
     </div>
 
     <!-- Modal Collaborator -->
-    <div id="modal-collaborator" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <div id="modal-collaborator"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
         <div class="glass w-full max-w-xl rounded-3xl p-8 border border-purple-500/20 shadow-2xl">
-            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-handshake text-purple-500"></i> Nouveau Partenaire</h4>
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-handshake text-purple-500"></i>
+                Nouveau Partenaire</h4>
             <form onsubmit="submitCollaborator(event)" class="space-y-4">
-                <input type="text" placeholder="Nom de l'entreprise ou du contact" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
-                <select class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
+                <input type="text" placeholder="Nom de l'entreprise ou du contact" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
+                <select
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
                     <option value="Client">Client</option>
                     <option value="Fournisseur">Fournisseur</option>
                     <option value="Investisseur">Investisseur</option>
                 </select>
-                <input type="text" placeholder="Contact (Téléphone, Email...)" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
-                <button type="submit" class="w-full bg-purple-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-purple-500/20">Ajouter Collaborateur</button>
-                <button type="button" onclick="closeModal('collaborator')" class="w-full text-slate-500 text-xs py-2">Fermer</button>
+                <input type="text" placeholder="Contact (Téléphone, Email...)"
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
+                <button type="submit"
+                    class="w-full bg-purple-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-purple-500/20">Ajouter
+                    Collaborateur</button>
+                <button type="button" onclick="closeModal('collaborator')"
+                    class="w-full text-slate-500 text-xs py-2">Fermer</button>
             </form>
         </div>
     </div>
 
     <!-- Modal Investment -->
-    <div id="modal-investment" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <div id="modal-investment"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
         <div class="glass w-full max-w-xl rounded-3xl p-8 border border-rose-500/20 shadow-2xl">
-            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-chart-line text-rose-500"></i> Mouvement d'Investissement</h4>
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-chart-line text-rose-500"></i>
+                Mouvement d'Investissement</h4>
             <form onsubmit="submitInvestment(event)" class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
-                    <select class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                    <input type="date" required
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                    <select
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
                         <option value="Entrée (Apport)">Entrée (Apport en capital)</option>
                         <option value="Sortie (Utilisation)">Sortie (Utilisation du fonds)</option>
                         <option value="Retour (Remboursement)">Retour (Remboursement)</option>
                     </select>
                 </div>
-                <input type="text" list="collab-list" placeholder="Investisseur / Collaborateur" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
-                <input type="number" placeholder="Montant (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
-                <input type="text" placeholder="Détails (ex: Matériel acheté, ROI...)" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <input type="text" list="collab-list" placeholder="Investisseur / Collaborateur" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <input type="number" placeholder="Montant (Ar)" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <input type="text" placeholder="Détails (ex: Matériel acheté, ROI...)"
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
                 <div>
-                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date d'échéance du retour</label>
-                    <input type="date" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date d'échéance du
+                        retour</label>
+                    <input type="date"
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
                 </div>
-                <button type="submit" class="w-full bg-rose-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-rose-500/20">Valider l'Investissement</button>
-                <button type="button" onclick="closeModal('investment')" class="w-full text-slate-500 text-xs py-2">Fermer</button>
+                <button type="submit"
+                    class="w-full bg-rose-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-rose-500/20">Valider
+                    l'Investissement</button>
+                <button type="button" onclick="closeModal('investment')"
+                    class="w-full text-slate-500 text-xs py-2">Fermer</button>
             </form>
         </div>
     </div>
 
     <!-- Modal Project Detail (Drill-down) -->
-    <div id="modal-project-detail" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
+    <div id="modal-project-detail"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
         <div class="glass w-full max-w-4xl rounded-3xl p-10">
-            <div class="flex justify-between items-center mb-8"><h4 class="text-2xl font-bold">Détails du Dossier</h4><button onclick="closeModal('project-detail')" class="text-2xl hover:text-rose-500">&times;</button></div>
+            <div class="flex justify-between items-center mb-8">
+                <h4 class="text-2xl font-bold">Détails du Dossier</h4><button onclick="closeModal('project-detail')"
+                    class="text-2xl hover:text-rose-500">&times;</button>
+            </div>
             <div id="project-detail-content"></div>
         </div>
     </div>
@@ -259,43 +530,101 @@
 
         function showSection(id, el) {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.getElementById('section-'+id).classList.remove('hidden');
+            document.getElementById('section-' + id).classList.remove('hidden');
             document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-            if(el) el.classList.add('active');
-            if(id === 'collaborateurs') fetchCompanies();
-            if(id === 'workflow') fetchWorkflow();
-            if(id === 'stocks') fetchStocks();
-            if(id === 'finance') fetchFinance();
-            if(id === 'investissements') fetchInvestments();
+            if (el) el.classList.add('active');
+            if (id === 'collaborateurs') fetchCompanies();
+            if (id === 'workflow') fetchWorkflow();
+            if (id === 'stocks') fetchStocks();
+            if (id === 'finance') fetchFinance();
+            if (id === 'investissements') fetchInvestments();
         }
 
-        function openModal(id) { document.getElementById('modal-'+id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById('modal-'+id).classList.add('hidden'); }
+        function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); }
 
         async function fetchData() {
             const month = document.getElementById('period-selector').value;
-            const cb = "cb_"+Date.now();
-            window[cb] = function(data) {
-                document.getElementById('kpi-revenue').textContent = (data.kpis.revenue||0).toLocaleString() + " Ar";
-                document.getElementById('kpi-pending').textContent = (data.kpis.pending||0).toLocaleString() + " Ar";
-                document.getElementById('kpi-expenses').textContent = (data.kpis.expenses||0).toLocaleString() + " Ar";
-                document.getElementById('kpi-cash').textContent = (data.kpis.cash||0).toLocaleString() + " Ar";
+            const cb = "cb_" + Date.now();
+            window[cb] = function (data) {
+                document.getElementById('kpi-revenue').textContent = (data.kpis.revenue || 0).toLocaleString() + " Ar";
+                document.getElementById('kpi-pending').textContent = (data.kpis.pending || 0).toLocaleString() + " Ar";
+                document.getElementById('kpi-expenses').textContent = (data.kpis.expenses || 0).toLocaleString() + " Ar";
+                document.getElementById('kpi-cash').textContent = (data.kpis.cash || 0).toLocaleString() + " Ar";
+                
+                const profit = (data.kpis.revenue || 0) - (data.kpis.expenses || 0);
+                const kpiProfit = document.getElementById('kpi-profit');
+                kpiProfit.textContent = profit.toLocaleString() + " Ar";
+                if (profit >= 0) {
+                    kpiProfit.classList.remove('text-rose-500');
+                    kpiProfit.classList.add('text-emerald-400');
+                } else {
+                    kpiProfit.classList.remove('text-emerald-400');
+                    kpiProfit.classList.add('text-rose-500');
+                }
+
                 initChart(data.cashFlow);
                 delete window[cb];
             };
             const s = document.createElement("script");
             s.src = API_URL + "?action=getDashboardData&month=" + month + "&callback=" + cb;
             document.body.appendChild(s);
-            
+
             // Populate datalist in background
             fetchCompaniesList();
+            fetchDashboardWidgets();
+        }
+
+        function fetchDashboardWidgets() {
+            const cbW = "cb_dw_" + Date.now();
+            window[cbW] = function (data) {
+                // Top Projects
+                const topProjects = data.slice().sort((a,b) => (b.revenue - b.cost) - (a.revenue - a.cost)).slice(0,3);
+                const projHtml = topProjects.map(p => `
+                    <div class="bg-slate-800/50 p-3 rounded-xl flex justify-between items-center border border-slate-700/50">
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-bold text-blue-300 truncate w-24">${p.project}</p>
+                            <p class="text-[10px] text-slate-400 truncate w-24">${p.client}</p>
+                        </div>
+                        <span class="text-xs font-bold ${(p.revenue - p.cost) >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${(p.revenue - p.cost).toLocaleString()} Ar</span>
+                    </div>
+                `).join('');
+                document.getElementById('dashboard-top-projects').innerHTML = projHtml || '<p class="text-xs text-slate-500">Aucun projet actif</p>';
+                
+                // Alerts
+                let alertsHtml = '';
+                const unpaid = data.filter(p => p.status && (p.status.includes('En attente') || p.status.includes('Proforma')));
+                if (unpaid.length > 0) {
+                    alertsHtml += `
+                    <div class="bg-amber-900/20 p-3 rounded-xl flex items-center gap-3 border border-amber-500/20">
+                        <i class="fas fa-file-invoice text-amber-500"></i>
+                        <div>
+                            <p class="text-xs font-bold text-amber-400">${unpaid.length} Facture(s) en attente</p>
+                            <p class="text-[10px] text-slate-400">À relancer</p>
+                        </div>
+                    </div>`;
+                }
+                
+                document.getElementById('dashboard-alerts').innerHTML = alertsHtml || '<p class="text-xs text-emerald-500"><i class="fas fa-check-circle"></i> Tout est au vert !</p>';
+                delete window[cbW];
+            };
+            const sW = document.createElement("script");
+            sW.src = API_URL + "?action=getWorkflow&callback=" + cbW;
+            document.body.appendChild(sW);
         }
 
         function fetchCompaniesList() {
-            const cb = "cb_clist_"+Date.now();
-            window[cb] = function(data) {
+            const cb = "cb_clist_" + Date.now();
+            window[cb] = function (data) {
                 const list = document.getElementById('collab-list');
                 list.innerHTML = data.map(c => `<option value="${c.name}">`).join('');
+                
+                const invCollab = document.getElementById('invoice-collab');
+                if(invCollab) invCollab.innerHTML = `<option value="">Sélectionnez un Client...</option>` + data.map(c => `<option value="${c.name}">${c.name} (${c.type})</option>`).join('');
+                
+                const profCollab = document.getElementById('proforma-collab');
+                if(profCollab) profCollab.innerHTML = `<option value="">Sélectionnez un Client...</option>` + data.map(c => `<option value="${c.name}">${c.name} (${c.type})</option>`).join('');
+                
                 delete window[cb];
             };
             const s = document.createElement("script");
@@ -304,15 +633,15 @@
         }
 
         function fetchCompanies() {
-            const cb = "cb_c_"+Date.now();
-            window[cb] = function(data) {
+            const cb = "cb_c_" + Date.now();
+            window[cb] = function (data) {
                 document.getElementById('company-table-body').innerHTML = data.map(c => `
                     <tr class="border-t border-slate-800">
                         <td class="p-6 font-bold text-blue-400">${c.name}</td>
                         <td class="p-6 text-xs">${c.type}</td>
                         <td class="p-6 text-xs text-slate-400">${c.contact || '-'}</td>
-                        <td class="p-6">${(c.total||0).toLocaleString()} Ar</td>
-                        <td class="p-6 text-amber-500 font-bold">${(c.pending||0).toLocaleString()} Ar</td>
+                        <td class="p-6">${(c.total || 0).toLocaleString()} Ar</td>
+                        <td class="p-6 text-amber-500 font-bold">${(c.pending || 0).toLocaleString()} Ar</td>
                         <td class="p-6"><span class="px-2 py-1 rounded bg-slate-800 text-[10px]">${c.status}</span></td>
                     </tr>`).join('');
                 delete window[cb];
@@ -323,17 +652,17 @@
         }
 
         function fetchInvestments() {
-            const cb = "cb_inv_"+Date.now();
-            window[cb] = function(data) {
+            const cb = "cb_inv_" + Date.now();
+            window[cb] = function (data) {
                 let totalInvest = 0, totalOut = 0, totalRet = 0;
-                
+
                 document.getElementById('invest-table-body').innerHTML = data.map(inv => {
-                    if(inv.type.includes('Apport')) totalInvest += parseFloat(inv.amount)||0;
-                    if(inv.type.includes('Sortie')) totalOut += parseFloat(inv.amount)||0;
-                    if(inv.type.includes('Retour')) totalRet += parseFloat(inv.amount)||0;
-                    
+                    if (inv.type.includes('Apport')) totalInvest += parseFloat(inv.amount) || 0;
+                    if (inv.type.includes('Sortie')) totalOut += parseFloat(inv.amount) || 0;
+                    if (inv.type.includes('Retour')) totalRet += parseFloat(inv.amount) || 0;
+
                     let delayStatus = inv.status;
-                    if(inv.deadline && new Date(inv.deadline) < new Date() && !inv.status.includes('Payé')) {
+                    if (inv.deadline && new Date(inv.deadline) < new Date() && !inv.status.includes('Payé')) {
                         delayStatus = "EN RETARD";
                     }
 
@@ -342,18 +671,18 @@
                         <td class="p-6 text-xs text-slate-500">${new Date(inv.date).toLocaleDateString()}</td>
                         <td class="p-6 font-bold text-rose-400">${inv.investor}</td>
                         <td class="p-6 text-xs">${inv.type}</td>
-                        <td class="p-6 font-bold">${(inv.amount||0).toLocaleString()} Ar</td>
+                        <td class="p-6 font-bold">${(inv.amount || 0).toLocaleString()} Ar</td>
                         <td class="p-6 text-xs text-slate-400">${inv.details || '-'}</td>
                         <td class="p-6 text-xs">${inv.deadline ? new Date(inv.deadline).toLocaleDateString() : '-'}</td>
-                        <td class="p-6"><span class="px-2 py-1 rounded text-[10px] font-bold ${delayStatus==='EN RETARD'?'bg-rose-500/20 text-rose-500':'bg-slate-800'}">${delayStatus}</span></td>
+                        <td class="p-6"><span class="px-2 py-1 rounded text-[10px] font-bold ${delayStatus === 'EN RETARD' ? 'bg-rose-500/20 text-rose-500' : 'bg-slate-800'}">${delayStatus}</span></td>
                         <td class="p-6 flex gap-3"><i onclick="deleteRow('tresorerie','Investissements','${inv.id}')" class="fas fa-trash text-slate-600 hover:text-rose-500 cursor-pointer btn-action"></i></td>
                     </tr>`;
                 }).join('');
-                
+
                 document.getElementById('kpi-inv-total').textContent = totalInvest.toLocaleString() + " Ar";
                 document.getElementById('kpi-inv-out').textContent = totalOut.toLocaleString() + " Ar";
                 document.getElementById('kpi-inv-return').textContent = totalRet.toLocaleString() + " Ar";
-                
+
                 delete window[cb];
             };
             const s = document.createElement("script");
@@ -364,15 +693,22 @@
         async function submitInvoice(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button'); btn.innerHTML = "...";
-            const formData = { action: "addInvoice", data: ["FAC-"+Date.now().toString().slice(-4), e.target[0].value, e.target[1].value, 0, 0, parseFloat(e.target[3].value), "En attente"] };
-            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('invoice'); fetchData(); fetchWorkflow(); } catch(e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer la Vente"; }
+            const formData = { action: "addInvoice", data: ["FAC-" + Date.now().toString().slice(-4), e.target[0].value, e.target[1].value, 0, 0, parseFloat(e.target[3].value), "En attente"] };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('invoice'); fetchData(); fetchWorkflow(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer la Vente"; }
+        }
+
+        async function submitProforma(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button'); btn.innerHTML = "...";
+            const formData = { action: "addInvoice", data: ["PROF-" + Date.now().toString().slice(-4), e.target[0].value, e.target[1].value, 0, 0, parseFloat(e.target[3].value), "Proforma"] };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('proforma'); fetchData(); fetchWorkflow(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer le Proforma"; }
         }
 
         async function submitExpense(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button'); btn.innerHTML = "...";
-            const formData = { 
-                action: "addExpense", 
+            const formData = {
+                action: "addExpense",
                 month: e.target[1].value,
                 data: [
                     e.target[0].value, // Date
@@ -384,42 +720,42 @@
                     e.target[3].value, // Détails
                     e.target[2].value, // Collaborateur copié
                     e.target[6].value  // Echéance
-                ] 
+                ]
             };
-            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('expense'); fetchData(); } catch(e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer l'Achat"; }
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('expense'); fetchData(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer l'Achat"; }
         }
 
         async function submitCash(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button'); btn.innerHTML = "...";
-            const formData = { action: "addCash", data: [e.target[0].value, e.target[1].value, e.target[2].value, parseFloat(e.target[3].value)||0, parseFloat(e.target[4].value)||0, 0] };
-            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('cash'); fetchFinance(); fetchData(); } catch(e) { alert("Erreur"); } finally { btn.innerHTML = "Valider l'Opération"; }
+            const formData = { action: "addCash", data: [e.target[0].value, e.target[1].value, e.target[2].value, parseFloat(e.target[3].value) || 0, parseFloat(e.target[4].value) || 0, 0] };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('cash'); fetchFinance(); fetchData(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Valider l'Opération"; }
         }
 
         async function submitCollaborator(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button'); btn.innerHTML = "...";
             const formData = { action: "addCollaborator", data: [e.target[0].value, e.target[1].value, e.target[2].value] };
-            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('collaborator'); fetchCompaniesList(); fetchCompanies(); } catch(e) { alert("Erreur"); } finally { btn.innerHTML = "Ajouter Collaborateur"; }
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('collaborator'); fetchCompaniesList(); fetchCompanies(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Ajouter Collaborateur"; }
         }
 
         async function submitInvestment(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button'); btn.innerHTML = "...";
-            const formData = { 
-                action: "addInvestment", 
+            const formData = {
+                action: "addInvestment",
                 data: [
-                    "INV-"+Date.now().toString().slice(-4), // ID
+                    "INV-" + Date.now().toString().slice(-4), // ID
                     e.target[0].value, // Date
                     e.target[2].value, // Investisseur
                     e.target[1].value, // Type
-                    parseFloat(e.target[3].value)||0, // Montant
+                    parseFloat(e.target[3].value) || 0, // Montant
                     e.target[4].value, // Details
                     e.target[5].value, // Echéance
                     "En cours" // Statut
-                ] 
+                ]
             };
-            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('investment'); fetchInvestments(); } catch(e) { alert("Erreur"); } finally { btn.innerHTML = "Valider l'Investissement"; }
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('investment'); fetchInvestments(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Valider l'Investissement"; }
         }
 
         // Rest of unchanged UI logic functions
@@ -428,40 +764,40 @@
             const params = { action: "updateStatus", file, sheet, id, newStatus, colIndex };
             try {
                 await fetch(API_URL, { method: 'POST', body: JSON.stringify(params) });
-                if(sheet === 'Base facturation') fetchWorkflow();
-                if(sheet === 'suivi trésorerie') fetchFinance();
-                if(sheet === 'Investissements') fetchInvestments();
+                if (sheet === 'Base facturation') fetchWorkflow();
+                if (sheet === 'suivi trésorerie') fetchFinance();
+                if (sheet === 'Investissements') fetchInvestments();
                 fetchData();
-            } catch(e) { alert("Erreur de synchronisation"); }
+            } catch (e) { alert("Erreur de synchronisation"); }
             finally { showLoading(false); }
         }
 
         async function deleteRow(file, sheet, id) {
-            if(!confirm("Supprimer définitivement cette ligne du fichier Excel ?")) return;
+            if (!confirm("Supprimer définitivement cette ligne du fichier Excel ?")) return;
             showLoading(true);
             const params = { action: "deleteRow", file, sheet, id };
             try {
                 await fetch(API_URL, { method: 'POST', body: JSON.stringify(params) });
                 fetchData();
                 showSection(document.querySelector('.sidebar-item.active').getAttribute('onclick').match(/'([^']+)'/)[1]);
-            } catch(e) { alert("Erreur"); }
+            } catch (e) { alert("Erreur"); }
             finally { showLoading(false); }
         }
 
         function fetchWorkflow() {
-            const cb = "cb_w_"+Date.now();
-            window[cb] = function(data) {
+            const cb = "cb_w_" + Date.now();
+            window[cb] = function (data) {
                 document.getElementById('workflow-table-body').innerHTML = data.map(w => `
                     <tr class="border-t border-slate-800">
                         <td class="p-6 font-mono text-xs text-blue-400">${w.id}</td>
                         <td class="p-6 font-bold cursor-pointer hover:text-blue-500" onclick="viewProjectDetail('${w.id}')">${w.project}</td>
                         <td class="p-6"><span class="text-[10px] bg-slate-800 px-2 py-1 rounded">${w.phaseAchat}</span></td>
                         <td class="p-6">
-                            <button onclick="updateStatus('facturation','Base facturation','${w.id}','Payé',6)" class="text-[10px] ${w.phaseVente==='Payé'?'bg-emerald-500/10 text-emerald-400':'bg-amber-500/10 text-amber-400'} px-2 py-1 rounded font-bold">
+                            <button onclick="updateStatus('facturation','Base facturation','${w.id}','Payé',6)" class="text-[10px] ${w.phaseVente === 'Payé' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'} px-2 py-1 rounded font-bold">
                                 ${w.phaseVente}
                             </button>
                         </td>
-                        <td class="p-6 text-emerald-400 font-bold">${(w.margin||0).toLocaleString()} Ar</td>
+                        <td class="p-6 text-emerald-400 font-bold">${(w.margin || 0).toLocaleString()} Ar</td>
                         <td class="p-6 flex gap-3">
                             <i onclick="deleteRow('facturation','Base facturation','${w.id}')" class="fas fa-trash text-slate-600 hover:text-rose-500 cursor-pointer btn-action"></i>
                         </td>
@@ -478,9 +814,9 @@
             openModal('project-detail');
             const cont = document.getElementById('project-detail-content');
             cont.innerHTML = "<div class='flex justify-center p-10'><i class='fas fa-spinner animate-spin text-2xl text-blue-500'></i></div>";
-            const cb = "cb_pd_"+Date.now();
-            window[cb] = function(data) {
-                cont.innerHTML = `<div class="grid grid-cols-2 gap-8"><div><h5 class="text-xs font-bold text-slate-500 uppercase mb-4">Revenus</h5><div class="space-y-2">${data.invoices.map(i => `<div class="bg-slate-900/50 p-3 rounded-xl flex justify-between text-xs"><span>${i[0]}</span><span class="font-bold">${(i[5]||0).toLocaleString()} Ar</span></div>`).join('')}</div></div><div><h5 class="text-xs font-bold text-slate-500 uppercase mb-4">Coûts</h5><div class="space-y-2">${data.costs.map(c => `<div class="bg-rose-500/5 p-3 rounded-xl flex justify-between text-xs"><span>${c[1]}</span><span class="font-bold text-rose-400">-${(c[3]||0).toLocaleString()} Ar</span></div>`).join('')}</div></div></div>`;
+            const cb = "cb_pd_" + Date.now();
+            window[cb] = function (data) {
+                cont.innerHTML = `<div class="grid grid-cols-2 gap-8"><div><h5 class="text-xs font-bold text-slate-500 uppercase mb-4">Revenus</h5><div class="space-y-2">${data.invoices.map(i => `<div class="bg-slate-900/50 p-3 rounded-xl flex justify-between text-xs"><span>${i[0]}</span><span class="font-bold">${(i[5] || 0).toLocaleString()} Ar</span></div>`).join('')}</div></div><div><h5 class="text-xs font-bold text-slate-500 uppercase mb-4">Coûts</h5><div class="space-y-2">${data.costs.map(c => `<div class="bg-rose-500/5 p-3 rounded-xl flex justify-between text-xs"><span>${c[1]}</span><span class="font-bold text-rose-400">-${(c[3] || 0).toLocaleString()} Ar</span></div>`).join('')}</div></div></div>`;
                 delete window[cb];
             };
             const s = document.createElement("script");
@@ -489,14 +825,14 @@
         }
 
         function fetchStocks() {
-            const cb = "cb_s_"+Date.now();
-            window[cb] = function(data) {
+            const cb = "cb_s_" + Date.now();
+            window[cb] = function (data) {
                 document.getElementById('stock-table-body').innerHTML = data.map(s => `
                     <tr class="border-t border-slate-800">
                         <td class="p-6 font-semibold">${s.name}</td>
                         <td class="p-6 font-bold text-lg">${s.current}</td>
                         <td class="p-6 text-xs text-slate-500">${s.unit}</td>
-                        <td class="p-6"><span class="px-2 py-1 rounded-md text-[10px] font-bold ${s.current<=s.alert?'bg-rose-500/10 text-rose-400':'bg-emerald-500/10 text-emerald-400'}">${s.current<=s.alert?'CRITIQUE':'OK'}</span></td>
+                        <td class="p-6"><span class="px-2 py-1 rounded-md text-[10px] font-bold ${s.current <= s.alert ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}">${s.current <= s.alert ? 'CRITIQUE' : 'OK'}</span></td>
                         <td class="p-6 flex gap-2">
                             <button onclick="adjustStock('${s.id}', 1)" class="bg-slate-800 w-8 h-8 rounded-lg">+</button>
                             <button onclick="adjustStock('${s.id}', -1)" class="bg-slate-800 w-8 h-8 rounded-lg">-</button>
@@ -518,15 +854,15 @@
         }
 
         function fetchFinance() {
-            const cb = "cb_f_"+Date.now();
-            window[cb] = function(data) {
+            const cb = "cb_f_" + Date.now();
+            window[cb] = function (data) {
                 document.getElementById('finance-table-body').innerHTML = data.history.map(h => `
                     <tr class="border-t border-slate-800">
                         <td class="p-6 text-xs text-slate-500">${new Date(h.date).toLocaleDateString()}</td>
                         <td class="p-6 font-semibold">${h.label}</td>
-                        <td class="p-6 ${h.in>0?'text-emerald-400':'text-rose-400'} font-bold">${h.in>0?'+':'-'}${Math.max(h.in,h.out).toLocaleString()} Ar</td>
-                        <td class="p-6 font-bold text-blue-400">${(h.balance||0).toLocaleString()} Ar</td>
-                        <td class="p-6"><i onclick="deleteRow('tresorerie','suivi trésorerie','${h.id||''}')" class="fas fa-trash text-slate-700 cursor-pointer btn-action"></i></td>
+                        <td class="p-6 ${h.in > 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold">${h.in > 0 ? '+' : '-'}${Math.max(h.in, h.out).toLocaleString()} Ar</td>
+                        <td class="p-6 font-bold text-blue-400">${(h.balance || 0).toLocaleString()} Ar</td>
+                        <td class="p-6"><i onclick="deleteRow('tresorerie','suivi trésorerie','${h.id || ''}')" class="fas fa-trash text-slate-700 cursor-pointer btn-action"></i></td>
                     </tr>
                 `).reverse().join('');
                 delete window[cb];
@@ -545,4 +881,5 @@
         window.onload = fetchData;
     </script>
 </body>
+
 </html>
