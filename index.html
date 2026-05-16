@@ -383,26 +383,32 @@
                         <option value="Décembre">Décembre</option>
                     </select>
                 </div>
-                <input type="text" list="collab-list" placeholder="Fournisseur / Collaborateur" required
+                <input id="expense-collab" type="text" list="collab-list" placeholder="Fournisseur / Collaborateur" required
                     class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
-                <input type="text" placeholder="Détails de l'achat"
-                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
-                <div class="grid grid-cols-2 gap-4">
-                    <select
-                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
-                        <option>Matières Premières</option>
-                        <option>Logistique</option>
-                        <option>Salaires</option>
-                        <option>Loyer/Charges</option>
-                        <option>Divers</option>
-                    </select>
-                    <input type="number" placeholder="Montant (Ar)" required
-                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                <input id="expense-project" type="text" placeholder="Projet (ex: Villa A)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                
+                <div class="bg-slate-800/20 p-4 rounded-xl border border-slate-700/50">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="block text-[10px] uppercase font-bold text-slate-400">Lignes d'achat (Détails & Montants)</label>
+                        <button type="button" onclick="addExpenseLine()" class="text-xs text-amber-500 font-bold hover:text-amber-400">+ Ajouter une ligne</button>
+                    </div>
+                    <div id="expense-lines" class="space-y-3 max-h-40 overflow-y-auto custom-scroll pr-2">
+                        <div class="expense-line flex gap-2 items-center">
+                            <input type="text" placeholder="Détail (ex: Ciment)" required class="flex-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm">
+                            <input type="number" placeholder="Montant (Ar)" oninput="updateExpenseTotal()" required class="w-1/3 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm">
+                            <button type="button" onclick="if(document.querySelectorAll('.expense-line').length>1) { this.parentElement.remove(); updateExpenseTotal(); }" class="text-rose-500/50 hover:text-rose-500 p-2"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-right">
+                        <span class="text-[10px] text-slate-500 uppercase font-bold mr-2">Total estimé:</span>
+                        <span id="expense-total-display" class="font-bold text-amber-500 text-lg">0 Ar</span>
+                    </div>
                 </div>
+
                 <div>
                     <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date d'échéance de
                         paiement</label>
-                    <input type="date"
+                    <input id="expense-echeance" type="date"
                         class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
                 </div>
                 <button type="submit"
@@ -704,25 +710,70 @@
             try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('proforma'); fetchData(); fetchWorkflow(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer le Proforma"; }
         }
 
+        function updateExpenseTotal() {
+            let t = 0;
+            document.querySelectorAll('.expense-line input[type="number"]').forEach(i => t += parseFloat(i.value)||0);
+            const display = document.getElementById('expense-total-display');
+            if (display) display.textContent = t.toLocaleString() + " Ar";
+        }
+
+        function addExpenseLine() {
+            const container = document.getElementById('expense-lines');
+            const row = document.createElement('div');
+            row.className = 'expense-line flex gap-2 items-center';
+            row.innerHTML = `
+                <input type="text" placeholder="Détail (ex: Peinture)" required class="flex-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm">
+                <input type="number" placeholder="Montant (Ar)" oninput="updateExpenseTotal()" required class="w-1/3 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm">
+                <button type="button" onclick="if(document.querySelectorAll('.expense-line').length>1) { this.parentElement.remove(); updateExpenseTotal(); }" class="text-rose-500/50 hover:text-rose-500 p-2"><i class="fas fa-times"></i></button>
+            `;
+            container.appendChild(row);
+        }
+
         async function submitExpense(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button'); btn.innerHTML = "...";
-            const formData = {
-                action: "addExpense",
-                month: e.target[1].value,
-                data: [
-                    e.target[0].value, // Date
-                    e.target[2].value, // Collaborateur / Fournisseur
-                    e.target[4].value, // Catégorie
-                    parseFloat(e.target[5].value), // Montant
-                    "Espèces", // Mode par défaut
-                    "En attente", // Statut
-                    e.target[3].value, // Détails
-                    e.target[2].value, // Collaborateur copié
-                    e.target[6].value  // Echéance
-                ]
+            const currentCash = parseFloat(document.getElementById('kpi-cash').textContent.replace(/[^0-9.-]+/g,"")) || 0;
+            
+            const lines = document.querySelectorAll('.expense-line');
+            let totalAmount = 0;
+            let rowsData = [];
+            
+            const dateAchat = e.target[0].value;
+            const monthAchat = e.target[1].value;
+            const collabAchat = document.getElementById('expense-collab').value;
+            const projetAchat = document.getElementById('expense-project').value;
+            const echeanceAchat = document.getElementById('expense-echeance').value;
+            
+            lines.forEach(line => {
+                const detail = line.children[0].value;
+                const montant = parseFloat(line.children[1].value) || 0;
+                totalAmount += montant;
+                
+                rowsData.push([
+                    dateAchat,
+                    collabAchat,
+                    "Achat Opérationnel", // Catégorie générique
+                    montant,
+                    "Espèces",
+                    "En attente",
+                    detail,
+                    collabAchat,
+                    echeanceAchat,
+                    projetAchat
+                ]);
+            });
+
+            if (totalAmount > currentCash) {
+                alert("Erreur : Fonds insuffisants. L'achat total de " + totalAmount.toLocaleString() + " Ar dépasse votre disponibilité actuelle de " + currentCash.toLocaleString() + " Ar.");
+                return;
+            }
+
+            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
+            const formData = { 
+                action: "addExpense", 
+                month: monthAchat,
+                data: rowsData 
             };
-            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('expense'); fetchData(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer l'Achat"; }
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('expense'); fetchData(); } catch(err) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer l'Achat"; }
         }
 
         async function submitCash(e) {
