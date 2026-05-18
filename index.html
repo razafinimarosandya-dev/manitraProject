@@ -81,7 +81,7 @@
                 class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <i class="fas fa-shield-alt text-white text-xl"></i>
             </div>
-            <h1 class="text-xl font-bold tracking-tight">Manitra <span class="text-blue-500 text-xs">ERP V6</span></h1>
+            <h1 class="text-xl font-bold tracking-tight">Financial Tech <span class="text-blue-500 text-xs">ERP V6</span></h1>
         </div>
 
         <nav class="flex-1 custom-scroll overflow-y-auto space-y-1">
@@ -381,6 +381,56 @@
 
                 <button type="submit" class="w-full bg-indigo-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-indigo-500/20">Enregistrer le Proforma</button>
                 <button type="button" onclick="closeModal('proforma')" class="w-full text-slate-500 text-xs py-2">Fermer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Edit Workflow -->
+    <div id="modal-edit-workflow" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-xl rounded-3xl p-8 border border-blue-500/20 shadow-2xl">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-edit text-blue-500"></i> Modifier le Projet / Vente</h4>
+            <form onsubmit="submitEditWorkflow(event)" class="space-y-4">
+                <input id="edit-w-id" type="text" readonly class="w-full bg-slate-950/50 p-4 rounded-xl border border-slate-800 text-slate-500 font-mono text-sm">
+                <input id="edit-w-date" type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <input id="edit-w-client" type="text" placeholder="Nom du Client" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <input id="edit-w-project" type="text" placeholder="Nom du Projet" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <input id="edit-w-amount" type="number" placeholder="Montant TTC (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date d'échéance</label>
+                    <input id="edit-w-duedate" type="date" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/20">Enregistrer les Modifications</button>
+                <button type="button" onclick="closeModal('edit-workflow')" class="w-full text-slate-500 text-xs py-2">Annuler</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Edit Investment -->
+    <div id="modal-edit-investment" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-xl rounded-3xl p-8 border border-rose-500/20 shadow-2xl">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-edit text-rose-500"></i> Modifier l'Investissement</h4>
+            <form onsubmit="submitEditInvestment(event)" class="space-y-4">
+                <input id="edit-inv-id" type="text" readonly class="w-full bg-slate-950/50 p-4 rounded-xl border border-slate-800 text-slate-500 font-mono text-sm">
+                <input id="edit-inv-date" type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <input id="edit-inv-investor" type="text" placeholder="Investisseur" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <select id="edit-inv-type" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                    <option value="Apport (Entrée)">Apport (Entrée)</option>
+                    <option value="Sortie (Achat / Dépense)">Sortie (Achat / Dépense)</option>
+                    <option value="Retour (ROI / Remboursement)">Retour (ROI / Remboursement)</option>
+                </select>
+                <input id="edit-inv-amount" type="number" placeholder="Montant (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <input id="edit-inv-details" type="text" placeholder="Détails / Notes" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Échéance Retour</label>
+                    <input id="edit-inv-deadline" type="date" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                </div>
+                <select id="edit-inv-status" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                    <option value="Actif">Actif</option>
+                    <option value="En cours">En cours</option>
+                    <option value="Payé (Remboursé)">Payé (Remboursé)</option>
+                </select>
+                <button type="submit" class="w-full bg-rose-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-rose-500/20">Enregistrer les Modifications</button>
+                <button type="button" onclick="closeModal('edit-investment')" class="w-full text-slate-500 text-xs py-2">Annuler</button>
             </form>
         </div>
     </div>
@@ -731,7 +781,10 @@
                         <td class="p-6 text-xs text-slate-400">${inv.details || '-'}</td>
                         <td class="p-6 text-xs">${inv.deadline ? new Date(inv.deadline).toLocaleDateString() : '-'}</td>
                         <td class="p-6"><span class="px-2 py-1 rounded text-[10px] font-bold ${delayStatus === 'EN RETARD' ? 'bg-rose-500/20 text-rose-500' : 'bg-slate-800'}">${delayStatus}</span></td>
-                        <td class="p-6 flex gap-3"><i onclick="deleteRow('tresorerie','Investissements','${inv.id}')" class="fas fa-trash text-slate-600 hover:text-rose-500 cursor-pointer btn-action"></i></td>
+                        <td class="p-6 flex gap-3">
+                            <i onclick="editInvestment('${inv.id}', '${inv.date}', '${inv.investor}', '${inv.type}', ${inv.amount}, '${inv.details || ''}', '${inv.deadline || ''}', '${inv.status}')" class="fas fa-edit text-slate-600 hover:text-blue-500 cursor-pointer btn-action"></i>
+                            <i onclick="deleteRow('tresorerie','Investissements','${inv.id}')" class="fas fa-trash text-slate-600 hover:text-rose-500 cursor-pointer btn-action"></i>
+                        </td>
                     </tr>`;
                 }).join('');
 
@@ -1008,6 +1061,97 @@
             }
         }
 
+        function editWorkflow(id, date, client, project, amount, dueDate) {
+            openModal('edit-workflow');
+            document.getElementById('edit-w-id').value = id;
+            if (date) {
+                try { document.getElementById('edit-w-date').value = new Date(date).toISOString().split('T')[0]; } catch(e){}
+            }
+            document.getElementById('edit-w-client').value = client || '';
+            document.getElementById('edit-w-project').value = project || '';
+            document.getElementById('edit-w-amount').value = parseFloat(amount) || 0;
+            if (dueDate) {
+                try { document.getElementById('edit-w-duedate').value = new Date(dueDate).toISOString().split('T')[0]; } catch(e){}
+            }
+        }
+
+        async function submitEditWorkflow(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
+            const id = document.getElementById('edit-w-id').value;
+            const dataObj = {
+                "Date": document.getElementById('edit-w-date').value,
+                "Client": document.getElementById('edit-w-client').value,
+                "Projet": document.getElementById('edit-w-project').value,
+                "Montant TTC": parseFloat(document.getElementById('edit-w-amount').value) || 0,
+                "Echéance": document.getElementById('edit-w-duedate').value
+            };
+            const formData = { action: "editEntry", file: "facturation", sheet: "Base facturation", id: id, data: dataObj };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('edit-workflow'); fetchData(); fetchWorkflow(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer les Modifications"; }
+        }
+
+        function editInvestment(id, date, investor, type, amount, details, deadline, status) {
+            openModal('edit-investment');
+            document.getElementById('edit-inv-id').value = id;
+            if (date) {
+                try { document.getElementById('edit-inv-date').value = new Date(date).toISOString().split('T')[0]; } catch(e){}
+            }
+            document.getElementById('edit-inv-investor').value = investor || '';
+            document.getElementById('edit-inv-type').value = type || 'Apport (Entrée)';
+            document.getElementById('edit-inv-amount').value = parseFloat(amount) || 0;
+            document.getElementById('edit-inv-details').value = details || '';
+            if (deadline) {
+                try { document.getElementById('edit-inv-deadline').value = new Date(deadline).toISOString().split('T')[0]; } catch(e){}
+            }
+            document.getElementById('edit-inv-status').value = status || 'Actif';
+        }
+
+        async function submitEditInvestment(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
+            const id = document.getElementById('edit-inv-id').value;
+            const statusVal = document.getElementById('edit-inv-status').value;
+            const amountVal = parseFloat(document.getElementById('edit-inv-amount').value) || 0;
+            const investorVal = document.getElementById('edit-inv-investor').value;
+            
+            const dataObj = {
+                "Date": document.getElementById('edit-inv-date').value,
+                "Investisseur": investorVal,
+                "Type": document.getElementById('edit-inv-type').value,
+                "Montant": amountVal,
+                "Détails / Notes": document.getElementById('edit-inv-details').value,
+                "Échéance de retour": document.getElementById('edit-inv-deadline').value,
+                "Statut": statusVal
+            };
+            
+            const formData = { action: "editEntry", file: "tresorerie", sheet: "Investissements", id: id, data: dataObj };
+            
+            try { 
+                await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); 
+                
+                if (statusVal === 'Payé (Remboursé)') {
+                    if (confirm(`Voulez-vous enregistrer automatiquement le remboursement de ${amountVal.toLocaleString()} Ar à ${investorVal} dans votre Trésorerie ?`)) {
+                        const d = new Date();
+                        const dateStr = d.toISOString().split('T')[0];
+                        const cashData = [
+                            "CSH-" + Date.now().toString().slice(-4),
+                            dateStr,
+                            "Remboursement Investissement " + id + " (" + investorVal + ")",
+                            "Remboursement Investisseur",
+                            0,
+                            amountVal,
+                            0
+                        ];
+                        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "addCash", data: cashData }) });
+                    }
+                }
+                
+                closeModal('edit-investment'); 
+                fetchData(); 
+                fetchInvestments(); 
+            } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer les Modifications"; }
+        }
+
         function fetchWorkflow() {
             const cb = "cb_w_" + Date.now();
             window[cb] = function (data) {
@@ -1025,6 +1169,7 @@
                         </td>
                         <td class="p-6 text-emerald-400 font-bold">${(w.margin || 0).toLocaleString()} Ar</td>
                         <td class="p-6 flex gap-3">
+                            <i onclick="editWorkflow('${w.id}', '${w.date || ''}', '${w.client || ''}', '${w.project}', ${w.revenue}, '${w.dueDate || ''}')" class="fas fa-edit text-slate-600 hover:text-blue-500 cursor-pointer btn-action"></i>
                             <i onclick="deleteRow('facturation','Base facturation','${w.id}')" class="fas fa-trash text-slate-600 hover:text-rose-500 cursor-pointer btn-action"></i>
                         </td>
                     </tr>
