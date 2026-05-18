@@ -330,10 +330,14 @@
             <form onsubmit="submitInvoice(event)" class="space-y-4">
                 <input type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
                 <select id="invoice-collab" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
-                    <option value="">Sélectionnez un Client / Collaborateur...</option>
+                    <option value="">Sélectionnez un Client...</option>
                 </select>
-                <input type="text" placeholder="Projet / Description" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <input type="text" placeholder="Projet / Description" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
                 <input type="number" placeholder="Montant TTC (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date d'échéance de paiement</label>
+                    <input type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                </div>
                 <button type="submit" class="w-full bg-blue-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/20">Enregistrer la Vente</button>
                 <button type="button" onclick="closeModal('invoice')" class="w-full text-slate-500 text-xs py-2">Fermer</button>
             </form>
@@ -349,8 +353,26 @@
                 <select id="proforma-collab" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm">
                     <option value="">Sélectionnez un Client...</option>
                 </select>
-                <input type="text" placeholder="Projet / Description" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm">
-                <input type="number" placeholder="Montant TTC Estimé (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm">
+                <input id="proforma-project" type="text" placeholder="Projet / Description" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm">
+                
+                <div class="bg-slate-800/20 p-4 rounded-xl border border-slate-700/50">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="block text-[10px] uppercase font-bold text-slate-400">Lignes du Devis (Détails & Montants)</label>
+                        <button type="button" onclick="addProformaLine()" class="text-xs text-indigo-500 font-bold hover:text-indigo-400">+ Ajouter une ligne</button>
+                    </div>
+                    <div id="proforma-lines" class="space-y-3 max-h-40 overflow-y-auto custom-scroll pr-2">
+                        <div class="proforma-line flex gap-2 items-center">
+                            <input type="text" placeholder="Détail (ex: Prestation A)" required class="flex-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm">
+                            <input type="number" placeholder="Montant (Ar)" oninput="updateProformaTotal()" required class="w-1/3 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm">
+                            <button type="button" onclick="if(document.querySelectorAll('.proforma-line').length>1) { this.parentElement.remove(); updateProformaTotal(); }" class="text-rose-500/50 hover:text-rose-500 p-2"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-right">
+                        <span class="text-[10px] text-slate-500 uppercase font-bold mr-2">Total estimé:</span>
+                        <span id="proforma-total-display" class="font-bold text-indigo-400 text-lg">0 Ar</span>
+                    </div>
+                </div>
+
                 <button type="submit" class="w-full bg-indigo-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-indigo-500/20">Enregistrer le Proforma</button>
                 <button type="button" onclick="closeModal('proforma')" class="w-full text-slate-500 text-xs py-2">Fermer</button>
             </form>
@@ -383,8 +405,10 @@
                         <option value="Décembre">Décembre</option>
                     </select>
                 </div>
-                <input id="expense-collab" type="text" list="collab-list" placeholder="Fournisseur / Collaborateur" required
+                <select id="expense-collab" required
                     class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                    <option value="">Sélectionnez un Fournisseur...</option>
+                </select>
                 <input id="expense-project" type="text" placeholder="Projet (ex: Villa A)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
                 
                 <div class="bg-slate-800/20 p-4 rounded-xl border border-slate-700/50">
@@ -478,6 +502,22 @@
         </div>
     </div>
 
+    <!-- Modal Project Detail -->
+    <div id="modal-project-detail" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-2xl rounded-3xl p-8 border border-blue-500/20 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h4 class="text-xl font-bold flex items-center gap-3"><i class="fas fa-folder-open text-blue-500"></i> Détails du Dossier</h4>
+                <button onclick="closeModal('project-detail')" class="text-slate-500 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="project-detail-content" class="min-h-[200px]">
+                <!-- Contenu injecté via JS -->
+            </div>
+            <div class="mt-6 pt-6 border-t border-slate-800 text-center">
+                <button type="button" onclick="closeModal('project-detail')" class="text-slate-500 text-xs py-2 hover:text-white">Fermer la vue</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Investment -->
     <div id="modal-investment"
         class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
@@ -495,18 +535,14 @@
                         <option value="Retour (Remboursement)">Retour (Remboursement)</option>
                     </select>
                 </div>
-                <input type="text" list="collab-list" placeholder="Investisseur / Collaborateur" required
+                <select id="investment-collab" required
                     class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                    <option value="">Sélectionnez un Investisseur...</option>
+                </select>
                 <input type="number" placeholder="Montant (Ar)" required
                     class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
                 <input type="text" placeholder="Détails (ex: Matériel acheté, ROI...)"
                     class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
-                <div>
-                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date d'échéance du
-                        retour</label>
-                    <input type="date"
-                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
-                </div>
                 <button type="submit"
                     class="w-full bg-rose-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-rose-500/20">Valider
                     l'Investissement</button>
@@ -517,14 +553,14 @@
     </div>
 
     <!-- Modal Project Detail (Drill-down) -->
-    <div id="modal-project-detail"
+    <div id="modal-project-detail-drill"
         class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
         <div class="glass w-full max-w-4xl rounded-3xl p-10">
             <div class="flex justify-between items-center mb-8">
-                <h4 class="text-2xl font-bold">Détails du Dossier</h4><button onclick="closeModal('project-detail')"
+                <h4 class="text-2xl font-bold">Détails du Dossier</h4><button onclick="closeModal('project-detail-drill')"
                     class="text-2xl hover:text-rose-500">&times;</button>
             </div>
-            <div id="project-detail-content"></div>
+            <div id="project-detail-content-drill"></div>
         </div>
     </div>
 
@@ -622,15 +658,22 @@
         function fetchCompaniesList() {
             const cb = "cb_clist_" + Date.now();
             window[cb] = function (data) {
-                const list = document.getElementById('collab-list');
-                list.innerHTML = data.map(c => `<option value="${c.name}">`).join('');
-                
+                const clients = data.filter(c => c.type.toLowerCase().includes('client'));
+                const fournisseurs = data.filter(c => c.type.toLowerCase().includes('fournisseur'));
+                const investisseurs = data.filter(c => c.type.toLowerCase().includes('investisseur'));
+
                 const invCollab = document.getElementById('invoice-collab');
-                if(invCollab) invCollab.innerHTML = `<option value="">Sélectionnez un Client...</option>` + data.map(c => `<option value="${c.name}">${c.name} (${c.type})</option>`).join('');
+                if(invCollab) invCollab.innerHTML = `<option value="">Sélectionnez un Client...</option>` + clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
                 
                 const profCollab = document.getElementById('proforma-collab');
-                if(profCollab) profCollab.innerHTML = `<option value="">Sélectionnez un Client...</option>` + data.map(c => `<option value="${c.name}">${c.name} (${c.type})</option>`).join('');
+                if(profCollab) profCollab.innerHTML = `<option value="">Sélectionnez un Client...</option>` + clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+
+                const expCollab = document.getElementById('expense-collab');
+                if(expCollab) expCollab.innerHTML = `<option value="">Sélectionnez un Fournisseur...</option>` + fournisseurs.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
                 
+                const investCollab = document.getElementById('investment-collab');
+                if(investCollab) investCollab.innerHTML = `<option value="">Sélectionnez un Investisseur...</option>` + investisseurs.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+
                 delete window[cb];
             };
             const s = document.createElement("script");
@@ -646,7 +689,7 @@
                         <td class="p-6 font-bold text-blue-400">${c.name}</td>
                         <td class="p-6 text-xs">${c.type}</td>
                         <td class="p-6 text-xs text-slate-400">${c.contact || '-'}</td>
-                        <td class="p-6">${(c.total || 0).toLocaleString()} Ar</td>
+                        <td class="p-6">${c.type === 'Investisseur' && c.lastMonth ? `<span class="text-xs text-emerald-400 font-bold">${(c.lastAmount || 0).toLocaleString()} Ar</span><br><span class="text-[10px] text-slate-500">${c.lastMonth}</span>` : (c.total || 0).toLocaleString() + ' Ar'}</td>
                         <td class="p-6 text-amber-500 font-bold">${(c.pending || 0).toLocaleString()} Ar</td>
                         <td class="p-6"><span class="px-2 py-1 rounded bg-slate-800 text-[10px]">${c.status}</span></td>
                     </tr>`).join('');
@@ -698,16 +741,41 @@
 
         async function submitInvoice(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button'); btn.innerHTML = "...";
-            const formData = { action: "addInvoice", data: ["FAC-" + Date.now().toString().slice(-4), e.target[0].value, e.target[1].value, 0, 0, parseFloat(e.target[3].value), "En attente"] };
+            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
+            // e.target[0] = Date, e.target[1] = Client, e.target[2] = Projet, e.target[3] = Montant, e.target[4] = Echéance
+            const formData = { action: "addInvoice", data: ["FAC-" + Date.now().toString().slice(-4), e.target[0].value, e.target[1].value, 0, 0, parseFloat(e.target[3].value), "En attente", e.target[2].value, e.target[4].value] };
             try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('invoice'); fetchData(); fetchWorkflow(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer la Vente"; }
         }
 
         async function submitProforma(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button'); btn.innerHTML = "...";
-            const formData = { action: "addInvoice", data: ["PROF-" + Date.now().toString().slice(-4), e.target[0].value, e.target[1].value, 0, 0, parseFloat(e.target[3].value), "Proforma"] };
+            const lines = document.querySelectorAll('.proforma-line');
+            let totalAmount = 0;
+            lines.forEach(l => {
+                const inputs = l.querySelectorAll('input');
+                totalAmount += parseFloat(inputs[1].value) || 0;
+            });
+            if (totalAmount <= 0) { alert("Veuillez saisir un montant valide."); return; }
+
+            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
+            // e.target[0] = Date, e.target[1] = Client, e.target[2] = Projet
+            const formData = { action: "addInvoice", data: ["PROF-" + Date.now().toString().slice(-4), e.target[0].value, e.target[1].value, 0, 0, totalAmount, "Proforma", e.target[2].value, ""] };
             try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('proforma'); fetchData(); fetchWorkflow(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer le Proforma"; }
+        }
+
+        function updateProformaTotal() {
+            let t = 0;
+            document.querySelectorAll('.proforma-line').forEach(l => {
+                t += parseFloat(l.querySelectorAll('input')[1].value) || 0;
+            });
+            document.getElementById('proforma-total-display').innerText = t.toLocaleString() + ' Ar';
+        }
+
+        function addProformaLine() {
+            const c = document.createElement('div');
+            c.className = 'proforma-line flex gap-2 items-center mt-2';
+            c.innerHTML = '<input type="text" placeholder="Détail (ex: Prestation A)" required class="flex-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm"><input type="number" placeholder="Montant (Ar)" oninput="updateProformaTotal()" required class="w-1/3 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm"><button type="button" onclick="if(document.querySelectorAll(\'.proforma-line\').length>1) { this.parentElement.remove(); updateProformaTotal(); }" class="text-rose-500/50 hover:text-rose-500 p-2"><i class="fas fa-times"></i></button>';
+            document.getElementById('proforma-lines').appendChild(c);
         }
 
         function updateExpenseTotal() {
@@ -741,23 +809,23 @@
             const monthAchat = e.target[1].value;
             const collabAchat = document.getElementById('expense-collab').value;
             const projetAchat = document.getElementById('expense-project').value;
-            const echeanceAchat = document.getElementById('expense-echeance').value;
             
             lines.forEach(line => {
-                const detail = line.children[0].value;
-                const montant = parseFloat(line.children[1].value) || 0;
+                const inputs = line.querySelectorAll('input');
+                const detail = inputs[0].value;
+                const montant = parseFloat(inputs[1].value) || 0;
                 totalAmount += montant;
                 
                 rowsData.push([
                     dateAchat,
                     collabAchat,
-                    "Achat Opérationnel", // Catégorie générique
+                    "Achat Opérationnel",
                     montant,
                     "Espèces",
                     "En attente",
                     detail,
                     collabAchat,
-                    echeanceAchat,
+                    "",
                     projetAchat
                 ]);
             });
@@ -779,7 +847,7 @@
         async function submitCash(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button'); btn.innerHTML = "...";
-            const formData = { action: "addCash", data: [e.target[0].value, e.target[1].value, e.target[2].value, parseFloat(e.target[3].value) || 0, parseFloat(e.target[4].value) || 0, 0] };
+            const formData = { action: "addCash", data: ["CSH-" + Date.now().toString().slice(-4), e.target[0].value, e.target[1].value, e.target[2].value, parseFloat(e.target[3].value) || 0, parseFloat(e.target[4].value) || 0, 0] };
             try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('cash'); fetchFinance(); fetchData(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Valider l'Opération"; }
         }
 
@@ -792,7 +860,7 @@
 
         async function submitInvestment(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button'); btn.innerHTML = "...";
+            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
             const formData = {
                 action: "addInvestment",
                 data: [
@@ -801,8 +869,8 @@
                     e.target[2].value, // Investisseur
                     e.target[1].value, // Type
                     parseFloat(e.target[3].value) || 0, // Montant
-                    e.target[4].value, // Details
-                    e.target[5].value, // Echéance
+                    "", // Details vide
+                    "", // Echéance vide
                     "En cours" // Statut
                 ]
             };
