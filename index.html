@@ -224,7 +224,9 @@
                         <thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]">
                             <tr>
                                 <th class="p-6">Dossier</th>
+                                <th class="p-6">Projet</th>
                                 <th class="p-6">Client</th>
+                                <th class="p-6">Fournisseurs</th>
                                 <th class="p-6">Achat</th>
                                 <th class="p-6">Vente</th>
                                 <th class="p-6">Marge Net</th>
@@ -910,6 +912,8 @@
                     <tr class="border-t border-slate-800">
                         <td class="p-6 font-mono text-xs text-blue-400">${w.id}</td>
                         <td class="p-6 font-bold cursor-pointer hover:text-blue-500" onclick="viewProjectDetail('${w.id}')">${w.project}</td>
+                        <td class="p-6 text-xs text-slate-300">${w.client || '-'}</td>
+                        <td class="p-6 text-xs text-slate-400">${w.fournisseurs || '-'}</td>
                         <td class="p-6"><span class="text-[10px] bg-slate-800 px-2 py-1 rounded">${w.phaseAchat}</span></td>
                         <td class="p-6">
                             <button onclick="updateStatus('facturation','Base facturation','${w.id}','Payé',6)" class="text-[10px] ${w.phaseVente === 'Payé' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'} px-2 py-1 rounded font-bold">
@@ -930,12 +934,46 @@
         }
 
         function viewProjectDetail(id) {
-            openModal('project-detail');
-            const cont = document.getElementById('project-detail-content');
+            openModal('project-detail-drill');
+            const cont = document.getElementById('project-detail-content-drill');
             cont.innerHTML = "<div class='flex justify-center p-10'><i class='fas fa-spinner animate-spin text-2xl text-blue-500'></i></div>";
             const cb = "cb_pd_" + Date.now();
             window[cb] = function (data) {
-                cont.innerHTML = `<div class="grid grid-cols-2 gap-8"><div><h5 class="text-xs font-bold text-slate-500 uppercase mb-4">Revenus</h5><div class="space-y-2">${data.invoices.map(i => `<div class="bg-slate-900/50 p-3 rounded-xl flex justify-between text-xs"><span>${i[0]}</span><span class="font-bold">${(i[5] || 0).toLocaleString()} Ar</span></div>`).join('')}</div></div><div><h5 class="text-xs font-bold text-slate-500 uppercase mb-4">Coûts</h5><div class="space-y-2">${data.costs.map(c => `<div class="bg-rose-500/5 p-3 rounded-xl flex justify-between text-xs"><span>${c[1]}</span><span class="font-bold text-rose-400">-${(c[3] || 0).toLocaleString()} Ar</span></div>`).join('')}</div></div></div>`;
+                let totalRevenus = 0;
+                let totalCouts = 0;
+                const revHtml = data.invoices.map(i => {
+                    totalRevenus += (parseFloat(i[5]) || 0);
+                    return `<div class="bg-slate-900/50 p-3 rounded-xl flex justify-between text-sm"><span>Facture ${i[0]}</span><span class="font-bold text-emerald-400">${(i[5] || 0).toLocaleString()} Ar</span></div>`;
+                }).join('');
+                
+                const coutsHtml = data.costs.map(c => {
+                    totalCouts += (parseFloat(c[3]) || 0);
+                    return `<div class="bg-slate-900/50 p-3 rounded-xl flex justify-between text-sm"><span>${c[1] || 'Achat'}</span><span class="font-bold text-rose-400">-${(c[3] || 0).toLocaleString()} Ar</span></div>`;
+                }).join('');
+
+                cont.innerHTML = \`
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <h5 class="text-xs font-bold text-slate-500 uppercase mb-4">Revenus (Factures)</h5>
+                        <div class="space-y-2 mb-4">\${revHtml || '<p class="text-xs text-slate-500">Aucun revenu</p>'}</div>
+                        <div class="border-t border-slate-700 pt-3 flex justify-between">
+                            <span class="font-bold text-sm">Total Revenus</span>
+                            <span class="font-bold text-emerald-400">\${totalRevenus.toLocaleString()} Ar</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="text-xs font-bold text-slate-500 uppercase mb-4">Lignes d'achat (Coûts)</h5>
+                        <div class="space-y-2 mb-4 max-h-60 overflow-y-auto custom-scroll pr-2">\${coutsHtml || '<p class="text-xs text-slate-500">Aucun coût</p>'}</div>
+                        <div class="border-t border-slate-700 pt-3 flex justify-between">
+                            <span class="font-bold text-sm">Total Coûts</span>
+                            <span class="font-bold text-rose-400">-\${totalCouts.toLocaleString()} Ar</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 pt-6 border-t border-slate-800 flex justify-between items-center">
+                    <span class="text-slate-400 font-bold uppercase text-xs">Marge Nette du Projet</span>
+                    <span class="text-2xl font-bold \${totalRevenus - totalCouts >= 0 ? 'text-emerald-400' : 'text-rose-400'}">\${(totalRevenus - totalCouts).toLocaleString()} Ar</span>
+                </div>\`;
                 delete window[cb];
             };
             const s = document.createElement("script");
