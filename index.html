@@ -1065,10 +1065,55 @@
             document.body.appendChild(s);
         }
 
-        function initChart(data) {
+        function initChart(chartData) {
             const ctx = document.getElementById('mainChart').getContext('2d');
             if (mainChart) mainChart.destroy();
-            mainChart = new Chart(ctx, { type: 'line', data: { labels: ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'], datasets: [{ label: 'Performance', data: data, borderColor: '#3b82f6', borderWidth: 4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.05)', tension: 0.4, pointRadius: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.02)' } }, x: { grid: { display: false } } } } });
+            
+            const labels = chartData ? chartData.labels : ['Jan','Feb','Mar','Apr','Mai'];
+            const revenus = chartData ? chartData.revenus : [0,0,0,0,0];
+            const depenses = chartData ? chartData.depenses : [0,0,0,0,0];
+
+            mainChart = new Chart(ctx, { 
+                type: 'line', 
+                data: { 
+                    labels: labels, 
+                    datasets: [
+                        { 
+                            label: 'Revenus', 
+                            data: revenus, 
+                            borderColor: '#10b981', 
+                            borderWidth: 4, 
+                            fill: true, 
+                            backgroundColor: 'rgba(16, 185, 129, 0.05)', 
+                            tension: 0.4, 
+                            pointRadius: 4,
+                            pointBackgroundColor: '#10b981'
+                        },
+                        { 
+                            label: 'Dépenses', 
+                            data: depenses, 
+                            borderColor: '#f43f5e', 
+                            borderWidth: 4, 
+                            fill: true, 
+                            backgroundColor: 'rgba(244, 63, 94, 0.05)', 
+                            tension: 0.4, 
+                            pointRadius: 4,
+                            pointBackgroundColor: '#f43f5e'
+                        }
+                    ] 
+                }, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { display: true, labels: { color: '#94a3b8', font: { family: 'Inter', weight: 'bold' } } } 
+                    }, 
+                    scales: { 
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', callback: value => value.toLocaleString() + ' Ar' } }, 
+                        x: { grid: { display: false }, ticks: { color: '#64748b' } } 
+                    } 
+                } 
+            });
         }
 
         window.onload = fetchData;
