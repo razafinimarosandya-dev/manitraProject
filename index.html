@@ -951,29 +951,29 @@
                     return `<div class="bg-slate-900/50 p-3 rounded-xl flex justify-between text-sm"><span>${c[1] || 'Achat'}</span><span class="font-bold text-rose-400">-${(c[3] || 0).toLocaleString()} Ar</span></div>`;
                 }).join('');
 
-                cont.innerHTML = \`
+                cont.innerHTML = `
                 <div class="grid grid-cols-2 gap-8">
                     <div>
                         <h5 class="text-xs font-bold text-slate-500 uppercase mb-4">Revenus (Factures)</h5>
-                        <div class="space-y-2 mb-4">\${revHtml || '<p class="text-xs text-slate-500">Aucun revenu</p>'}</div>
+                        <div class="space-y-2 mb-4">${revHtml || '<p class="text-xs text-slate-500">Aucun revenu</p>'}</div>
                         <div class="border-t border-slate-700 pt-3 flex justify-between">
                             <span class="font-bold text-sm">Total Revenus</span>
-                            <span class="font-bold text-emerald-400">\${totalRevenus.toLocaleString()} Ar</span>
+                            <span class="font-bold text-emerald-400">${totalRevenus.toLocaleString()} Ar</span>
                         </div>
                     </div>
                     <div>
                         <h5 class="text-xs font-bold text-slate-500 uppercase mb-4">Lignes d'achat (Coûts)</h5>
-                        <div class="space-y-2 mb-4 max-h-60 overflow-y-auto custom-scroll pr-2">\${coutsHtml || '<p class="text-xs text-slate-500">Aucun coût</p>'}</div>
+                        <div class="space-y-2 mb-4 max-h-60 overflow-y-auto custom-scroll pr-2">${coutsHtml || '<p class="text-xs text-slate-500">Aucun coût</p>'}</div>
                         <div class="border-t border-slate-700 pt-3 flex justify-between">
                             <span class="font-bold text-sm">Total Coûts</span>
-                            <span class="font-bold text-rose-400">-\${totalCouts.toLocaleString()} Ar</span>
+                            <span class="font-bold text-rose-400">-${totalCouts.toLocaleString()} Ar</span>
                         </div>
                     </div>
                 </div>
                 <div class="mt-8 pt-6 border-t border-slate-800 flex justify-between items-center">
                     <span class="text-slate-400 font-bold uppercase text-xs">Marge Nette du Projet</span>
-                    <span class="text-2xl font-bold \${totalRevenus - totalCouts >= 0 ? 'text-emerald-400' : 'text-rose-400'}">\${(totalRevenus - totalCouts).toLocaleString()} Ar</span>
-                </div>\`;
+                    <span class="text-2xl font-bold ${totalRevenus - totalCouts >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${(totalRevenus - totalCouts).toLocaleString()} Ar</span>
+                </div>`;
                 delete window[cb];
             };
             const s = document.createElement("script");
