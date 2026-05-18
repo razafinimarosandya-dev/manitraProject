@@ -6,43 +6,116 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manitra ERP - TOTAL CONTROL V6</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: ['class', '[data-theme="dark"]'],
+            theme: {
+                extend: {
+                    colors: {
+                        red: { DEFAULT: '#ee6055', 500: '#ee6055', 600: '#d4534a', 400: '#ee6055' },
+                        yellow: { DEFAULT: '#ffd97d', 500: '#ffd97d', 600: '#e6c370', 400: '#ffd97d' },
+                        amber: { DEFAULT: '#ffd97d', 500: '#ffd97d', 600: '#e6c370', 400: '#ffd97d' },
+                        teal: { DEFAULT: '#0b939b', 500: '#0b939b', 600: '#097a80', 400: '#0b939b' },
+                        blue: { DEFAULT: '#0b939b', 500: '#0b939b', 600: '#097a80', 400: '#0b939b', 300: '#0b939b' },
+                        indigo: { DEFAULT: '#0b939b', 500: '#0b939b', 600: '#097a80', 400: '#0b939b', 300: '#0b939b' },
+                        green: { DEFAULT: '#1e8e1e', 500: '#1e8e1e', 600: '#197819', 400: '#1e8e1e' },
+                        emerald: { DEFAULT: '#1e8e1e', 500: '#1e8e1e', 600: '#197819', 400: '#1e8e1e', 500: '#1e8e1e' },
+                        rose: { DEFAULT: '#ee6055', 500: '#ee6055', 600: '#d4534a', 400: '#ee6055' },
+                        slate: { DEFAULT: '#4d4d4d', 300: '#7a7a7a', 400: '#666666', 500: '#4d4d4d', 600: '#3a3a3a', 700: '#2d2d2d', 800: '#1f1f1f', 900: '#121212', 950: '#0a0a0a' },
+                    }
+                }
+            }
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-main: #ffffff;
+            --bg-glass: rgba(77, 77, 77, 0.05);
+            --bg-input: rgba(77, 77, 77, 0.08);
+            --bg-card: rgba(77, 77, 77, 0.04);
+            --border-glass: rgba(77, 77, 77, 0.2);
+            --text-main: #4d4d4d;
+            --text-muted: rgba(77, 77, 77, 0.7);
+            --text-invert: #ffffff;
+
+            --sidebar-active-bg: rgba(11, 147, 155, 0.15);
+            --sidebar-active-border: #0b939b;
+            --sidebar-active-text: #0b939b;
+            --shadow-glass: 0 8px 32px 0 rgba(77, 77, 77, 0.15);
+        }
+
+        [data-theme="dark"] {
+            --bg-main: #121212;
+            --bg-glass: rgba(77, 77, 77, 0.18);
+            --bg-input: rgba(77, 77, 77, 0.25);
+            --bg-card: rgba(77, 77, 77, 0.2);
+            --border-glass: rgba(77, 77, 77, 0.4);
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --text-invert: #4d4d4d;
+
+            --sidebar-active-bg: rgba(11, 147, 155, 0.25);
+            --sidebar-active-border: #0b939b;
+            --sidebar-active-text: #0b939b;
+            --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
         body {
             font-family: 'Outfit', sans-serif;
-            background-color: #0b0f1a;
-            color: #e2e8f0;
+            background-color: var(--bg-main);
+            color: var(--text-main);
             overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .glass {
-            background: rgba(15, 23, 42, 0.6);
+            background: var(--bg-glass);
             backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            box-shadow: var(--shadow-glass);
         }
 
         .sidebar-item {
             transition: all 0.3s ease;
             border-radius: 12px;
             margin-bottom: 4px;
-            color: #94a3b8;
+            color: var(--text-muted);
             cursor: pointer;
         }
 
-        .sidebar-item:hover,
+        .sidebar-item:hover {
+            background: var(--bg-card);
+            color: var(--text-main);
+        }
+
         .sidebar-item.active {
-            background: rgba(59, 130, 246, 0.1);
-            color: #60a5fa;
+            background: var(--sidebar-active-bg);
+            color: var(--sidebar-active-text);
+            border: 1px solid var(--sidebar-active-border);
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            background: var(--bg-input) !important;
+            border: 1px solid var(--border-glass) !important;
+            color: var(--text-main) !important;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #0b939b !important;
+            outline: none;
         }
 
         .btn-action {
             transition: all 0.2s;
+            color: var(--text-muted);
         }
 
         .btn-action:hover {
             transform: scale(1.1);
+            color: var(--text-main);
         }
 
         .custom-scroll::-webkit-scrollbar {
@@ -50,7 +123,7 @@
         }
 
         .custom-scroll::-webkit-scrollbar-thumb {
-            background: #334155;
+            background: var(--border-glass);
             border-radius: 10px;
         }
 
@@ -129,14 +202,19 @@
             <div class="flex items-center gap-3 lg:gap-4">
                 <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white text-xl p-2 mr-1"><i class="fas fa-bars"></i></button>
                 <h2 id="section-title" class="text-base lg:text-lg font-bold truncate max-w-[150px] sm:max-w-none">Tableau de Bord</h2>
-                <select id="period-selector" onchange="fetchData()"
-                    class="bg-slate-900 border border-slate-800 rounded-lg text-[10px] px-3 py-1 outline-none font-bold uppercase tracking-wider text-blue-400">
-                    <option value="Janvier">Janvier 2026</option>
-                    <option value="Février">Février 2026</option>
-                    <option value="Mars">Mars 2026</option>
-                    <option value="Avril">Avril 2026</option>
-                    <option value="Mai" selected>Mai 2026</option>
-                </select>
+                <div class="flex items-center gap-2">
+                    <select id="period-selector" onchange="fetchData()"
+                        class="rounded-lg text-[10px] px-3 py-1.5 outline-none font-bold uppercase tracking-wider cursor-pointer shadow-sm">
+                        <option value="Janvier">Janvier 2026</option>
+                        <option value="Février">Février 2026</option>
+                        <option value="Mars">Mars 2026</option>
+                        <option value="Avril">Avril 2026</option>
+                        <option value="Mai" selected>Mai 2026</option>
+                    </select>
+                    <button onclick="toggleTheme()" class="p-1 px-2.5 rounded-lg border border-glass bg-input hover:opacity-80 transition-all cursor-pointer shadow-sm">
+                        <i id="theme-icon" class="fas fa-sun text-yellow text-sm"></i>
+                    </button>
+                </div>
             </div>
             <div class="flex items-center gap-4">
                 <div
@@ -1469,6 +1547,34 @@
             document.body.appendChild(s);
         }
 
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            const icon = document.getElementById('theme-icon');
+            if (icon) {
+                icon.className = next === 'dark' ? 'fas fa-sun text-yellow text-sm' : 'fas fa-moon text-teal text-sm';
+            }
+            if (mainChart) updateChartTheme(next);
+        }
+
+        function updateChartTheme(theme) {
+            if (!mainChart) return;
+            const isDark = theme === 'dark';
+            const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(77,77,77,0.1)';
+            const textColor = isDark ? '#ffd97d' : '#4d4d4d';
+            
+            mainChart.data.datasets[0].backgroundColor = isDark ? 'rgba(30, 142, 30, 0.1)' : 'rgba(30, 142, 30, 0.15)';
+            mainChart.data.datasets[1].backgroundColor = isDark ? 'rgba(238, 96, 85, 0.1)' : 'rgba(238, 96, 85, 0.15)';
+
+            mainChart.options.plugins.legend.labels.color = textColor;
+            mainChart.options.scales.y.grid.color = gridColor;
+            mainChart.options.scales.y.ticks.color = textColor;
+            mainChart.options.scales.x.ticks.color = textColor;
+            mainChart.update();
+        }
+
         function initChart(chartData) {
             const ctx = document.getElementById('mainChart').getContext('2d');
             if (mainChart) mainChart.destroy();
@@ -1476,6 +1582,11 @@
             const labels = chartData ? chartData.labels : ['Jan','Feb','Mar','Apr','Mai'];
             const revenus = chartData ? chartData.revenus : [0,0,0,0,0];
             const depenses = chartData ? chartData.depenses : [0,0,0,0,0];
+
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const isDark = currentTheme === 'dark';
+            const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(77,77,77,0.1)';
+            const textColor = isDark ? '#ffd97d' : '#4d4d4d';
 
             mainChart = new Chart(ctx, { 
                 type: 'line', 
@@ -1485,24 +1596,24 @@
                         { 
                             label: 'Revenus', 
                             data: revenus, 
-                            borderColor: '#10b981', 
+                            borderColor: '#1e8e1e', 
                             borderWidth: 4, 
                             fill: true, 
-                            backgroundColor: 'rgba(16, 185, 129, 0.05)', 
+                            backgroundColor: isDark ? 'rgba(30, 142, 30, 0.1)' : 'rgba(30, 142, 30, 0.15)', 
                             tension: 0.4, 
                             pointRadius: 4,
-                            pointBackgroundColor: '#10b981'
+                            pointBackgroundColor: '#1e8e1e'
                         },
                         { 
                             label: 'Dépenses', 
                             data: depenses, 
-                            borderColor: '#f43f5e', 
+                            borderColor: '#ee6055', 
                             borderWidth: 4, 
                             fill: true, 
-                            backgroundColor: 'rgba(244, 63, 94, 0.05)', 
+                            backgroundColor: isDark ? 'rgba(238, 96, 85, 0.1)' : 'rgba(238, 96, 85, 0.15)', 
                             tension: 0.4, 
                             pointRadius: 4,
-                            pointBackgroundColor: '#f43f5e'
+                            pointBackgroundColor: '#ee6055'
                         }
                     ] 
                 }, 
@@ -1510,17 +1621,23 @@
                     responsive: true, 
                     maintainAspectRatio: false, 
                     plugins: { 
-                        legend: { display: true, labels: { color: '#94a3b8', font: { family: 'Inter', weight: 'bold' } } } 
+                        legend: { display: true, labels: { color: textColor, font: { family: 'Outfit', weight: 'bold' } } } 
                     }, 
                     scales: { 
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', callback: value => value.toLocaleString() + ' Ar' } }, 
-                        x: { grid: { display: false }, ticks: { color: '#64748b' } } 
+                        y: { grid: { color: gridColor }, ticks: { color: textColor, callback: value => value.toLocaleString() + ' Ar' } }, 
+                        x: { grid: { display: false }, ticks: { color: textColor } } 
                     } 
                 } 
             });
         }
 
-        window.onload = fetchData;
+        window.onload = () => {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const icon = document.getElementById('theme-icon');
+            if (icon) icon.className = savedTheme === 'dark' ? 'fas fa-sun text-yellow text-sm' : 'fas fa-moon text-teal text-sm';
+            fetchData();
+        };
     </script>
 </body>
 
