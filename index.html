@@ -905,6 +905,42 @@
             finally { showLoading(false); }
         }
 
+        async function markAsPaid(id, currentStatus, project, amount) {
+            if (currentStatus === 'Payé') {
+                alert("Cette facture est déjà marquée comme payée.");
+                return;
+            }
+            if (currentStatus === 'Proforma') {
+                alert("Impossible de payer un Proforma. Créez d'abord une Vente officielle.");
+                return;
+            }
+            if (!confirm(`Confirmer le paiement de ${amount.toLocaleString()} Ar pour la facture ${id} ?\n\nCela va automatiquement l'ajouter à votre Trésorerie.`)) return;
+            
+            showLoading(true);
+            const statusParams = { action: "updateStatus", file: 'facturation', sheet: 'Base facturation', id: id, status: 'Payé', colIndex: 6 };
+            
+            const d = new Date();
+            const dateStr = d.toISOString().split('T')[0];
+            const cashData = [
+                "CSH-" + Date.now().toString().slice(-4),
+                dateStr,
+                "Paiement Facture " + id + " (" + project + ")",
+                "Encaissement Client",
+                amount,
+                0,
+                0
+            ];
+            const cashParams = { action: "addCash", data: cashData };
+
+            try {
+                await fetch(API_URL, { method: 'POST', body: JSON.stringify(statusParams) });
+                await fetch(API_URL, { method: 'POST', body: JSON.stringify(cashParams) });
+                fetchData(); 
+                fetchWorkflow();
+            } catch (e) { alert("Erreur lors de l'enregistrement du paiement"); }
+            finally { showLoading(false); }
+        }
+
         function fetchWorkflow() {
             const cb = "cb_w_" + Date.now();
             window[cb] = function (data) {
@@ -916,7 +952,7 @@
                         <td class="p-6 text-xs text-slate-400">${w.fournisseurs || '-'}</td>
                         <td class="p-6"><span class="text-[10px] bg-slate-800 px-2 py-1 rounded">${w.phaseAchat}</span></td>
                         <td class="p-6">
-                            <button onclick="updateStatus('facturation','Base facturation','${w.id}','Payé',6)" class="text-[10px] ${w.phaseVente === 'Payé' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'} px-2 py-1 rounded font-bold">
+                            <button onclick="markAsPaid('${w.id}', '${w.phaseVente}', '${w.project}', ${w.revenue})" class="text-[10px] ${w.phaseVente === 'Payé' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'} px-2 py-1 rounded font-bold">
                                 ${w.phaseVente}
                             </button>
                         </td>
