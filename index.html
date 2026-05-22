@@ -364,8 +364,16 @@
 
             <!-- SECTION : WORKFLOW -->
             <section id="section-workflow" class="hidden space-y-6 lg:space-y-8">
-                <div class="flex justify-between items-center">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h3 class="text-xl font-bold">Suivi Opérationnel</h3>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <input type="text" id="workflow-search" oninput="renderWorkflowTable()" placeholder="Rechercher projet, client..." class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm w-full sm:w-64">
+                        <select id="workflow-filter" onchange="renderWorkflowTable()" class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm w-full sm:w-auto">
+                            <option value="all">Tous les statuts</option>
+                            <option value="vente">Ventes (En cours / Payées)</option>
+                            <option value="proforma">Proformas Uniquement</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="glass rounded-3xl overflow-hidden overflow-x-auto custom-scroll">
                     <table class="w-full text-left text-sm min-w-[900px]">
@@ -1405,28 +1413,54 @@
             } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer les Modifications"; }
         }
 
+        let workflowDataCache = [];
+
+        function renderWorkflowTable() {
+            const search = (document.getElementById('workflow-search')?.value || '').toLowerCase();
+            const filter = document.getElementById('workflow-filter')?.value || 'all';
+
+            const filteredData = workflowDataCache.filter(w => {
+                // Search filter
+                const searchMatch = w.project.toLowerCase().includes(search) || 
+                                    (w.client && w.client.toLowerCase().includes(search));
+                
+                // Status filter
+                let statusMatch = true;
+                if (filter === 'proforma') {
+                    statusMatch = w.phaseVente.toLowerCase().includes('proforma');
+                } else if (filter === 'vente') {
+                    statusMatch = !w.phaseVente.toLowerCase().includes('proforma');
+                }
+                
+                return searchMatch && statusMatch;
+            });
+
+            document.getElementById('workflow-table-body').innerHTML = filteredData.map(w => `
+                <tr class="border-t border-slate-800">
+                    <td class="p-6 font-mono text-xs text-blue-400">${w.id}</td>
+                    <td class="p-6 font-bold cursor-pointer hover:text-blue-500" onclick="viewProjectDetail('${w.id}')">${w.project}</td>
+                    <td class="p-6 text-xs text-slate-300">${w.client || '-'}</td>
+                    <td class="p-6 text-xs text-slate-400">${w.fournisseurs || '-'}</td>
+                    <td class="p-6"><span class="text-[10px] bg-slate-800 px-2 py-1 rounded">${w.phaseAchat}</span><button onclick="quickExpense('${w.project}')" class="bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-white px-2 py-1 rounded font-bold text-[10px] ml-2 transition-all">+ Dépense</button></td>
+                    <td class="p-6">
+                        <button onclick="markAsPaid('${w.id}', '${w.phaseVente}', '${w.project}', ${w.revenue})" class="text-[10px] ${w.phaseVente === 'Payé' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'} px-2 py-1 rounded font-bold">
+                            ${w.phaseVente}
+                        </button>
+                    </td>
+                    <td class="p-6 text-emerald-400 font-bold">${(w.margin || 0).toLocaleString()} Ar</td>
+                    <td class="p-6 flex gap-3">
+                        <i onclick="editWorkflow('${w.id}', '${w.date || ''}', '${w.client || ''}', '${w.project}', ${w.revenue}, '${w.dueDate || ''}')" class="fas fa-edit text-slate-600 hover:text-blue-500 cursor-pointer btn-action"></i>
+                        <i onclick="deleteRow('facturation','Base facturation','${w.id}')" class="fas fa-trash text-slate-600 hover:text-rose-500 cursor-pointer btn-action"></i>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
         function fetchWorkflow() {
             const cb = "cb_w_" + Date.now();
             window[cb] = function (data) {
-                document.getElementById('workflow-table-body').innerHTML = data.map(w => `
-                    <tr class="border-t border-slate-800">
-                        <td class="p-6 font-mono text-xs text-blue-400">${w.id}</td>
-                        <td class="p-6 font-bold cursor-pointer hover:text-blue-500" onclick="viewProjectDetail('${w.id}')">${w.project}</td>
-                        <td class="p-6 text-xs text-slate-300">${w.client || '-'}</td>
-                        <td class="p-6 text-xs text-slate-400">${w.fournisseurs || '-'}</td>
-                        <td class="p-6"><span class="text-[10px] bg-slate-800 px-2 py-1 rounded">${w.phaseAchat}</span><button onclick="quickExpense('${w.project}')" class="bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-white px-2 py-1 rounded font-bold text-[10px] ml-2 transition-all">+ Dépense</button></td>
-                        <td class="p-6">
-                            <button onclick="markAsPaid('${w.id}', '${w.phaseVente}', '${w.project}', ${w.revenue})" class="text-[10px] ${w.phaseVente === 'Payé' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'} px-2 py-1 rounded font-bold">
-                                ${w.phaseVente}
-                            </button>
-                        </td>
-                        <td class="p-6 text-emerald-400 font-bold">${(w.margin || 0).toLocaleString()} Ar</td>
-                        <td class="p-6 flex gap-3">
-                            <i onclick="editWorkflow('${w.id}', '${w.date || ''}', '${w.client || ''}', '${w.project}', ${w.revenue}, '${w.dueDate || ''}')" class="fas fa-edit text-slate-600 hover:text-blue-500 cursor-pointer btn-action"></i>
-                            <i onclick="deleteRow('facturation','Base facturation','${w.id}')" class="fas fa-trash text-slate-600 hover:text-rose-500 cursor-pointer btn-action"></i>
-                        </td>
-                    </tr>
-                `).join('');
+                workflowDataCache = data;
+                renderWorkflowTable();
                 delete window[cb];
             };
             const s = document.createElement("script");
