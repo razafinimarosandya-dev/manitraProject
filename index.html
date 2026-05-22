@@ -860,7 +860,7 @@
             
             // Alerts
             let alertsHtml = '';
-            const unpaid = workflowData.filter(p => p.status && (p.status.includes('En attente') || p.status.includes('Proforma')));
+            const unpaid = workflowData.filter(p => p.status && p.status.includes('En attente'));
             if (unpaid.length > 0) {
                 alertsHtml = unpaid.map(u => `
                 <div class="bg-rose-500/10 p-3 rounded-xl flex items-center gap-3 border border-rose-500/20 mb-2">
