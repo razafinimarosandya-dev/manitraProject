@@ -842,16 +842,73 @@
         }
         function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); }
 
-        async function fetchData() {
+        let globalDataCache = null;
+
+        function renderDashboardWidgets(workflowData) {
+            // Top Projects
+            const topProjects = workflowData.slice().sort((a,b) => (b.revenue - b.cost) - (a.revenue - a.cost)).slice(0,3);
+            const projHtml = topProjects.map(p => `
+                <div class="bg-slate-800/50 p-3 rounded-xl flex justify-between items-center border border-slate-700/50">
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-bold text-blue-300 truncate w-24">${p.project}</p>
+                        <p class="text-[10px] text-slate-400 truncate w-24">${p.client}</p>
+                    </div>
+                    <span class="text-xs font-bold ${(p.revenue - p.cost) >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${(p.revenue - p.cost).toLocaleString()} Ar</span>
+                </div>
+            `).join('');
+            document.getElementById('dashboard-top-projects').innerHTML = projHtml || '<p class="text-xs text-slate-500">Aucun projet actif</p>';
+            
+            // Alerts
+            let alertsHtml = '';
+            const unpaid = workflowData.filter(p => p.status && (p.status.includes('En attente') || p.status.includes('Proforma')));
+            if (unpaid.length > 0) {
+                alertsHtml = unpaid.map(u => `
+                <div class="bg-rose-500/10 p-3 rounded-xl flex items-center gap-3 border border-rose-500/20 mb-2">
+                    <i class="fas fa-exclamation-circle text-rose-500 text-lg"></i>
+                    <div class="overflow-hidden flex-1">
+                        <p class="text-xs font-bold text-rose-400 truncate">Projet ${u.project}</p>
+                        <p class="text-[10px] text-slate-300 truncate">Client : ${u.client || 'Inconnu'} - <span class="font-bold text-amber-400">${(u.revenue || 0).toLocaleString()} Ar</span></p>
+                        <p class="text-[9px] text-slate-400 italic mt-0.5">Échéance : ${u.dueDate ? new Date(u.dueDate).toLocaleDateString() : 'Non spécifiée'}</p>
+                    </div>
+                </div>`).join('');
+            }
+            
+            document.getElementById('dashboard-alerts').innerHTML = alertsHtml || '<p class="text-xs text-emerald-500"><i class="fas fa-check-circle"></i> Tout est au vert ! Aucun retard.</p>';
+        }
+
+        function renderCompaniesList(companiesData) {
+            const clients = companiesData.filter(c => c.type.toLowerCase().includes('client'));
+            const fournisseurs = companiesData.filter(c => c.type.toLowerCase().includes('fournisseur'));
+            const investisseurs = companiesData.filter(c => c.type.toLowerCase().includes('investisseur'));
+
+            const invCollab = document.getElementById('invoice-collab');
+            if(invCollab) invCollab.innerHTML = `<option value="">Sélectionnez un Client...</option>` + clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            
+            const profCollab = document.getElementById('proforma-collab');
+            if(profCollab) profCollab.innerHTML = `<option value="">Sélectionnez un Client...</option>` + clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+
+            const expCollab = document.getElementById('expense-collab');
+            if(expCollab) expCollab.innerHTML = `<option value="">Sélectionnez un Fournisseur...</option>` + fournisseurs.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            
+            const investCollab = document.getElementById('investment-collab');
+            if(investCollab) investCollab.innerHTML = `<option value="">Sélectionnez un Investisseur...</option>` + investisseurs.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+        }
+
+        async function initGlobalData() {
+            showLoading(true);
             const month = document.getElementById('period-selector').value;
-            const cb = "cb_" + Date.now();
+            const cb = "cb_all_" + Date.now();
             window[cb] = function (data) {
-                document.getElementById('kpi-revenue').textContent = (data.kpis.revenue || 0).toLocaleString() + " Ar";
-                document.getElementById('kpi-pending').textContent = (data.kpis.pending || 0).toLocaleString() + " Ar";
-                document.getElementById('kpi-expenses').textContent = (data.kpis.expenses || 0).toLocaleString() + " Ar";
-                document.getElementById('kpi-cash').textContent = (data.kpis.cash || 0).toLocaleString() + " Ar";
+                globalDataCache = data;
                 
-                const profit = (data.kpis.revenue || 0) - (data.kpis.expenses || 0);
+                // 1. Dashboard
+                const dash = data.dashboard;
+                document.getElementById('kpi-revenue').textContent = (dash.kpis.revenue || 0).toLocaleString() + " Ar";
+                document.getElementById('kpi-pending').textContent = (dash.kpis.pending || 0).toLocaleString() + " Ar";
+                document.getElementById('kpi-expenses').textContent = (dash.kpis.expenses || 0).toLocaleString() + " Ar";
+                document.getElementById('kpi-cash').textContent = (dash.kpis.cash || 0).toLocaleString() + " Ar";
+                
+                const profit = (dash.kpis.revenue || 0) - (dash.kpis.expenses || 0);
                 const kpiProfit = document.getElementById('kpi-profit');
                 kpiProfit.textContent = profit.toLocaleString() + " Ar";
                 if (profit >= 0) {
@@ -862,84 +919,33 @@
                     kpiProfit.classList.add('text-rose-500');
                 }
 
-                initChart(data.cashFlow);
-                if (data.achatsAnalysis) {
-                    initAchatsAnalysis(data.achatsAnalysis);
+                initChart(dash.cashFlow);
+                if (dash.achatsAnalysis) {
+                    initAchatsAnalysis(dash.achatsAnalysis);
                 }
+                
+                // 2. Widgets & Lists
+                renderDashboardWidgets(data.workflow);
+                renderCompaniesList(data.companies);
+                
+                showLoading(false);
                 delete window[cb];
             };
             const s = document.createElement("script");
-            s.src = API_URL + "?action=getDashboardData&month=" + month + "&callback=" + cb;
+            s.src = API_URL + "?action=getAllData&month=" + month + "&callback=" + cb;
             document.body.appendChild(s);
-
-            // Populate datalist in background
-            fetchCompaniesList();
-            fetchDashboardWidgets();
         }
 
-        function fetchDashboardWidgets() {
-            const cbW = "cb_dw_" + Date.now();
-            window[cbW] = function (data) {
-                // Top Projects
-                const topProjects = data.slice().sort((a,b) => (b.revenue - b.cost) - (a.revenue - a.cost)).slice(0,3);
-                const projHtml = topProjects.map(p => `
-                    <div class="bg-slate-800/50 p-3 rounded-xl flex justify-between items-center border border-slate-700/50">
-                        <div class="overflow-hidden">
-                            <p class="text-xs font-bold text-blue-300 truncate w-24">${p.project}</p>
-                            <p class="text-[10px] text-slate-400 truncate w-24">${p.client}</p>
-                        </div>
-                        <span class="text-xs font-bold ${(p.revenue - p.cost) >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${(p.revenue - p.cost).toLocaleString()} Ar</span>
-                    </div>
-                `).join('');
-                document.getElementById('dashboard-top-projects').innerHTML = projHtml || '<p class="text-xs text-slate-500">Aucun projet actif</p>';
-                
-                // Alerts
-                let alertsHtml = '';
-                const unpaid = data.filter(p => p.status && (p.status.includes('En attente') || p.status.includes('Proforma')));
-                if (unpaid.length > 0) {
-                    alertsHtml = unpaid.map(u => `
-                    <div class="bg-rose-500/10 p-3 rounded-xl flex items-center gap-3 border border-rose-500/20 mb-2">
-                        <i class="fas fa-exclamation-circle text-rose-500 text-lg"></i>
-                        <div class="overflow-hidden flex-1">
-                            <p class="text-xs font-bold text-rose-400 truncate">Projet ${u.project}</p>
-                            <p class="text-[10px] text-slate-300 truncate">Client : ${u.client || 'Inconnu'} - <span class="font-bold text-amber-400">${(u.revenue || 0).toLocaleString()} Ar</span></p>
-                            <p class="text-[9px] text-slate-400 italic mt-0.5">Échéance : ${u.dueDate ? new Date(u.dueDate).toLocaleDateString() : 'Non spécifiée'}</p>
-                        </div>
-                    </div>`).join('');
-                }
-                
-                document.getElementById('dashboard-alerts').innerHTML = alertsHtml || '<p class="text-xs text-emerald-500"><i class="fas fa-check-circle"></i> Tout est au vert ! Aucun retard.</p>';
-                delete window[cbW];
-            };
-            const sW = document.createElement("script");
-            sW.src = API_URL + "?action=getWorkflow&callback=" + cbW;
-            document.body.appendChild(sW);
+        async function fetchData() {
+            initGlobalData();
         }
 
         function fetchCompaniesList() {
-            const cb = "cb_clist_" + Date.now();
-            window[cb] = function (data) {
-                const clients = data.filter(c => c.type.toLowerCase().includes('client'));
-                const fournisseurs = data.filter(c => c.type.toLowerCase().includes('fournisseur'));
-                const investisseurs = data.filter(c => c.type.toLowerCase().includes('investisseur'));
+            // Keep empty function to prevent errors from other modules calling it
+        }
 
-                const invCollab = document.getElementById('invoice-collab');
-                if(invCollab) invCollab.innerHTML = `<option value="">Sélectionnez un Client...</option>` + clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-                
-                const profCollab = document.getElementById('proforma-collab');
-                if(profCollab) profCollab.innerHTML = `<option value="">Sélectionnez un Client...</option>` + clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-
-                const expCollab = document.getElementById('expense-collab');
-                if(expCollab) expCollab.innerHTML = `<option value="">Sélectionnez un Fournisseur...</option>` + fournisseurs.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-                
-                const investCollab = document.getElementById('investment-collab');
-                if(investCollab) investCollab.innerHTML = `<option value="">Sélectionnez un Investisseur...</option>` + investisseurs.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-
-                delete window[cb];
-            };
-            const s = document.createElement("script");
-            s.src = API_URL + "?action=getCompanies&callback=" + cb;
-            document.body.appendChild(s);
+        function fetchDashboardWidgets() {
+            // Keep empty function to prevent errors from other modules calling it
         }
 
         function fetchCompanies() {
