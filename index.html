@@ -827,7 +827,21 @@
             <div id="project-detail-content-drill"></div>
         </div>
     </div>
-
+    <!-- Modal Finance Detail -->
+    <div id="modal-finance-detail" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-2xl rounded-3xl p-8 border border-blue-500/20 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h4 class="text-xl font-bold flex items-center gap-3"><i class="fas fa-search-dollar text-blue-500"></i> Détails de la ligne</h4>
+                <button onclick="closeModal('finance-detail')" class="text-slate-500 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="finance-detail-content" class="min-h-[100px] max-h-[60vh] overflow-y-auto custom-scroll space-y-3 pr-2">
+                <!-- Contenu injecté via JS -->
+            </div>
+            <div class="mt-6 pt-6 border-t border-slate-800 text-center">
+                <button type="button" onclick="closeModal('finance-detail')" class="w-full bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl font-bold text-sm transition-all">Fermer</button>
+            </div>
+        </div>
+    </div>
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbxwlNp4nFB6TFMgfCBeoWzCgsw98KJrkm8iR9NoQHAtCB9DUsDSmuwYJErsHx21h3tM/exec";
         let mainChart = null;
@@ -1058,6 +1072,7 @@
                 workflowDataCache = data.workflow || [];
                 if (typeof renderWorkflowTable === 'function') renderWorkflowTable();
 
+                financeHeadersCache = (data.finance && data.finance.headers) ? data.finance.headers : [];
                 financeDataCache = (data.finance && data.finance.history) ? data.finance.history : [];
                 if (typeof renderFinanceTable === 'function') renderFinanceTable();
 
@@ -1870,6 +1885,7 @@
         }
 
         let financeDataCache = [];
+        let financeHeadersCache = [];
 
         function renderFinanceTable() {
             const search = (document.getElementById('finance-search')?.value || '').toLowerCase();
@@ -1886,7 +1902,9 @@
                 return searchMatch && filterMatch;
             });
 
-            document.getElementById('finance-table-body').innerHTML = filteredData.map(h => `
+            document.getElementById('finance-table-body').innerHTML = filteredData.map((h) => {
+                const realIndex = financeDataCache.indexOf(h);
+                return `
                 <tr class="border-t border-slate-800 hover:bg-slate-800/30 transition-colors">
                     <td class="p-6 text-xs text-slate-500">${h.date || '-'}</td>
                     <td class="p-6 text-xs font-bold text-indigo-400">${h.category || 'Non catégorisé'}</td>
@@ -1894,14 +1912,49 @@
                     <td class="p-6 text-right font-bold text-emerald-400">${h.in > 0 ? '+' + h.in.toLocaleString() + ' Ar' : ''}</td>
                     <td class="p-6 text-right font-bold text-rose-400">${h.out > 0 ? '-' + h.out.toLocaleString() + ' Ar' : ''}</td>
                     <td class="p-6 text-right font-bold text-blue-400">${(h.balance || 0).toLocaleString()} Ar</td>
-                    <td class="p-6 text-center"><i onclick="deleteRow('tresorerie','suivi trésorerie','${h.id || ''}')" class="fas fa-trash text-slate-700 hover:text-rose-500 cursor-pointer btn-action transition-all"></i></td>
+                    <td class="p-6 text-center">
+                        <i onclick="viewFinanceDetails(${realIndex})" class="fas fa-eye text-blue-500 hover:text-blue-400 cursor-pointer btn-action transition-all mr-3"></i>
+                        <i onclick="deleteRow('tresorerie','suivi trésorerie','${h.id || ''}')" class="fas fa-trash text-slate-700 hover:text-rose-500 cursor-pointer btn-action transition-all"></i>
+                    </td>
                 </tr>
-            `).reverse().join('');
+                `;
+            }).reverse().join('');
+        }
+
+        function viewFinanceDetails(index) {
+            const rowData = financeDataCache[index];
+            if (!rowData || !rowData.rawData) return;
+            
+            let html = '';
+            rowData.rawData.forEach((val, i) => {
+                const headerName = financeHeadersCache[i] || `Colonne ${i + 1}`;
+                
+                let displayVal = val;
+                if (displayVal instanceof Date || (typeof displayVal === 'string' && displayVal.match(/^\d{4}-\d{2}-\d{2}T/))) {
+                    try { displayVal = new Date(displayVal).toLocaleDateString(); } catch(e){}
+                } else if (typeof displayVal === 'number' && !headerName.toLowerCase().includes('id')) {
+                    displayVal = displayVal.toLocaleString() + ' Ar';
+                }
+                
+                if (displayVal === undefined || displayVal === null || displayVal === '') {
+                    displayVal = '<span class="italic text-slate-600">Vide</span>';
+                }
+
+                html += `
+                <div class="bg-slate-800/40 p-3 rounded-lg flex justify-between items-center border border-slate-700/50">
+                    <span class="text-xs font-bold text-slate-400 uppercase w-1/3">${headerName}</span>
+                    <span class="text-sm font-semibold text-right w-2/3 break-words text-slate-200">${displayVal}</span>
+                </div>`;
+            });
+            
+            document.getElementById('finance-detail-content').innerHTML = html;
+            openModal('finance-detail');
         }
 
         function fetchFinance() {
             const cb = "cb_f_" + Date.now();
             window[cb] = function (data) {
+                financeHeadersCache = data.headers || [];
                 financeDataCache = data.history || [];
                 renderFinanceTable();
                 delete window[cb];
