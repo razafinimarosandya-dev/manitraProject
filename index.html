@@ -1040,6 +1040,10 @@
                 
                 // 2. Widgets & Lists
                 renderDashboardWidgets(data.workflow);
+                
+                companiesDataCache = data.companies || [];
+                renderCompaniesTable();
+                
                 renderCompaniesList(data.companies, data.investments);
                 renderProjectsList(data.workflow);
                 
