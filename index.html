@@ -342,8 +342,17 @@
 
             <!-- SECTION : COLLABORATEURS -->
             <section id="section-collaborateurs" class="hidden space-y-6 lg:space-y-8">
-                <div class="flex justify-between items-center">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h3 class="text-xl font-bold">Partenaires Commerciaux</h3>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <input type="text" id="company-search" oninput="renderCompaniesTable()" placeholder="Rechercher un nom..." class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm w-full sm:w-64">
+                        <select id="company-filter" onchange="renderCompaniesTable()" class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm w-full sm:w-auto">
+                            <option value="all">Tous les types</option>
+                            <option value="client">Client</option>
+                            <option value="fournisseur">Fournisseur</option>
+                            <option value="investisseur">Investisseur</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="glass rounded-3xl overflow-hidden overflow-x-auto custom-scroll border border-white/5">
                     <table class="w-full text-left text-sm min-w-[700px]">
@@ -419,18 +428,28 @@
 
             <!-- SECTION : FINANCE -->
             <section id="section-finance" class="hidden space-y-6 lg:space-y-8">
-                <div class="flex justify-between items-center">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h3 class="text-xl font-bold">Historique Bancaire & Cash</h3>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <input type="text" id="finance-search" oninput="renderFinanceTable()" placeholder="Rechercher une opération..." class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm w-full sm:w-64">
+                        <select id="finance-filter" onchange="renderFinanceTable()" class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm w-full sm:w-auto">
+                            <option value="all">Toutes les opérations</option>
+                            <option value="in">Entrées d'argent (+)</option>
+                            <option value="out">Sorties d'argent (-)</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="glass rounded-3xl overflow-hidden overflow-x-auto custom-scroll">
-                    <table class="w-full text-left text-sm min-w-[600px]">
+                    <table class="w-full text-left text-sm min-w-[900px]">
                         <thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]">
                             <tr>
                                 <th class="p-6">Date</th>
-                                <th class="p-6">Opération</th>
-                                <th class="p-6">Flux</th>
-                                <th class="p-6">Solde</th>
-                                <th class="p-6">Action</th>
+                                <th class="p-6">Catégorie</th>
+                                <th class="p-6">Opération / Libellé</th>
+                                <th class="p-6 text-right">Entrées (+)</th>
+                                <th class="p-6 text-right">Sorties (-)</th>
+                                <th class="p-6 text-right">Solde</th>
+                                <th class="p-6 text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody id="finance-table-body"></tbody>
@@ -490,8 +509,23 @@
                 <select id="invoice-collab" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
                     <option value="">Sélectionnez un Client...</option>
                 </select>
-                <input type="text" placeholder="Projet / Description" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
-                <input type="number" placeholder="Montant TTC (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <select id="invoice-project" onchange="autoFillInvoiceData()" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                    <option value="">Sélectionnez un Projet en cours...</option>
+                </select>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Montant de la Vente (Ar)</label>
+                        <input id="invoice-amount" type="number" placeholder="Montant TTC (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm font-bold text-emerald-400">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Total Achat (Ar)</label>
+                        <input id="invoice-cost" type="text" readonly placeholder="Calcul automatique..." class="w-full bg-slate-950/50 p-4 rounded-xl border border-slate-800 text-sm font-bold text-rose-400">
+                    </div>
+                </div>
+                <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50 text-right">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 mr-2">Bénéfice Net :</span>
+                    <span id="invoice-profit" class="text-xl font-bold text-slate-300">0 Ar</span>
+                </div>
                 <div>
                     <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date d'échéance de paiement</label>
                     <input type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
@@ -630,7 +664,9 @@
                     class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
                     <option value="">Sélectionnez un Fournisseur...</option>
                 </select>
-                <input id="expense-project" type="text" placeholder="Projet (ex: Villa A)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                <select id="expense-project" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                    <option value="">Sélectionnez un Projet en cours...</option>
+                </select>
                 
                 <div class="bg-slate-800/20 p-4 rounded-xl border border-slate-700/50">
                     <div class="flex justify-between items-center mb-3">
@@ -884,6 +920,64 @@
             document.getElementById('dashboard-alerts').innerHTML = alertsHtml || '<p class="text-xs text-emerald-500"><i class="fas fa-check-circle"></i> Tout est au vert ! Aucun retard.</p>';
         }
 
+        function renderProjectsList(workflowData) {
+            // Get all projects that are not fully paid/finished
+            const activeProjects = workflowData.filter(p => p.project && !p.status.includes('Payé'));
+            
+            // Deduplicate project names (just in case)
+            const uniqueProjects = [];
+            const projectMap = new Map();
+            activeProjects.forEach(p => {
+                if (!projectMap.has(p.project.toLowerCase())) {
+                    projectMap.set(p.project.toLowerCase(), p);
+                    uniqueProjects.push(p);
+                }
+            });
+
+            const optionsHtml = `<option value="">Sélectionnez un Projet en cours...</option>` + 
+                uniqueProjects.map(p => `<option value="${p.project}">${p.project} (Client: ${p.client})</option>`).join('');
+
+            const expProj = document.getElementById('expense-project');
+            if(expProj) expProj.innerHTML = optionsHtml;
+
+            const invProj = document.getElementById('invoice-project');
+            if(invProj) invProj.innerHTML = optionsHtml;
+        }
+
+        function autoFillInvoiceData() {
+            const projectSelect = document.getElementById('invoice-project');
+            const projectName = projectSelect.value;
+            
+            const amountInput = document.getElementById('invoice-amount');
+            const costInput = document.getElementById('invoice-cost');
+            const profitDisplay = document.getElementById('invoice-profit');
+            
+            if (!projectName || !globalDataCache || !globalDataCache.workflow) {
+                amountInput.value = '';
+                costInput.value = '';
+                profitDisplay.textContent = '0 Ar';
+                return;
+            }
+
+            // Find the project in workflow data
+            const projectData = globalDataCache.workflow.find(p => p.project === projectName);
+            if (projectData) {
+                const revenue = projectData.revenue || 0;
+                const cost = projectData.cost || 0;
+                const profit = revenue - cost;
+
+                amountInput.value = revenue;
+                costInput.value = cost.toLocaleString() + ' Ar';
+                profitDisplay.textContent = profit.toLocaleString() + ' Ar';
+                
+                if (profit >= 0) {
+                    profitDisplay.className = 'text-xl font-bold text-emerald-400';
+                } else {
+                    profitDisplay.className = 'text-xl font-bold text-rose-400';
+                }
+            }
+        }
+
         function renderCompaniesList(companiesData, investmentsData = []) {
             const clients = companiesData.filter(c => c.type && c.type.toLowerCase().includes('client'));
             const fournisseurs = companiesData.filter(c => c.type && c.type.toLowerCase().includes('fournisseur'));
@@ -947,6 +1041,7 @@
                 // 2. Widgets & Lists
                 renderDashboardWidgets(data.workflow);
                 renderCompaniesList(data.companies, data.investments);
+                renderProjectsList(data.workflow);
                 
                 showLoading(false);
                 delete window[cb];
@@ -968,18 +1063,55 @@
             initGlobalData();
         }
 
+        let companiesDataCache = [];
+
+        function renderCompaniesTable() {
+            const search = (document.getElementById('company-search')?.value || '').toLowerCase();
+            const filter = (document.getElementById('company-filter')?.value || 'all').toLowerCase();
+
+            const filteredData = companiesDataCache.filter(c => {
+                const searchMatch = c.name.toLowerCase().includes(search) || 
+                                    (c.contact && c.contact.toLowerCase().includes(search));
+                
+                let filterMatch = true;
+                if (filter !== 'all') {
+                    filterMatch = c.type && c.type.toLowerCase().includes(filter);
+                }
+
+                return searchMatch && filterMatch;
+            });
+
+            document.getElementById('company-table-body').innerHTML = filteredData.map(c => {
+                let cumulHtml = '';
+                let soldeHtml = '';
+                if (c.type.includes('Investisseur')) {
+                    cumulHtml = c.lastMonth ? `<span class="text-xs text-emerald-400 font-bold">${(c.lastAmount || 0).toLocaleString()} Ar</span><br><span class="text-[10px] text-slate-500">Dernier apport: ${c.lastMonth}</span>` : '0 Ar';
+                    soldeHtml = `<span class="text-xs text-slate-500">-</span>`;
+                } else if (c.type.includes('Client')) {
+                    cumulHtml = `<span class="text-xs text-blue-400 font-bold">${(c.total || 0).toLocaleString()} Ar</span><br><span class="text-[10px] text-slate-500">Total Facturé</span>`;
+                    soldeHtml = `<span class="text-xs ${c.pending > 0 ? 'text-amber-500' : 'text-emerald-500'} font-bold">${(c.pending || 0).toLocaleString()} Ar</span><br><span class="text-[10px] text-slate-500">Reste à encaisser</span>`;
+                } else if (c.type.includes('Fournisseur')) {
+                    cumulHtml = `<span class="text-xs text-rose-400 font-bold">${(c.total || 0).toLocaleString()} Ar</span><br><span class="text-[10px] text-slate-500">Total Achats</span>`;
+                    soldeHtml = `<span class="text-xs ${c.pending > 0 ? 'text-rose-500' : 'text-slate-500'} font-bold">${(c.pending || 0).toLocaleString()} Ar</span><br><span class="text-[10px] text-slate-500">Reste à payer</span>`;
+                }
+
+                return `
+                <tr class="border-t border-slate-800 hover:bg-slate-800/30 transition-colors">
+                    <td class="p-6 font-bold text-blue-400">${c.name}</td>
+                    <td class="p-6 text-xs text-indigo-300 font-bold">${c.type}</td>
+                    <td class="p-6 text-xs text-slate-400">${c.contact || '-'}</td>
+                    <td class="p-6">${cumulHtml}</td>
+                    <td class="p-6">${soldeHtml}</td>
+                    <td class="p-6"><span class="px-2 py-1 rounded bg-slate-800 text-[10px]">${c.status}</span></td>
+                </tr>`;
+            }).join('');
+        }
+
         function fetchCompanies() {
             const cb = "cb_c_" + Date.now();
             window[cb] = function (data) {
-                document.getElementById('company-table-body').innerHTML = data.map(c => `
-                    <tr class="border-t border-slate-800">
-                        <td class="p-6 font-bold text-blue-400">${c.name}</td>
-                        <td class="p-6 text-xs">${c.type}</td>
-                        <td class="p-6 text-xs text-slate-400">${c.contact || '-'}</td>
-                        <td class="p-6">${c.type === 'Investisseur' && c.lastMonth ? `<span class="text-xs text-emerald-400 font-bold">${(c.lastAmount || 0).toLocaleString()} Ar</span><br><span class="text-[10px] text-slate-500">${c.lastMonth}</span>` : (c.total || 0).toLocaleString() + ' Ar'}</td>
-                        <td class="p-6 text-amber-500 font-bold">${(c.pending || 0).toLocaleString()} Ar</td>
-                        <td class="p-6"><span class="px-2 py-1 rounded bg-slate-800 text-[10px]">${c.status}</span></td>
-                    </tr>`).join('');
+                companiesDataCache = data;
+                renderCompaniesTable();
                 delete window[cb];
             };
             const s = document.createElement("script");
@@ -1034,10 +1166,10 @@
             const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
             const idFac = "FAC-" + Date.now().toString().slice(-4);
             const dateVal = e.target[0].value;
-            const collab = e.target[1].value;
-            const projet = e.target[2].value;
-            const montant = parseFloat(e.target[3].value) || 0;
-            const echeance = e.target[4].value;
+            const collab = document.getElementById('invoice-collab').value;
+            const projet = document.getElementById('invoice-project').value;
+            const montant = parseFloat(document.getElementById('invoice-amount').value) || 0;
+            const echeance = e.target[5].value; // Date d'échéance is the 6th input (index 5)
 
             const formData = { 
                 action: "addInvoice", 
@@ -1655,18 +1787,41 @@
             finally { showLoading(false); }
         }
 
+        let financeDataCache = [];
+
+        function renderFinanceTable() {
+            const search = (document.getElementById('finance-search')?.value || '').toLowerCase();
+            const filter = document.getElementById('finance-filter')?.value || 'all';
+
+            const filteredData = financeDataCache.filter(h => {
+                const searchMatch = (h.label && h.label.toLowerCase().includes(search)) ||
+                                    (h.category && h.category.toLowerCase().includes(search));
+                
+                let filterMatch = true;
+                if (filter === 'in') filterMatch = h.in > 0;
+                if (filter === 'out') filterMatch = h.out > 0;
+
+                return searchMatch && filterMatch;
+            });
+
+            document.getElementById('finance-table-body').innerHTML = filteredData.map(h => `
+                <tr class="border-t border-slate-800 hover:bg-slate-800/30 transition-colors">
+                    <td class="p-6 text-xs text-slate-500">${h.date || '-'}</td>
+                    <td class="p-6 text-xs font-bold text-indigo-400">${h.category || 'Non catégorisé'}</td>
+                    <td class="p-6 font-semibold">${h.label}</td>
+                    <td class="p-6 text-right font-bold text-emerald-400">${h.in > 0 ? '+' + h.in.toLocaleString() + ' Ar' : ''}</td>
+                    <td class="p-6 text-right font-bold text-rose-400">${h.out > 0 ? '-' + h.out.toLocaleString() + ' Ar' : ''}</td>
+                    <td class="p-6 text-right font-bold text-blue-400">${(h.balance || 0).toLocaleString()} Ar</td>
+                    <td class="p-6 text-center"><i onclick="deleteRow('tresorerie','suivi trésorerie','${h.id || ''}')" class="fas fa-trash text-slate-700 hover:text-rose-500 cursor-pointer btn-action transition-all"></i></td>
+                </tr>
+            `).reverse().join('');
+        }
+
         function fetchFinance() {
             const cb = "cb_f_" + Date.now();
             window[cb] = function (data) {
-                document.getElementById('finance-table-body').innerHTML = data.history.map(h => `
-                    <tr class="border-t border-slate-800">
-                        <td class="p-6 text-xs text-slate-500">${new Date(h.date).toLocaleDateString()}</td>
-                        <td class="p-6 font-semibold">${h.label}</td>
-                        <td class="p-6 ${h.in > 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold">${h.in > 0 ? '+' : '-'}${Math.max(h.in, h.out).toLocaleString()} Ar</td>
-                        <td class="p-6 font-bold text-blue-400">${(h.balance || 0).toLocaleString()} Ar</td>
-                        <td class="p-6"><i onclick="deleteRow('tresorerie','suivi trésorerie','${h.id || ''}')" class="fas fa-trash text-slate-700 cursor-pointer btn-action"></i></td>
-                    </tr>
-                `).reverse().join('');
+                financeDataCache = data.history || [];
+                renderFinanceTable();
                 delete window[cb];
             };
             const s = document.createElement("script");
