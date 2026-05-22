@@ -1,650 +1,2007 @@
-/**
- * GOOGLE APPS SCRIPT - BACKEND ERP "TOTAL CONTROL" V5
- * Zéro intervention manuelle sur les fichiers Excel.
- */
+<!DOCTYPE html>
+<html lang="fr">
 
-const FILE_IDS = {
-  facturation: "1tcwVnGS9MwDYaUqrBqwyLUiFY2LV_VW88_xDtMYOaaA",
-  achats: "1gN6_3DcdozJUroIwCpQWTZ-5T334m8TrH7u19EZY48k",
-  tresorerie: "1pu9VfH0RckOS-PV7zWFEtzFOKfHE6UCa0_qW-aiiM2k",
-  stocks: "VOTRE_ID_STOCKS"
-};
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manitra ERP - TOTAL CONTROL V6</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: ['class', '[data-theme="dark"]'],
+            theme: {
+                extend: {
+                    colors: {
+                        red: { DEFAULT: 'var(--c-red)', 400: 'var(--c-red-400)', 500: 'var(--c-red)', 600: 'var(--c-red-600)' },
+                        yellow: { DEFAULT: 'var(--c-yellow)', 400: 'var(--c-yellow-400)', 500: 'var(--c-yellow)', 600: 'var(--c-yellow-600)' },
+                        amber: { DEFAULT: 'var(--c-yellow)', 400: 'var(--c-yellow-400)', 500: 'var(--c-yellow)', 600: 'var(--c-yellow-600)' },
+                        teal: { DEFAULT: 'var(--c-teal)', 400: 'var(--c-teal)', 500: 'var(--c-teal)', 600: 'var(--c-teal-600)' },
+                        blue: { DEFAULT: 'var(--c-teal)', 300: 'var(--c-teal)', 400: 'var(--c-teal)', 500: 'var(--c-teal)', 600: 'var(--c-teal-600)' },
+                        indigo: { DEFAULT: 'var(--c-teal)', 300: 'var(--c-teal)', 400: 'var(--c-teal)', 500: 'var(--c-teal)', 600: 'var(--c-teal-600)' },
+                        green: { DEFAULT: 'var(--c-green)', 400: 'var(--c-green)', 500: 'var(--c-green)', 600: 'var(--c-green-600)' },
+                        emerald: { DEFAULT: 'var(--c-green)', 400: 'var(--c-green)', 500: 'var(--c-green)', 600: 'var(--c-green-600)' },
+                        rose: { DEFAULT: 'var(--c-red)', 400: 'var(--c-red-400)', 500: 'var(--c-red)', 600: 'var(--c-red-600)' },
+                        slate: { DEFAULT: 'var(--c-slate-500)', 300: 'var(--c-slate-300)', 400: 'var(--c-slate-400)', 500: 'var(--c-slate-500)', 600: 'var(--c-slate-600)', 700: 'var(--c-slate-700)', 800: 'var(--c-slate-800)', 900: 'var(--c-slate-900)', 950: 'var(--c-slate-950)' },
+                        white: 'var(--c-white)',
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.9);
+            --bg-input: rgba(77, 77, 77, 0.06);
+            --bg-card: rgba(77, 77, 77, 0.04);
+            --border-glass: rgba(77, 77, 77, 0.25);
+            --text-main: #4d4d4d;
+            --text-muted: rgba(77, 77, 77, 0.85);
+            --text-invert: #ffffff;
 
-function doGet(e) {
-  try {
-    const action = e.parameter.action || "getDashboardData";
-    const callback = e.parameter.callback;
-    let data;
+            --sidebar-active-bg: rgba(11, 147, 155, 0.12);
+            --sidebar-active-border: #0b939b;
+            --sidebar-active-text: #0b939b;
+            --shadow-glass: 0 8px 32px 0 rgba(77, 77, 77, 0.15);
 
-    switch (action) {
-      case "getDashboardData": data = getConsolidatedData(e.parameter.month); break;
-      case "getCompanies": 
-        const aMaster = getAchatsMasterData();
-        const wFlow = getFullWorkflow(aMaster.projData);
-        data = getCompaniesAnalysis(null, aMaster, wFlow); 
-        break;
-      case "getWorkflow": data = getFullWorkflow(); break;
-      case "getStocks": data = getStocksData(); break;
-      case "getFinance": data = getFullFinance(); break;
-      case "getInvestments": data = getInvestmentsData(); break;
-      case "getProjectDetail": data = getProjectDetail(e.parameter.id); break;
-      case "getAllData": 
-        const invsAll = getInvestmentsData();
-        const achatsMasterAll = getAchatsMasterData();
-        const wfAll = getFullWorkflow(achatsMasterAll.projData);
-        data = {
-          dashboard: getConsolidatedData(e.parameter.month, invsAll, achatsMasterAll, wfAll),
-          companies: getCompaniesAnalysis(invsAll, achatsMasterAll, wfAll),
-          workflow: wfAll,
-          finance: getFullFinance(),
-          investments: invsAll,
-          stocks: getStocksData()
-        };
-        break;
-      default: data = { error: "Action inconnue" };
-    }
-
-    const output = JSON.stringify(data);
-    if (callback) return ContentService.createTextOutput(callback + "(" + output + ")").setMimeType(ContentService.MimeType.JAVASCRIPT);
-    return ContentService.createTextOutput(output).setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ error: err.toString() })).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function doPost(e) {
-  try {
-    const params = JSON.parse(e.postData.contents);
-    const action = params.action;
-    let result;
-
-    switch (action) {
-      case "addExpense":
-        if (Array.isArray(params.data[0])) {
-          params.data.forEach(row => {
-            result = addEntryWithHeaders(FILE_IDS.achats, params.month, row,
-              ["Date", "Libellé / Fournisseur", "Catégorie", "Montant (Ar)", "Mode de Paiement", "Statut", "Détails", "Collaborateur Assigné", "Date d'Échéance", "Projet", "Quantité", "Unité", "P.U"]);
+            --c-red: #ee6055;
+            --c-red-400: #d4534a;
+            --c-red-600: #b33b34;
             
-            // Push to tresorerie
-            addEntryWithHeaders(FILE_IDS.tresorerie, "suivi trésorerie", [
-              "CSH-" + Math.floor(Math.random()*100000),
-              row[0],
-              "Achat " + (row[6] || row[2]) + " (" + row[9] + ")",
-              "Paiement Fournisseur",
-              0,
-              parseFloat(row[3]) || 0,
-              0
-            ], ["ID", "Date", "Libellé", "Catégorie", "Entrées (Recettes)", "Sorties (Achats)", "Solde"]);
-          });
-        } else {
-          result = addEntryWithHeaders(FILE_IDS.achats, params.month, params.data,
-            ["Date", "Libellé / Fournisseur", "Catégorie", "Montant (Ar)", "Mode de Paiement", "Statut", "Détails", "Collaborateur Assigné", "Date d'Échéance", "Projet", "Quantité", "Unité", "P.U"]);
-          
-          addEntryWithHeaders(FILE_IDS.tresorerie, "suivi trésorerie", [
-            "CSH-" + Math.floor(Math.random()*100000),
-            params.data[0],
-            "Achat " + (params.data[6] || params.data[2]) + " (" + params.data[9] + ")",
-            "Paiement Fournisseur",
-            0,
-            parseFloat(params.data[3]) || 0,
-            0
-          ], ["ID", "Date", "Libellé", "Catégorie", "Entrées (Recettes)", "Sorties (Achats)", "Solde"]);
+            --c-yellow: #e6a817; /* Dérivé ambre foncé de ffd97d pour un contraste parfait sur fond blanc */
+            --c-yellow-400: #e6a817;
+            --c-yellow-600: #c58f12;
+
+            --c-teal: #0b939b;
+            --c-teal-600: #097a80;
+
+            --c-green: #1e8e1e;
+            --c-green-600: #197819;
+
+            --c-slate-300: rgba(77, 77, 77, 0.7);
+            --c-slate-400: rgba(77, 77, 77, 0.85);
+            --c-slate-500: #4d4d4d;
+            --c-slate-600: #3a3a3a;
+            --c-slate-700: rgba(77, 77, 77, 0.15);
+            --c-slate-800: rgba(77, 77, 77, 0.2);
+            --c-slate-900: rgba(77, 77, 77, 0.05);
+            --c-slate-950: rgba(77, 77, 77, 0.08);
+
+            --c-white: #4d4d4d; /* text-white devient text-main (4d4d4d) sur fond blanc pour être 100% lisible */
         }
-        break;
-      case "addCash":
-        result = addEntryWithHeaders(FILE_IDS.tresorerie, "suivi trésorerie", params.data,
-          ["ID", "Date", "Libellé", "Catégorie", "Entrées (Recettes)", "Sorties (Achats)", "Solde"]);
-        break;
-      case "addInvestment":
-        result = addEntryWithHeaders(FILE_IDS.tresorerie, "Investissements", params.data,
-          ["ID", "Date", "Investisseur", "Type", "Montant", "Détails", "Échéance", "Statut"]);
-        
-        // Push to tresorerie
-        let isApport = String(params.data[3]).includes('Apport');
-        addEntryWithHeaders(FILE_IDS.tresorerie, "suivi trésorerie", [
-           "CSH-" + Math.floor(Math.random()*100000),
-           params.data[1],
-           "Investissement " + params.data[2] + " (" + params.data[3] + ")",
-           "Opération Courante",
-           isApport ? (parseFloat(params.data[4]) || 0) : 0,
-           !isApport ? (parseFloat(params.data[4]) || 0) : 0,
-           0
-        ], ["ID", "Date", "Libellé", "Catégorie", "Entrées (Recettes)", "Sorties (Achats)", "Solde"]);
-        break;
-      case "updateStock":
-        result = handleStockMovement(params.data);
-        break;
-      case "addStockItem":
-        result = addEntryWithHeaders(FILE_IDS.stocks, "Etat des Stocks", params.data,
-          ["Code", "Désignation", "Catégorie", "Quantité Initiale", "Unité", "Alerte"]);
-        break;
-      case "addCollaborator":
-        result = addEntryWithHeaders(FILE_IDS.facturation, "Base clients", params.data,
-          ["Nom du Partenaire", "Type", "Contact"]);
-        break;
-      case "addInvoice":
-        let isProforma = false;
-        let pClient = "", pProjet = "";
-        
-        if (params.data && params.data.main) {
-           isProforma = (params.data.main[6] === "Proforma");
-           pClient = params.data.main[2];
-           pProjet = params.data.main[7];
-           
-           result = addEntryWithHeaders(FILE_IDS.facturation, "Base facturation", params.data.main,
-             ["ID Facture", "Date", "Client", "Acompte", "Remise", "Montant TTC", "Statut", "Projet", "Echéance"]);
-           
-           if (params.data.lines && Array.isArray(params.data.lines)) {
-              params.data.lines.forEach(line => {
-                 addEntryWithHeaders(FILE_IDS.facturation, "Lignes Factures", line,
-                   ["ID Facture", "Détail", "Quantité", "Unité", "P.U", "Total"]);
-              });
-           }
-        } else {
-           isProforma = (params.data[6] === "Proforma");
-           pClient = params.data[2];
-           pProjet = params.data[7];
-           
-           result = addEntryWithHeaders(FILE_IDS.facturation, "Base facturation", params.data,
-             ["ID Facture", "Date", "Client", "Acompte", "Remise", "Montant TTC", "Statut", "Projet", "Echéance"]);
+
+        [data-theme="dark"] {
+            --bg-main: #121212;
+            --bg-glass: rgba(77, 77, 77, 0.18);
+            --bg-input: rgba(77, 77, 77, 0.25);
+            --bg-card: rgba(77, 77, 77, 0.2);
+            --border-glass: rgba(77, 77, 77, 0.4);
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --text-invert: #4d4d4d;
+
+            --sidebar-active-bg: rgba(11, 147, 155, 0.25);
+            --sidebar-active-border: #0b939b;
+            --sidebar-active-text: #0b939b;
+            --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+            --c-red: #ee6055;
+            --c-red-400: #ee6055;
+            --c-red-600: #d4534a;
+            
+            --c-yellow: #ffd97d;
+            --c-yellow-400: #ffd97d;
+            --c-yellow-600: #e6c370;
+
+            --c-teal: #0b939b;
+            --c-teal-600: #097a80;
+
+            --c-green: #1e8e1e;
+            --c-green-600: #197819;
+
+            --c-slate-300: #7a7a7a;
+            --c-slate-400: #94a3b8;
+            --c-slate-500: #4d4d4d;
+            --c-slate-600: #3a3a3a;
+            --c-slate-700: rgba(77, 77, 77, 0.4);
+            --c-slate-800: rgba(77, 77, 77, 0.3);
+            --c-slate-900: rgba(77, 77, 77, 0.15);
+            --c-slate-950: rgba(77, 77, 77, 0.25);
+
+            --c-white: #ffffff;
         }
-        
-        // Auto-convert old Proforma to 'Converti en Vente'
-        if (!isProforma && pClient && pProjet) {
-           try {
-             const ssFact = SpreadsheetApp.openById(FILE_IDS.facturation);
-             const sheetFact = ssFact.getSheetByName("Base facturation");
-             const factData = sheetFact.getDataRange().getValues();
-             const headers = factData[0];
-             const clientIdx = headers.indexOf("Client");
-             const projIdx = headers.indexOf("Projet");
-             const statusIdx = headers.indexOf("Statut");
-             
-             if (clientIdx !== -1 && projIdx !== -1 && statusIdx !== -1) {
-               for(let r=1; r<factData.length; r++) {
-                 if (String(factData[r][clientIdx]).trim() === String(pClient).trim() && 
-                     String(factData[r][projIdx]).trim() === String(pProjet).trim() && 
-                     String(factData[r][statusIdx]).trim() === "Proforma") {
-                   sheetFact.getRange(r+1, statusIdx+1).setValue("Converti en Vente");
-                 }
-               }
-             }
-           } catch(e) {
-             // Ignore errors in sync, so the invoice creation still succeeds
-           }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
-        break;
-      case "updateStatus":
-        result = updateEntryStatus(params.file, params.sheet, params.id, params.status || params.newStatus, params.colIndex);
-        break;
-      case "editEntry":
-        result = editEntryById(params.file, params.sheet, params.id, params.data);
-        break;
-      case "deleteRow":
-        result = deleteRowById(params.file, params.sheet, params.id);
-        break;
-      default: result = { error: "Action POST inconnue" };
-    }
 
-    return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ error: err.toString() })).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-// --- NOUVELLES FONCTIONS DE CONTRÔLE TOTAL ---
-
-/**
- * Met à jour le statut d'une ligne (ex: En attente -> Payé)
- */
-function updateEntryStatus(fileKey, sheetName, id, newStatus, colIndex) {
-  const ss = SpreadsheetApp.openById(FILE_IDS[fileKey]);
-  const sheet = ss.getSheetByName(sheetName);
-  const data = sheet.getDataRange().getValues();
-
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0].toString() === id.toString()) {
-      sheet.getRange(i + 1, colIndex + 1).setValue(newStatus);
-      return { success: true, message: "Statut mis à jour" };
-    }
-  }
-  return { error: "ID non trouvé" };
-}
-
-/**
- * Supprime une ligne par son ID
- */
-function deleteRowById(fileKey, sheetName, id) {
-  const ss = SpreadsheetApp.openById(FILE_IDS[fileKey]);
-  const sheet = ss.getSheetByName(sheetName);
-  const data = sheet.getDataRange().getValues();
-
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0].toString() === id.toString()) {
-      sheet.deleteRow(i + 1);
-      return { success: true, message: "Ligne supprimée" };
-    }
-  }
-  return { error: "ID non trouvé" };
-}
-
-/**
- * Édite les valeurs d'une ligne par son ID selon un objet de correspondances { headerName: value }
- */
-function editEntryById(fileKey, sheetName, id, newDataObject) {
-  const ss = SpreadsheetApp.openById(FILE_IDS[fileKey]);
-  const sheet = ss.getSheetByName(sheetName);
-  const data = sheet.getDataRange().getValues();
-  const headers = data[0];
-
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0].toString() === id.toString()) {
-      Object.keys(newDataObject).forEach(key => {
-        const colIdx = headers.indexOf(key);
-        if (colIdx !== -1) {
-          sheet.getRange(i + 1, colIdx + 1).setValue(newDataObject[key]);
+        .glass {
+            background: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            box-shadow: var(--shadow-glass);
         }
-      });
-      return { success: true, message: "Ligne modifiée avec succès" };
-    }
-  }
-  return { error: "ID non trouvé pour modification" };
-}
 
-function addEntryWithHeaders(fileId, sheetName, dataArray, headersArray) {
-  const ss = SpreadsheetApp.openById(fileId);
-  let sheet = ss.getSheetByName(sheetName);
-
-  if (!sheet) {
-    sheet = ss.insertSheet(sheetName);
-    if (headersArray && headersArray.length > 0) {
-      sheet.appendRow(headersArray);
-    }
-  } else if (headersArray && headersArray.length > 0) {
-    // Check if headers exist, if not set them
-    const existingHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn() || 1).getValues()[0];
-    if (existingHeaders.filter(String).length === 0) {
-      sheet.getRange(1, 1, 1, headersArray.length).setValues([headersArray]);
-    } else if (existingHeaders.length < headersArray.length) {
-      // Add missing headers
-      for (let i = existingHeaders.length; i < headersArray.length; i++) {
-        sheet.getRange(1, i + 1).setValue(headersArray[i]);
-      }
-    }
-  }
-
-  sheet.appendRow(dataArray);
-  return { success: true };
-}
-
-// --- FONCTIONS LECTURE V6 ---
-
-function getInvestmentsData() {
-  try {
-    const ss = SpreadsheetApp.openById(FILE_IDS.tresorerie);
-    const sheet = ss.getSheetByName("Investissements");
-    if (!sheet) return [];
-    const data = sheet.getDataRange().getValues();
-    const res = [];
-    for(let i=1; i<data.length; i++) {
-      res.push({
-        id: data[i][0], date: data[i][1], investor: data[i][2], type: data[i][3],
-        amount: data[i][4], details: data[i][5], deadline: data[i][6], status: data[i][7]
-      });
-    }
-    return res;
-  } catch(e) { return []; }
-}
-
-function getCompaniesAnalysis(precomputedInvs = null, achatsMaster = null, wfData = null) {
-  try {
-    const ss = SpreadsheetApp.openById(FILE_IDS.facturation);
-    const sheet = ss.getSheetByName("Base clients");
-    if (!sheet) return [];
-    const data = sheet.getDataRange().getValues();
-    const res = [];
-    
-    const invs = precomputedInvs || getInvestmentsData();
-    const achats = achatsMaster ? achatsMaster.data : [];
-    const wf = wfData || [];
-
-    const existingNames = new Set();
-    for(let i=1; i<data.length; i++) {
-      const name = data[i][0];
-      const type = data[i][1];
-      const contact = data[i][2];
-      
-      existingNames.add(name);
-
-      let total = 0;
-      let pending = 0;
-      let lastAmount = 0;
-      let lastMonth = "";
-      
-      if (type === "Investisseur") {
-        let latestInv = null;
-        invs.forEach(inv => {
-           if (inv.investor === name && inv.type.includes('Apport')) {
-              if (!latestInv || new Date(inv.date) > new Date(latestInv.date)) {
-                 latestInv = inv;
-              }
-           }
-        });
-        if (latestInv) {
-           lastAmount = latestInv.amount;
-           const d = new Date(latestInv.date);
-           const months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
-           lastMonth = months[d.getMonth()] + " " + d.getFullYear();
+        .sidebar-item {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            margin-bottom: 4px;
+            color: var(--text-muted);
+            cursor: pointer;
         }
-      } else if (type === "Client" && wf.length > 0) {
-         wf.forEach(w => {
-            if (w.client === name && w.status !== "Proforma") {
-               total += w.revenue;
-               const statusStr = String(w.status || "");
-               if (statusStr !== "Payé" && statusStr !== "Converti en Vente (Payé)") {
-                  pending += w.revenue;
-               }
+
+        .sidebar-item:hover {
+            background: var(--bg-card);
+            color: var(--text-main);
+        }
+
+        .sidebar-item.active {
+            background: var(--sidebar-active-bg);
+            color: var(--sidebar-active-text);
+            border: 1px solid var(--sidebar-active-border);
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            background: var(--bg-input) !important;
+            border: 1px solid var(--border-glass) !important;
+            color: var(--text-main) !important;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #0b939b !important;
+            outline: none;
+        }
+
+        .btn-action {
+            transition: all 0.2s;
+            color: var(--text-muted);
+        }
+
+        .btn-action:hover {
+            transform: scale(1.1);
+            color: var(--text-main);
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: var(--border-glass);
+            border-radius: 10px;
+        }
+
+        #loading-overlay {
+            display: none;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body class="flex h-screen overflow-hidden">
+
+    <datalist id="collab-list"></datalist>
+
+    <!-- OVERLAY DE CHARGEMENT -->
+    <div id="loading-overlay"
+        class="fixed inset-0 bg-black/60 backdrop-blur-md z-[200] flex items-center justify-center">
+        <div class="text-center">
+            <i class="fas fa-circle-notch animate-spin text-4xl text-blue-500 mb-4"></i>
+            <p class="text-xs font-bold tracking-widest uppercase">Synchronisation Cloud...</p>
+        </div>
+    </div>
+
+    <!-- SIDEBAR & BACKDROP MOBILE -->
+    <div id="sidebar-backdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[140] lg:hidden hidden"></div>
+    <aside id="sidebar" class="w-72 glass border-r border-slate-800 flex flex-col p-6 z-[150] fixed inset-y-0 left-0 lg:relative lg:translate-x-0 -translate-x-full transition-all duration-300 ease-in-out">
+        <div class="flex items-center gap-3 mb-10 px-2">
+            <div
+                class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <i class="fas fa-shield-alt text-white text-xl"></i>
+            </div>
+            <h1 class="text-xl font-bold tracking-tight">Financial Tech <span class="text-blue-500 text-xs">ERP V6</span></h1>
+        </div>
+
+        <nav class="flex-1 custom-scroll overflow-y-auto space-y-1">
+            <p class="text-[10px] uppercase font-bold text-slate-500 mb-4 px-2 tracking-widest">Contrôle Total</p>
+            <div onclick="showSection('dashboard', this)"
+                class="sidebar-item active flex items-center gap-4 px-4 py-3 text-sm"><i
+                    class="fas fa-th-large w-5"></i> Dashboard</div>
+            <div onclick="showSection('collaborateurs', this)"
+                class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-user-friends w-5"></i>
+                Partenaires</div>
+            <div onclick="showSection('workflow', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm">
+                <i class="fas fa-project-diagram w-5"></i> Workflow</div>
+            <div onclick="showSection('stocks', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i
+                    class="fas fa-boxes w-5"></i> Inventaire</div>
+            <div onclick="showSection('finance', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm">
+                <i class="fas fa-wallet w-5"></i> Trésorerie</div>
+            <div onclick="showSection('investissements', this)"
+                class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-chart-pie w-5"></i>
+                Investissements</div>
+
+            <p class="text-[10px] uppercase font-bold text-slate-500 mt-8 mb-4 px-2 tracking-widest">Saisies Rapides</p>
+            <button onclick="openModal('proforma')" class="w-full bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-indigo-600 hover:text-white transition-all">+ Proforma / Devis</button>
+            <button onclick="openModal('invoice')"
+                class="w-full bg-blue-600/20 border border-blue-500/30 text-blue-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-blue-600 hover:text-white transition-all">+
+                Vente</button>
+            <button onclick="openExpenseNormal()"
+                class="w-full bg-amber-600/20 border border-amber-500/30 text-amber-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-amber-600 hover:text-white transition-all">+
+                Achat</button>
+            <button onclick="openModal('cash')"
+                class="w-full bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-emerald-600 hover:text-white transition-all">+
+                Mouvement Cash</button>
+            <button onclick="openModal('collaborator')"
+                class="w-full bg-purple-600/20 border border-purple-500/30 text-purple-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-purple-600 hover:text-white transition-all">+
+                Partenaire</button>
+            <button onclick="openModal('investment')"
+                class="w-full bg-rose-600/20 border border-rose-500/30 text-rose-400 py-2 rounded-xl text-xs font-bold hover:bg-rose-600 hover:text-white transition-all">+
+                Investissement</button>
+        </nav>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-20 glass border-b border-slate-800 flex items-center justify-between px-4 lg:px-8">
+            <div class="flex items-center gap-3 lg:gap-4">
+                <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white text-xl p-2 mr-1"><i class="fas fa-bars"></i></button>
+                <h2 id="section-title" class="text-base lg:text-lg font-bold truncate max-w-[150px] sm:max-w-none">Tableau de Bord</h2>
+                <div class="flex items-center gap-2">
+                    <select id="period-selector" onchange="fetchData()"
+                        class="rounded-lg text-[10px] px-3 py-1.5 outline-none font-bold uppercase tracking-wider cursor-pointer shadow-sm">
+                        <option value="Janvier">Janvier 2026</option>
+                        <option value="Février">Février 2026</option>
+                        <option value="Mars">Mars 2026</option>
+                        <option value="Avril">Avril 2026</option>
+                        <option value="Mai" selected>Mai 2026</option>
+                    </select>
+                    <button onclick="toggleTheme()" class="p-1 px-2.5 rounded-lg border border-glass bg-input hover:opacity-80 transition-all cursor-pointer shadow-sm">
+                        <i id="theme-icon" class="fas fa-sun text-yellow text-sm"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div
+                    class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                    LIVE CLOUD SYNC</div>
+            </div>
+        </header>
+
+        <div id="content-area" class="flex-1 p-8 overflow-y-auto custom-scroll">
+
+            <!-- SECTION : DASHBOARD -->
+            <section id="section-dashboard" class="space-y-6 lg:space-y-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Ventes Mois</p>
+                        <h3 id="kpi-revenue" class="text-2xl font-bold truncate">0 Ar</h3>
+                    </div>
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Restes à Encaisser</p>
+                        <h3 id="kpi-pending" class="text-2xl font-bold text-amber-500 truncate">0 Ar</h3>
+                    </div>
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Dépenses Mois</p>
+                        <h3 id="kpi-expenses" class="text-2xl font-bold text-rose-500 truncate">0 Ar</h3>
+                    </div>
+                    <div class="glass p-6 rounded-3xl border border-blue-500/30 bg-blue-900/10 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
+                        <p class="text-[10px] text-blue-400 font-bold uppercase mb-2">Bénéfice Net</p>
+                        <h3 id="kpi-profit" class="text-2xl font-bold truncate">0 Ar</h3>
+                    </div>
+                    <div class="glass p-6 rounded-3xl border border-emerald-500/30 bg-emerald-900/10 shadow-[0_0_15px_rgba(16,185,129,0.15)] sm:col-span-2 lg:col-span-1">
+                        <p class="text-[10px] text-emerald-400 font-bold uppercase mb-2">Disponibilité</p>
+                        <h3 id="kpi-cash" class="text-2xl font-bold text-white truncate">0 Ar</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mt-6">
+                    <div class="lg:col-span-2 glass p-6 lg:p-8 rounded-3xl h-[300px] lg:h-[400px]">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                    <div class="col-span-1 space-y-6">
+                        <!-- Alertes -->
+                        <div class="glass p-6 rounded-3xl h-[188px] overflow-y-auto custom-scroll">
+                            <h4 class="text-sm font-bold text-rose-500 mb-4 flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i> Alertes & Urgences</h4>
+                            <div id="dashboard-alerts" class="space-y-3">
+                                <p class="text-xs text-slate-400 italic">Analyse en cours...</p>
+                            </div>
+                        </div>
+                        <!-- Top Projets -->
+                        <div class="glass p-6 rounded-3xl h-[188px] overflow-y-auto custom-scroll">
+                            <h4 class="text-sm font-bold text-blue-400 mb-4 flex items-center gap-2"><i class="fas fa-trophy"></i> Top Dossiers</h4>
+                            <div id="dashboard-top-projects" class="space-y-3">
+                                <p class="text-xs text-slate-400 italic">Analyse en cours...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- NEW ROW: Analyse des Achats -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mt-6">
+                    <div class="glass p-6 rounded-3xl h-[300px]">
+                        <h4 class="text-sm font-bold text-amber-500 mb-4 flex items-center gap-2"><i class="fas fa-chart-pie"></i> Dépenses par Catégorie</h4>
+                        <div class="h-[220px]">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass p-6 rounded-3xl h-[300px] overflow-y-auto custom-scroll">
+                        <h4 class="text-sm font-bold text-amber-500 mb-4 flex items-center gap-2"><i class="fas fa-medal"></i> Top Fournisseurs</h4>
+                        <div id="top-suppliers-list" class="space-y-3">
+                            <p class="text-xs text-slate-400 italic">Analyse en cours...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION : COLLABORATEURS -->
+            <section id="section-collaborateurs" class="hidden space-y-6 lg:space-y-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <h3 class="text-xl font-bold">Partenaires Commerciaux</h3>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <input type="text" id="company-search" oninput="renderCompaniesTable()" placeholder="Rechercher un nom..." class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm w-full sm:w-64">
+                        <select id="company-filter" onchange="renderCompaniesTable()" class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm w-full sm:w-auto">
+                            <option value="all">Tous les types</option>
+                            <option value="client">Client</option>
+                            <option value="fournisseur">Fournisseur</option>
+                            <option value="investisseur">Investisseur</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="glass rounded-3xl overflow-hidden overflow-x-auto custom-scroll border border-white/5">
+                    <table class="w-full text-left text-sm min-w-[700px]">
+                        <thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px] tracking-widest">
+                            <tr>
+                                <th class="p-6">Entreprise</th>
+                                <th class="p-6">Type</th>
+                                <th class="p-6">Contact</th>
+                                <th class="p-6">Cumul</th>
+                                <th class="p-6">Solde en cours</th>
+                                <th class="p-6">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="company-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECTION : WORKFLOW -->
+            <section id="section-workflow" class="hidden space-y-6 lg:space-y-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <h3 class="text-xl font-bold">Suivi Opérationnel</h3>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <input type="text" id="workflow-search" oninput="renderWorkflowTable()" placeholder="Rechercher projet, client..." class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm w-full sm:w-64">
+                        <select id="workflow-filter" onchange="renderWorkflowTable()" class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm w-full sm:w-auto">
+                            <option value="all">Tous les statuts</option>
+                            <option value="vente">Ventes (En cours / Payées)</option>
+                            <option value="proforma">Proformas Uniquement</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="glass rounded-3xl overflow-hidden overflow-x-auto custom-scroll">
+                    <table class="w-full text-left text-sm min-w-[900px]">
+                        <thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]">
+                            <tr>
+                                <th class="p-6">Dossier</th>
+                                <th class="p-6">Projet</th>
+                                <th class="p-6">Client</th>
+                                <th class="p-6">Fournisseurs</th>
+                                <th class="p-6">Achat</th>
+                                <th class="p-6">Vente</th>
+                                <th class="p-6">Marge Net</th>
+                                <th class="p-6">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workflow-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECTION : STOCKS -->
+            <section id="section-stocks" class="hidden space-y-6 lg:space-y-8">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold">Inventaire</h3><button onclick="openModal('stock-add')"
+                        class="bg-blue-600 px-4 py-2 rounded-xl text-xs font-bold">+ Créer Article</button>
+                </div>
+                <div id="stock-alerts" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+                <div class="glass rounded-3xl overflow-hidden overflow-x-auto custom-scroll">
+                    <table class="w-full text-left text-sm min-w-[600px]">
+                        <thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]">
+                            <tr>
+                                <th class="p-6">Article</th>
+                                <th class="p-6">Quantité</th>
+                                <th class="p-6">Unité</th>
+                                <th class="p-6">État</th>
+                                <th class="p-6">Ajuster</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stock-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECTION : FINANCE -->
+            <section id="section-finance" class="hidden space-y-6 lg:space-y-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <h3 class="text-xl font-bold">Historique Bancaire & Cash</h3>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <input type="text" id="finance-search" oninput="renderFinanceTable()" placeholder="Rechercher une opération..." class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm w-full sm:w-64">
+                        <select id="finance-filter" onchange="renderFinanceTable()" class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm w-full sm:w-auto">
+                            <option value="all">Toutes les opérations</option>
+                            <option value="in">Entrées d'argent (+)</option>
+                            <option value="out">Sorties d'argent (-)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="glass rounded-3xl overflow-hidden overflow-x-auto custom-scroll">
+                    <table class="w-full text-left text-sm min-w-[900px]">
+                        <thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]">
+                            <tr>
+                                <th class="p-6">Date</th>
+                                <th class="p-6">Catégorie</th>
+                                <th class="p-6">Opération / Libellé</th>
+                                <th class="p-6 text-right">Entrées (+)</th>
+                                <th class="p-6 text-right">Sorties (-)</th>
+                                <th class="p-6 text-right">Solde</th>
+                                <th class="p-6 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="finance-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECTION : INVESTISSEMENTS -->
+            <section id="section-investissements" class="hidden space-y-6 lg:space-y-8">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold">Suivi des Investissements</h3>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 mb-6">
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Total Investi</p>
+                        <h3 id="kpi-inv-total" class="text-2xl font-bold text-blue-400 truncate">0 Ar</h3>
+                    </div>
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Sorties d'Investissements</p>
+                        <h3 id="kpi-inv-out" class="text-2xl font-bold text-rose-400 truncate">0 Ar</h3>
+                    </div>
+                    <div class="glass p-6 rounded-3xl">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Retours (ROI / Remboursements)
+                        </p>
+                        <h3 id="kpi-inv-return" class="text-2xl font-bold text-emerald-400 truncate">0 Ar</h3>
+                    </div>
+                </div>
+                <div class="glass rounded-3xl overflow-hidden overflow-x-auto custom-scroll">
+                    <table class="w-full text-left text-sm min-w-[900px]">
+                        <thead class="bg-slate-800/50 text-slate-400 uppercase text-[10px]">
+                            <tr>
+                                <th class="p-6">Date</th>
+                                <th class="p-6">Investisseur</th>
+                                <th class="p-6">Type</th>
+                                <th class="p-6">Montant</th>
+                                <th class="p-6">Détails</th>
+                                <th class="p-6">Échéance Retour</th>
+                                <th class="p-6">Statut</th>
+                                <th class="p-6">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invest-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- MODALS -->
+
+    <!-- Modal Invoice -->
+    <div id="modal-invoice" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-xl rounded-3xl p-8 border border-blue-500/20 shadow-2xl">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-file-invoice text-blue-500"></i> Nouvelle Facture de Vente</h4>
+            <form onsubmit="submitInvoice(event)" class="space-y-4">
+                <input type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <select id="invoice-collab" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                    <option value="">Sélectionnez un Client...</option>
+                </select>
+                <select id="invoice-project" onchange="autoFillInvoiceData()" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                    <option value="">Sélectionnez un Projet en cours...</option>
+                </select>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Montant de la Vente (Ar)</label>
+                        <input id="invoice-amount" type="number" placeholder="Montant TTC (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm font-bold text-emerald-400">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Total Achat (Ar)</label>
+                        <input id="invoice-cost" type="text" readonly placeholder="Calcul automatique..." class="w-full bg-slate-950/50 p-4 rounded-xl border border-slate-800 text-sm font-bold text-rose-400">
+                    </div>
+                </div>
+                <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50 text-right">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 mr-2">Bénéfice Net :</span>
+                    <span id="invoice-profit" class="text-xl font-bold text-slate-300">0 Ar</span>
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date d'échéance de paiement</label>
+                    <input type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/20">Enregistrer la Vente</button>
+                <button type="button" onclick="closeModal('invoice')" class="w-full text-slate-500 text-xs py-2">Fermer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Proforma -->
+    <div id="modal-proforma" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-3xl rounded-3xl p-6 lg:p-8 border border-indigo-500/20 shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-file-alt text-indigo-500"></i> Nouveau Proforma / Devis</h4>
+            <form onsubmit="submitProforma(event)" class="space-y-4">
+                <input type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm">
+                <select id="proforma-collab" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm">
+                    <option value="">Sélectionnez un Client...</option>
+                </select>
+                <input id="proforma-project" type="text" placeholder="Projet / Description" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm">
+                
+                <div class="bg-slate-800/20 p-4 rounded-xl border border-slate-700/50">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="block text-[10px] uppercase font-bold text-slate-400">Lignes du Devis (Détails & Montants)</label>
+                        <button type="button" onclick="addProformaLine()" class="text-xs text-indigo-500 font-bold hover:text-indigo-400">+ Ajouter une ligne</button>
+                    </div>
+                    <div class="hidden sm:grid sm:grid-cols-12 gap-2 px-1 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        <div class="col-span-4">Détail de l'article / prestation</div>
+                        <div class="col-span-1">Qté</div>
+                        <div class="col-span-2">Unité</div>
+                        <div class="col-span-2">Prix Unit. (Ar)</div>
+                        <div class="col-span-3 text-right pr-8">Total (Ar)</div>
+                    </div>
+                    <div id="proforma-lines" class="space-y-3 max-h-60 overflow-y-auto custom-scroll pr-2">
+                        <div class="proforma-line grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-900/40 p-3 rounded-xl sm:bg-transparent sm:p-0 border border-slate-800/50 sm:border-none">
+                            <input type="text" placeholder="Détail (ex: Prestation A)" required class="sm:col-span-4 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm w-full">
+                            <input type="number" placeholder="Qté" oninput="calcProformaLine(this)" required class="sm:col-span-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm w-full">
+                            <input type="text" placeholder="Unité (ex: m2, Ens)" required class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm w-full">
+                            <input type="number" placeholder="P.U (Ar)" oninput="calcProformaLine(this)" required class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm w-full">
+                            <div class="flex sm:col-span-3 items-center gap-2 w-full justify-between sm:justify-end">
+                                <span class="sm:hidden text-xs font-bold text-slate-400">Total:</span>
+                                <input type="text" placeholder="Total (Ar)" readonly class="flex-1 sm:w-full bg-indigo-950/50 p-3 rounded-lg border border-indigo-800 text-indigo-300 font-bold text-sm text-right">
+                                <button type="button" onclick="if(document.querySelectorAll('.proforma-line').length>1) { this.closest('.proforma-line').remove(); updateProformaTotal(); }" class="text-rose-500/50 hover:text-rose-500 p-2 text-center"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-right">
+                        <span class="text-[10px] text-slate-500 uppercase font-bold mr-2">Total estimé:</span>
+                        <span id="proforma-total-display" class="font-bold text-indigo-400 text-lg">0 Ar</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-indigo-500/20">Enregistrer le Proforma</button>
+                <button type="button" onclick="closeModal('proforma')" class="w-full text-slate-500 text-xs py-2">Fermer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Edit Workflow -->
+    <div id="modal-edit-workflow" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-xl rounded-3xl p-8 border border-blue-500/20 shadow-2xl">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-edit text-blue-500"></i> Modifier le Projet / Vente</h4>
+            <form onsubmit="submitEditWorkflow(event)" class="space-y-4">
+                <input id="edit-w-id" type="text" readonly class="w-full bg-slate-950/50 p-4 rounded-xl border border-slate-800 text-slate-500 font-mono text-sm">
+                <input id="edit-w-date" type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <input id="edit-w-client" type="text" placeholder="Nom du Client" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <input id="edit-w-project" type="text" placeholder="Nom du Projet" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <input id="edit-w-amount" type="number" placeholder="Montant TTC (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date d'échéance</label>
+                    <input id="edit-w-duedate" type="date" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/20">Enregistrer les Modifications</button>
+                <button type="button" onclick="closeModal('edit-workflow')" class="w-full text-slate-500 text-xs py-2">Annuler</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Edit Investment -->
+    <div id="modal-edit-investment" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-xl rounded-3xl p-8 border border-rose-500/20 shadow-2xl">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-edit text-rose-500"></i> Modifier l'Investissement</h4>
+            <form onsubmit="submitEditInvestment(event)" class="space-y-4">
+                <input id="edit-inv-id" type="text" readonly class="w-full bg-slate-950/50 p-4 rounded-xl border border-slate-800 text-slate-500 font-mono text-sm">
+                <input id="edit-inv-date" type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <input id="edit-inv-investor" type="text" placeholder="Investisseur" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <select id="edit-inv-type" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                    <option value="Apport (Entrée)">Apport (Entrée)</option>
+                    <option value="Sortie (Achat / Dépense)">Sortie (Achat / Dépense)</option>
+                    <option value="Retour (ROI / Remboursement)">Retour (ROI / Remboursement)</option>
+                </select>
+                <input id="edit-inv-amount" type="number" placeholder="Montant (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <input id="edit-inv-details" type="text" placeholder="Détails / Notes" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Échéance Retour</label>
+                    <input id="edit-inv-deadline" type="date" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                </div>
+                <select id="edit-inv-status" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                    <option value="Actif">Actif</option>
+                    <option value="En cours">En cours</option>
+                    <option value="Payé (Remboursé)">Payé (Remboursé)</option>
+                </select>
+                <button type="submit" class="w-full bg-rose-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-rose-500/20">Enregistrer les Modifications</button>
+                <button type="button" onclick="closeModal('edit-investment')" class="w-full text-slate-500 text-xs py-2">Annuler</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Expense -->
+    <div id="modal-expense"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-3xl rounded-3xl p-6 lg:p-8 border border-amber-500/20 shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i
+                    class="fas fa-shopping-cart text-amber-500"></i> Nouvel Achat / Charge</h4>
+            <form onsubmit="submitExpense(event)" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="date" required
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                    <select
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                        <option value="Janvier">Janvier</option>
+                        <option value="Février">Février</option>
+                        <option value="Mars">Mars</option>
+                        <option value="Avril">Avril</option>
+                        <option value="Mai" selected>Mai</option>
+                        <option value="Juin">Juin</option>
+                        <option value="Juillet">Juillet</option>
+                        <option value="Août">Août</option>
+                        <option value="Septembre">Septembre</option>
+                        <option value="Octobre">Octobre</option>
+                        <option value="Novembre">Novembre</option>
+                        <option value="Décembre">Décembre</option>
+                    </select>
+                </div>
+                <select id="expense-collab" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                    <option value="">Sélectionnez un Fournisseur...</option>
+                </select>
+                <select id="expense-project" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                    <option value="">Sélectionnez un Projet en cours...</option>
+                </select>
+                
+                <div class="bg-slate-800/20 p-4 rounded-xl border border-slate-700/50">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="block text-[10px] uppercase font-bold text-slate-400">Lignes d'achat (Détails & Montants)</label>
+                        <button type="button" onclick="addExpenseLine()" class="text-xs text-amber-500 font-bold hover:text-amber-400">+ Ajouter une ligne</button>
+                    </div>
+                    <div class="hidden sm:grid sm:grid-cols-12 gap-2 px-1 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        <div class="col-span-4">Détail de l'article / achat</div>
+                        <div class="col-span-1">Qté</div>
+                        <div class="col-span-2">Unité</div>
+                        <div class="col-span-2">Prix Unit. (Ar)</div>
+                        <div class="col-span-3 text-right pr-8">Total (Ar)</div>
+                    </div>
+                    <div id="expense-lines" class="space-y-3 max-h-60 overflow-y-auto custom-scroll pr-2">
+                        <div class="expense-line grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-900/40 p-3 rounded-xl sm:bg-transparent sm:p-0 border border-slate-800/50 sm:border-none">
+                            <input type="text" placeholder="Détail (ex: Ciment)" required class="sm:col-span-4 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                            <input type="number" placeholder="Qté" oninput="calcExpenseLine(this)" required class="sm:col-span-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                            <input type="text" placeholder="Unité (ex: Sac, m2)" required class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                            <input type="number" placeholder="P.U (Ar)" oninput="calcExpenseLine(this)" required class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                            <div class="flex sm:col-span-3 items-center gap-2 w-full justify-between sm:justify-end">
+                                <span class="sm:hidden text-xs font-bold text-slate-400">Total:</span>
+                                <input type="text" placeholder="Total (Ar)" readonly class="flex-1 sm:w-full bg-amber-950/50 p-3 rounded-lg border border-amber-800 text-amber-300 font-bold text-sm text-right">
+                                <button type="button" onclick="if(document.querySelectorAll('.expense-line').length>1) { this.closest('.expense-line').remove(); updateExpenseTotal(); }" class="text-rose-500/50 hover:text-rose-500 p-2 text-center"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-right">
+                        <span class="text-[10px] text-slate-500 uppercase font-bold mr-2">Total estimé:</span>
+                        <span id="expense-total-display" class="font-bold text-amber-500 text-lg">0 Ar</span>
+                    </div>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-amber-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-amber-500/20">Enregistrer
+                    l'Achat</button>
+                <button type="button" onclick="closeModal('expense')"
+                    class="w-full text-slate-500 text-xs py-2">Fermer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Cash -->
+    <div id="modal-cash"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-xl rounded-3xl p-8 border border-emerald-500/20 shadow-2xl">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i
+                    class="fas fa-money-bill text-emerald-500"></i> Mouvement de Trésorerie</h4>
+            <form onsubmit="submitCash(event)" class="space-y-4">
+                <input type="date" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
+                <input type="text" placeholder="Libellé de l'opération" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
+                <select
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
+                    <option>Opération Courante</option>
+                    <option>Encaissement Client</option>
+                    <option>Paiement Fournisseur</option>
+                </select>
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" placeholder="Entrée (+)"
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
+                    <input type="number" placeholder="Sortie (-)"
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
+                </div>
+                <button type="submit"
+                    class="w-full bg-emerald-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-emerald-500/20">Valider
+                    l'Opération</button>
+                <button type="button" onclick="closeModal('cash')"
+                    class="w-full text-slate-500 text-xs py-2">Fermer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Collaborator -->
+    <div id="modal-collaborator"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-xl rounded-3xl p-8 border border-purple-500/20 shadow-2xl">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-handshake text-purple-500"></i>
+                Nouveau Partenaire</h4>
+            <form onsubmit="submitCollaborator(event)" class="space-y-4">
+                <input type="text" placeholder="Nom de l'entreprise ou du contact" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
+                <select
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
+                    <option value="Client">Client</option>
+                    <option value="Fournisseur">Fournisseur</option>
+                    <option value="Investisseur">Investisseur</option>
+                </select>
+                <input type="text" placeholder="Contact (Téléphone, Email...)"
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
+                <button type="submit"
+                    class="w-full bg-purple-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-purple-500/20">Ajouter
+                    Collaborateur</button>
+                <button type="button" onclick="closeModal('collaborator')"
+                    class="w-full text-slate-500 text-xs py-2">Fermer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Project Detail -->
+    <div id="modal-project-detail" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-2xl rounded-3xl p-8 border border-blue-500/20 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h4 class="text-xl font-bold flex items-center gap-3"><i class="fas fa-folder-open text-blue-500"></i> Détails du Dossier</h4>
+                <button onclick="closeModal('project-detail')" class="text-slate-500 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="project-detail-content" class="min-h-[200px]">
+                <!-- Contenu injecté via JS -->
+            </div>
+            <div class="mt-6 pt-6 border-t border-slate-800 text-center">
+                <button type="button" onclick="closeModal('project-detail')" class="text-slate-500 text-xs py-2 hover:text-white">Fermer la vue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Investment -->
+    <div id="modal-investment"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-xl rounded-3xl p-8 border border-rose-500/20 shadow-2xl">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-chart-line text-rose-500"></i>
+                Mouvement d'Investissement</h4>
+            <form onsubmit="submitInvestment(event)" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="date" required
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                    <select
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                        <option value="Entrée (Apport)">Entrée (Apport en capital)</option>
+                        <option value="Sortie (Utilisation)">Sortie (Utilisation du fonds)</option>
+                        <option value="Retour (Remboursement)">Retour (Remboursement)</option>
+                    </select>
+                </div>
+                <select id="investment-collab" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                    <option value="">Sélectionnez un Investisseur...</option>
+                </select>
+                <input type="number" placeholder="Montant (Ar)" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <input type="text" placeholder="Détails (ex: Matériel acheté, ROI...)"
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <button type="submit"
+                    class="w-full bg-rose-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-rose-500/20">Valider
+                    l'Investissement</button>
+                <button type="button" onclick="closeModal('investment')"
+                    class="w-full text-slate-500 text-xs py-2">Fermer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Project Detail (Drill-down) -->
+    <div id="modal-project-detail-drill"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-4xl rounded-3xl p-10">
+            <div class="flex justify-between items-center mb-8">
+                <h4 class="text-2xl font-bold">Détails du Dossier</h4><button onclick="closeModal('project-detail-drill')"
+                    class="text-2xl hover:text-rose-500">&times;</button>
+            </div>
+            <div id="project-detail-content-drill"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbxwlNp4nFB6TFMgfCBeoWzCgsw98KJrkm8iR9NoQHAtCB9DUsDSmuwYJErsHx21h3tM/exec";
+        let mainChart = null;
+        let categoryChart = null;
+
+        function toggleSidebar() {
+            const sb = document.getElementById('sidebar');
+            const bd = document.getElementById('sidebar-backdrop');
+            if (window.innerWidth < 1024) {
+                if (sb.classList.contains('-translate-x-full')) {
+                    sb.classList.remove('-translate-x-full');
+                    bd.classList.remove('hidden');
+                } else {
+                    sb.classList.add('-translate-x-full');
+                    bd.classList.add('hidden');
+                }
+            } else {
+                if (sb.classList.contains('lg:w-0')) {
+                    sb.classList.remove('lg:w-0', 'lg:p-0', 'lg:border-none', 'lg:overflow-hidden');
+                    sb.classList.add('w-72', 'p-6');
+                } else {
+                    sb.classList.add('lg:w-0', 'lg:p-0', 'lg:border-none', 'lg:overflow-hidden');
+                    sb.classList.remove('w-72', 'p-6');
+                }
             }
-         });
-      } else if (type === "Fournisseur" && achats.length > 0) {
-         achats.forEach(a => {
-            if (a[1] === name || a[7] === name) {
-               const montant = parseFloat(a[3]) || 0;
-               const status = String(a[5] || "");
-               total += montant;
-               if (status !== "Payé" && !status.includes("Payé")) {
-                  pending += montant;
-               }
-            }
-         });
-      }
-
-      res.push({ 
-        name: name, 
-        type: type, 
-        contact: contact, 
-        total: total, 
-        pending: pending, 
-        status: "Actif",
-        lastAmount: lastAmount,
-        lastMonth: lastMonth
-      });
-    }
-
-    // Add investors from history who are not in Base clients
-    const extraInvestors = new Map();
-    invs.forEach(inv => {
-       if (inv.investor && !existingNames.has(inv.investor)) {
-          if (!extraInvestors.has(inv.investor)) {
-             extraInvestors.set(inv.investor, {
-                name: inv.investor, type: "Investisseur", contact: "-", total: 0, pending: 0, status: "Actif", lastAmount: 0, lastMonth: ""
-             });
-          }
-          if (inv.type.includes('Apport')) {
-             let entry = extraInvestors.get(inv.investor);
-             if (!entry.lastDate || new Date(inv.date) > new Date(entry.lastDate)) {
-                entry.lastAmount = inv.amount;
-                entry.lastDate = inv.date;
-                const d = new Date(inv.date);
-                const months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
-                entry.lastMonth = months[d.getMonth()] + " " + d.getFullYear();
-             }
-          }
-       }
-    });
-
-    extraInvestors.forEach(entry => res.push(entry));
-
-    return res;
-  } catch(e) { 
-    return [{name: "ERROR", type: "Client", contact: e.toString() + " | " + e.stack, total: 0, pending: 0, status: "Error"}]; 
-  }
-}
-
-function getFullWorkflow(precomputedAchatsProjData = null) {
-  try {
-    const ss = SpreadsheetApp.openById(FILE_IDS.facturation);
-    const sheet = ss.getSheetByName("Base facturation");
-    if (!sheet) return [];
-    const data = sheet.getDataRange().getValues();
-    
-    let projData = precomputedAchatsProjData;
-    if (!projData) {
-      projData = getAchatsMasterData().projData;
-    }
-
-    const res = [];
-    for(let i=1; i<data.length; i++) {
-      let projName = data[i][7] ? String(data[i][7]).trim() : ("Vente " + data[i][0]);
-      let pData = projData[projName.toLowerCase()];
-      let fournisseursList = pData ? Object.keys(pData.fournisseurs).join(", ") : "-";
-      let totalCost = pData ? pData.totalCost : 0;
-      let revenue = parseFloat(data[i][5]) || 0;
-
-      res.push({
-        id: data[i][0],
-        date: data[i][1],
-        project: data[i][7] ? data[i][7] : ("Vente " + data[i][0]),
-        client: data[i][2],
-        fournisseurs: fournisseursList,
-        cost: totalCost,
-        revenue: revenue,
-        status: data[i][6],
-        phaseVente: data[i][6],
-        phaseAchat: totalCost > 0 ? "En cours / Terminé" : "Aucun achat",
-        margin: revenue - totalCost,
-        dueDate: data[i][8] || ""
-      });
-    }
-    return res;
-  } catch(e) { return []; }
-}
-
-function getAchatsMasterData() {
-  try {
-    const ss = SpreadsheetApp.openById(FILE_IDS.achats);
-    const sheets = ss.getSheets();
-    
-    let totalAchats = 0;
-    const projData = {};
-    const byCategory = {};
-    const bySupplier = {};
-    const allAchatsData = [];
-    
-    sheets.forEach(sheet => {
-      const name = sheet.getName();
-      if (name !== "RECAPITULATIF" && name !== "suivi trésorerie") {
-        const data = sheet.getDataRange().getValues();
-        if(data.length > 0) {
-           const headers = data[0];
-           const montantIndex = headers.indexOf("Montant (Ar)") !== -1 ? headers.indexOf("Montant (Ar)") : 3;
-           const catIndex = headers.indexOf("Catégorie") !== -1 ? headers.indexOf("Catégorie") : 2;
-           const supplierIndex = headers.indexOf("Collaborateur Assigné") !== -1 ? headers.indexOf("Collaborateur Assigné") : (headers.indexOf("Libellé / Fournisseur") !== -1 ? headers.indexOf("Libellé / Fournisseur") : 1);
-           const pIdx = headers.indexOf("Projet");
-           
-           for(let i=1; i<data.length; i++) {
-             allAchatsData.push(data[i]);
-             const montant = parseFloat(data[i][montantIndex]) || 0;
-             if (montant > 0) {
-               totalAchats += montant;
-               
-               // Analysis
-               const cat = data[i][catIndex] ? String(data[i][catIndex]).trim() : "Non catégorisé";
-               const supplier = data[i][supplierIndex] ? String(data[i][supplierIndex]).trim() : "Inconnu";
-               
-               if (!byCategory[cat]) byCategory[cat] = 0;
-               byCategory[cat] += montant;
-               
-               if (!bySupplier[supplier]) bySupplier[supplier] = 0;
-               bySupplier[supplier] += montant;
-               
-               // Projects
-               if (pIdx !== -1) {
-                  let rowProj = String(data[i][pIdx]).trim().toLowerCase();
-                  if (rowProj) {
-                      if (!projData[rowProj]) projData[rowProj] = { fournisseurs: {}, totalCost: 0 };
-                      if (supplier !== "Inconnu") projData[rowProj].fournisseurs[supplier] = true;
-                      projData[rowProj].totalCost += montant;
-                  }
-               }
-             }
-           }
         }
-      }
-    });
-    
-    return {
-      data: allAchatsData,
-      total: totalAchats,
-      projData: projData,
-      analysis: { byCategory, bySupplier }
-    };
-  } catch(e) { 
-    return { data: [], total: 0, projData: {}, analysis: { byCategory: {}, bySupplier: {} } }; 
-  }
-}
 
-function getProjectDetail(id) {
-  try {
-    const fss = SpreadsheetApp.openById(FILE_IDS.facturation);
-    const fs = fss.getSheetByName("Base facturation");
-    const fdata = fs.getDataRange().getValues();
-    let projName = "";
-    let invoice = null;
-    for(let i=1; i<fdata.length; i++){
-      if(fdata[i][0] === id) {
-        invoice = fdata[i];
-        projName = fdata[i][7] || ("Vente " + id);
-        break;
-      }
-    }
+        function showLoading(show) { document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none'; }
 
-    if (!invoice) return { invoices: [], costs: [] };
+        function showSection(id, el) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('[id^="modal-"]').forEach(m => m.classList.add('hidden'));
+            document.getElementById('section-' + id).classList.remove('hidden');
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            if (el) el.classList.add('active');
+            if (window.innerWidth < 1024) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+                document.getElementById('sidebar-backdrop').classList.add('hidden');
+            }
+            if (id === 'collaborateurs') fetchCompanies();
+            if (id === 'workflow') fetchWorkflow();
+            if (id === 'stocks') fetchStocks();
+            if (id === 'finance') fetchFinance();
+            if (id === 'investissements') fetchInvestments();
+        }
 
-    // Chercher les coûts dans Achats qui correspondent au projet
-    const ass = SpreadsheetApp.openById(FILE_IDS.achats);
-    const asheets = ass.getSheets();
-    const costs = [];
-    asheets.forEach(sheet => {
-      const name = sheet.getName();
-      if(name !== "RECAPITULATIF" && name !== "suivi trésorerie") {
-        const adata = sheet.getDataRange().getValues();
-        if (adata.length > 0) {
-            const h = adata[0];
-            const pIdx = h.indexOf("Projet");
-            for(let j=1; j<adata.length; j++){
-               const row = adata[j];
-               const rowProj = pIdx !== -1 ? String(row[pIdx]).trim() : "";
-               if (rowProj && projName && rowProj.toLowerCase() === projName.toLowerCase()) {
-                   costs.push([row[0], row[6] || row[2], row[2], row[3] || 0]); // Date, Detail/Categorie, Categorie, Montant
-               }
+        function openModal(id) { 
+            document.querySelectorAll('[id^="modal-"]').forEach(m => m.classList.add('hidden'));
+            document.getElementById('modal-' + id).classList.remove('hidden'); 
+        }
+        function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); }
+
+        let globalDataCache = null;
+
+        function renderDashboardWidgets(workflowData) {
+            // Top Projects
+            const topProjects = workflowData.slice().sort((a,b) => (b.revenue - b.cost) - (a.revenue - a.cost)).slice(0,3);
+            const projHtml = topProjects.map(p => `
+                <div class="bg-slate-800/50 p-3 rounded-xl flex justify-between items-center border border-slate-700/50">
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-bold text-blue-300 truncate w-24">${p.project}</p>
+                        <p class="text-[10px] text-slate-400 truncate w-24">${p.client}</p>
+                    </div>
+                    <span class="text-xs font-bold ${(p.revenue - p.cost) >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${(p.revenue - p.cost).toLocaleString()} Ar</span>
+                </div>
+            `).join('');
+            document.getElementById('dashboard-top-projects').innerHTML = projHtml || '<p class="text-xs text-slate-500">Aucun projet actif</p>';
+            
+            // Alerts
+            let alertsHtml = '';
+            const unpaid = workflowData.filter(p => p.status && p.status.includes('En attente'));
+            if (unpaid.length > 0) {
+                alertsHtml = unpaid.map(u => `
+                <div class="bg-rose-500/10 p-3 rounded-xl flex items-center gap-3 border border-rose-500/20 mb-2">
+                    <i class="fas fa-exclamation-circle text-rose-500 text-lg"></i>
+                    <div class="overflow-hidden flex-1">
+                        <p class="text-xs font-bold text-rose-400 truncate">Projet ${u.project}</p>
+                        <p class="text-[10px] text-slate-300 truncate">Client : ${u.client || 'Inconnu'} - <span class="font-bold text-amber-400">${(u.revenue || 0).toLocaleString()} Ar</span></p>
+                        <p class="text-[9px] text-slate-400 italic mt-0.5">Échéance : ${u.dueDate ? new Date(u.dueDate).toLocaleDateString() : 'Non spécifiée'}</p>
+                    </div>
+                </div>`).join('');
+            }
+            
+            document.getElementById('dashboard-alerts').innerHTML = alertsHtml || '<p class="text-xs text-emerald-500"><i class="fas fa-check-circle"></i> Tout est au vert ! Aucun retard.</p>';
+        }
+
+        function renderProjectsList(workflowData) {
+            // Get all projects that are not fully paid/finished
+            const activeProjects = workflowData.filter(p => p.project && !p.status.includes('Payé'));
+            
+            // Deduplicate project names (just in case)
+            const uniqueProjects = [];
+            const projectMap = new Map();
+            activeProjects.forEach(p => {
+                if (!projectMap.has(p.project.toLowerCase())) {
+                    projectMap.set(p.project.toLowerCase(), p);
+                    uniqueProjects.push(p);
+                }
+            });
+
+            const optionsHtml = `<option value="">Sélectionnez un Projet en cours...</option>` + 
+                uniqueProjects.map(p => `<option value="${p.project}">${p.project} (Client: ${p.client})</option>`).join('');
+
+            const expProj = document.getElementById('expense-project');
+            if(expProj) expProj.innerHTML = optionsHtml;
+
+            const invProj = document.getElementById('invoice-project');
+            if(invProj) invProj.innerHTML = optionsHtml;
+        }
+
+        function autoFillInvoiceData() {
+            const projectSelect = document.getElementById('invoice-project');
+            const projectName = projectSelect.value;
+            
+            const amountInput = document.getElementById('invoice-amount');
+            const costInput = document.getElementById('invoice-cost');
+            const profitDisplay = document.getElementById('invoice-profit');
+            
+            if (!projectName || !globalDataCache || !globalDataCache.workflow) {
+                amountInput.value = '';
+                costInput.value = '';
+                profitDisplay.textContent = '0 Ar';
+                return;
+            }
+
+            // Find the project in workflow data
+            const projectData = globalDataCache.workflow.find(p => p.project === projectName);
+            if (projectData) {
+                const revenue = projectData.revenue || 0;
+                const cost = projectData.cost || 0;
+                const profit = revenue - cost;
+
+                amountInput.value = revenue;
+                costInput.value = cost.toLocaleString() + ' Ar';
+                profitDisplay.textContent = profit.toLocaleString() + ' Ar';
+                
+                if (profit >= 0) {
+                    profitDisplay.className = 'text-xl font-bold text-emerald-400';
+                } else {
+                    profitDisplay.className = 'text-xl font-bold text-rose-400';
+                }
             }
         }
-      }
-    });
 
-    const linesSheet = fss.getSheetByName("Lignes Factures");
-    let invoiceLines = [];
-    if (linesSheet) {
-       const ldata = linesSheet.getDataRange().getValues();
-       for(let k=1; k<ldata.length; k++) {
-          if (ldata[k][0] === id) {
-             invoiceLines.push(ldata[k]);
-          }
-       }
-    }
-    if (invoiceLines.length === 0) {
-       invoiceLines.push([id, "Prestation Globale (" + projName + ")", 1, "Ens", invoice[5], invoice[5]]);
-    }
+        function renderCompaniesList(companiesData, investmentsData = []) {
+            const clients = companiesData.filter(c => c.type && c.type.toLowerCase().includes('client'));
+            const fournisseurs = companiesData.filter(c => c.type && c.type.toLowerCase().includes('fournisseur'));
+            
+            // Collecte des investisseurs (Base clients + Historique)
+            const investisseursMap = new Map();
+            companiesData.filter(c => c.type && c.type.toLowerCase().includes('investisseur')).forEach(c => investisseursMap.set(c.name, c));
+            
+            if (investmentsData && investmentsData.length > 0) {
+                investmentsData.forEach(inv => {
+                    if (inv.investor && !investisseursMap.has(inv.investor)) {
+                        investisseursMap.set(inv.investor, { name: inv.investor });
+                    }
+                });
+            }
+            const investisseurs = Array.from(investisseursMap.values());
 
-    return {
-       invoices: [[invoice[0], invoice[1], invoice[2], invoice[3] || 0, invoice[4] || 0, invoice[5], invoice[6], invoice[7], invoice[8]]],
-       lines: invoiceLines,
-       costs: costs
-    };
-  } catch(e) { return { invoices: [], lines: [], costs: [] }; }
-}
+            const invCollab = document.getElementById('invoice-collab');
+            if(invCollab) invCollab.innerHTML = `<option value="">Sélectionnez un Client...</option>` + clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            
+            const profCollab = document.getElementById('proforma-collab');
+            if(profCollab) profCollab.innerHTML = `<option value="">Sélectionnez un Client...</option>` + clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
 
-function getFullFinance() {
-  try {
-    const ss = SpreadsheetApp.openById(FILE_IDS.tresorerie);
-    const sheet = ss.getSheetByName("suivi trésorerie");
-    if(!sheet) return { history: [] };
-    const data = sheet.getDataRange().getValues();
-    const res = [];
-    const headers = data[0] || [];
-    
-    // Regex-based header detection
-    const findIndex = (regex, fallback) => {
-      const idx = headers.findIndex(h => regex.test(String(h).toLowerCase()));
-      return idx !== -1 ? idx : fallback;
-    };
+            const expCollab = document.getElementById('expense-collab');
+            if(expCollab) expCollab.innerHTML = `<option value="">Sélectionnez un Fournisseur...</option>` + fournisseurs.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            
+            const investCollab = document.getElementById('investment-collab');
+            if(investCollab) investCollab.innerHTML = `<option value="">Sélectionnez un Investisseur...</option>` + investisseurs.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+        }
 
-    const idIdx = findIndex(/^id$/i, -1);
-    const dateIdx = findIndex(/date/i, idIdx !== -1 ? 1 : 0);
-    const libIdx = findIndex(/libell|détail|op[eé]ration/i, idIdx !== -1 ? 2 : 1);
-    const catIdx = findIndex(/cat[eé]gorie|type/i, idIdx !== -1 ? 3 : 2);
-    const inIdx = findIndex(/entr[eé]e|recette|in/i, idIdx !== -1 ? 4 : 3);
-    const outIdx = findIndex(/sortie|achat|d[eé]pense|out/i, idIdx !== -1 ? 5 : 4);
-    const balIdx = findIndex(/solde/i, idIdx !== -1 ? 6 : 5);
+        async function initGlobalData() {
+            showLoading(true);
+            const month = document.getElementById('period-selector').value;
+            const cb = "cb_all_" + Date.now();
+            window[cb] = function (data) {
+                globalDataCache = data;
+                
+                // 1. Dashboard
+                const dash = data.dashboard;
+                document.getElementById('kpi-revenue').textContent = (dash.kpis.revenue || 0).toLocaleString() + " Ar";
+                document.getElementById('kpi-pending').textContent = (dash.kpis.pending || 0).toLocaleString() + " Ar";
+                document.getElementById('kpi-expenses').textContent = (dash.kpis.expenses || 0).toLocaleString() + " Ar";
+                document.getElementById('kpi-cash').textContent = (dash.kpis.cash || 0).toLocaleString() + " Ar";
+                
+                const profit = (dash.kpis.revenue || 0) - (dash.kpis.expenses || 0);
+                const kpiProfit = document.getElementById('kpi-profit');
+                kpiProfit.textContent = profit.toLocaleString() + " Ar";
+                if (profit >= 0) {
+                    kpiProfit.classList.remove('text-rose-500');
+                    kpiProfit.classList.add('text-emerald-400');
+                } else {
+                    kpiProfit.classList.remove('text-emerald-400');
+                    kpiProfit.classList.add('text-rose-500');
+                }
 
-    let soldeCumul = 0;
-    for(let i=1; i<data.length; i++) {
-      if(!data[i][dateIdx]) continue;
-      const inVal = parseFloat(data[i][inIdx]) || 0;
-      const outVal = parseFloat(data[i][outIdx]) || 0;
-      soldeCumul += inVal - outVal;
-      
-      let dVal = data[i][dateIdx];
-      if (dVal instanceof Date) {
-         try { dVal = Utilities.formatDate(dVal, Session.getScriptTimeZone(), "yyyy-MM-dd"); } catch(e) {}
-      }
-      
-      res.push({
-         id: idIdx !== -1 ? data[i][idIdx] : "",
-         date: dVal,
-         label: data[i][libIdx] || "-",
-         category: data[i][catIdx] || "Non catégorisé",
-         in: inVal,
-         out: outVal,
-         balance: soldeCumul
-      });
-    }
-    return { history: res };
-  } catch(e) { return { history: [] }; }
-}
-function getStocksData() { return []; }
+                initChart(dash.cashFlow);
+                if (dash.achatsAnalysis) {
+                    initAchatsAnalysis(dash.achatsAnalysis);
+                }
+                
+                // 2. Widgets & Lists
+                renderDashboardWidgets(data.workflow);
+                
+                companiesDataCache = data.companies || [];
+                renderCompaniesTable();
+                
+                renderCompaniesList(data.companies, data.investments);
+                renderProjectsList(data.workflow);
+                
+                // 3. Tables & Caches
+                workflowDataCache = data.workflow || [];
+                if (typeof renderWorkflowTable === 'function') renderWorkflowTable();
 
-function getConsolidatedData(month, precomputedInvs = null, precomputedAchatsMaster = null, precomputedWf = null) {
-  const invs = precomputedInvs || getInvestmentsData();
-  let totalApports = 0; let totalRetours = 0; let totalSorties = 0;
-  invs.forEach(inv => {
-    if (inv.type && inv.type.includes('Apport')) totalApports += parseFloat(inv.amount) || 0;
-    if (inv.type && inv.type.includes('Retour')) totalRetours += parseFloat(inv.amount) || 0;
-    if (inv.type && inv.type.includes('Sortie')) totalSorties += parseFloat(inv.amount) || 0;
-  });
+                financeDataCache = (data.finance && data.finance.history) ? data.finance.history : [];
+                if (typeof renderFinanceTable === 'function') renderFinanceTable();
 
-  const achatsMaster = precomputedAchatsMaster || getAchatsMasterData();
-  const wf = precomputedWf || getFullWorkflow(achatsMaster.projData);
-  
-  let totalVentes = 0; let ventesEncaissables = 0;
-  wf.forEach(w => {
-    if (w.status && w.status.includes('En attente')) {
-      ventesEncaissables += parseFloat(w.revenue) || 0;
-    } else if (w.status && w.status.includes('Payé')) {
-      totalVentes += parseFloat(w.revenue) || 0;
-    }
-  });
+                if (typeof renderInvestmentsTable === 'function') renderInvestmentsTable(data.investments);
+                if (typeof renderStocksTable === 'function') renderStocksTable(data.stocks);
+                
+                showLoading(false);
+                delete window[cb];
+            };
+            const s = document.createElement("script");
+            s.src = API_URL + "?action=getAllData&month=" + month + "&callback=" + cb;
+            document.body.appendChild(s);
+        }
 
-  // Calcul dynamique des achats réels enregistrés
-  let totalAchats = achatsMaster.total;
-  
-  // Disponibilité = Apports - Achats - Retours - Sorties Diverses + Ventes Payées
-  let cash = totalApports - totalAchats - totalRetours - totalSorties + totalVentes;
+        async function fetchData() {
+            initGlobalData();
+        }
 
-  return {
-    kpis: { revenue: totalVentes, pending: ventesEncaissables, expenses: totalAchats, cash: cash },
-    cashFlow: { labels: ['Jan','Feb','Mar','Apr','May'], revenus: [0,0,0,0,totalVentes], depenses: [0,0,0,0,totalAchats] },
-    achatsAnalysis: achatsMaster.analysis
-  };
-}
+        function fetchCompaniesList() {
+            initGlobalData();
+        }
+
+        function fetchDashboardWidgets() {
+            initGlobalData();
+        }
+
+        let companiesDataCache = [];
+
+        function renderCompaniesTable() {
+            const search = (document.getElementById('company-search')?.value || '').toLowerCase();
+            const filter = (document.getElementById('company-filter')?.value || 'all').toLowerCase();
+
+            const filteredData = companiesDataCache.filter(c => {
+                const searchMatch = String(c.name || '').toLowerCase().includes(search) || 
+                                    (c.contact && String(c.contact).toLowerCase().includes(search));
+                
+                let filterMatch = true;
+                if (filter !== 'all') {
+                    filterMatch = c.type && String(c.type).toLowerCase().includes(filter);
+                }
+
+                return searchMatch && filterMatch;
+            });
+
+            document.getElementById('company-table-body').innerHTML = filteredData.map(c => {
+                let cumulHtml = '';
+                let soldeHtml = '';
+                if (c.type.includes('Investisseur')) {
+                    cumulHtml = c.lastMonth ? `<span class="text-xs text-emerald-400 font-bold">${(c.lastAmount || 0).toLocaleString()} Ar</span><br><span class="text-[10px] text-slate-500">Dernier apport: ${c.lastMonth}</span>` : '0 Ar';
+                    soldeHtml = `<span class="text-xs text-slate-500">-</span>`;
+                } else if (c.type.includes('Client')) {
+                    cumulHtml = `<span class="text-xs text-blue-400 font-bold">${(c.total || 0).toLocaleString()} Ar</span><br><span class="text-[10px] text-slate-500">Total Facturé</span>`;
+                    soldeHtml = `<span class="text-xs ${c.pending > 0 ? 'text-amber-500' : 'text-emerald-500'} font-bold">${(c.pending || 0).toLocaleString()} Ar</span><br><span class="text-[10px] text-slate-500">Reste à encaisser</span>`;
+                } else if (c.type.includes('Fournisseur')) {
+                    cumulHtml = `<span class="text-xs text-rose-400 font-bold">${(c.total || 0).toLocaleString()} Ar</span><br><span class="text-[10px] text-slate-500">Total Achats</span>`;
+                    soldeHtml = `<span class="text-xs text-slate-500 font-bold">-</span><br><span class="text-[10px] text-slate-500">Payé comptant</span>`;
+                }
+
+                return `
+                <tr class="border-t border-slate-800 hover:bg-slate-800/30 transition-colors">
+                    <td class="p-6 font-bold text-blue-400">${c.name}</td>
+                    <td class="p-6 text-xs text-indigo-300 font-bold">${c.type}</td>
+                    <td class="p-6 text-xs text-slate-400">${c.contact || '-'}</td>
+                    <td class="p-6">${cumulHtml}</td>
+                    <td class="p-6">${soldeHtml}</td>
+                    <td class="p-6"><span class="px-2 py-1 rounded bg-slate-800 text-[10px]">${c.status}</span></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function fetchCompanies() {
+            const cb = "cb_c_" + Date.now();
+            window[cb] = function (data) {
+                companiesDataCache = data;
+                renderCompaniesTable();
+                delete window[cb];
+            };
+            const s = document.createElement("script");
+            s.src = API_URL + "?action=getCompanies&callback=" + cb;
+            document.body.appendChild(s);
+        }
+
+        function fetchInvestments() {
+            const cb = "cb_inv_" + Date.now();
+            window[cb] = function (data) {
+                renderInvestmentsTable(data);
+                delete window[cb];
+            };
+            const s = document.createElement("script");
+            s.src = API_URL + "?action=getInvestments&callback=" + cb;
+            document.body.appendChild(s);
+        }
+
+        function renderInvestmentsTable(data) {
+            if(!data) return;
+            let totalInvest = 0, totalOut = 0, totalRet = 0;
+
+            document.getElementById('invest-table-body').innerHTML = data.map(inv => {
+                if (inv.type.includes('Apport')) totalInvest += parseFloat(inv.amount) || 0;
+                if (inv.type.includes('Sortie')) totalOut += parseFloat(inv.amount) || 0;
+                if (inv.type.includes('Retour')) totalRet += parseFloat(inv.amount) || 0;
+
+                let delayStatus = inv.status;
+                if (inv.deadline && new Date(inv.deadline) < new Date() && !inv.status.includes('Payé')) {
+                    delayStatus = "EN RETARD";
+                }
+
+                return `
+                <tr class="border-t border-slate-800">
+                    <td class="p-6 text-xs text-slate-500">${new Date(inv.date).toLocaleDateString()}</td>
+                    <td class="p-6 font-bold text-rose-400">${inv.investor}</td>
+                    <td class="p-6 text-xs">${inv.type}</td>
+                    <td class="p-6 font-bold">${(inv.amount || 0).toLocaleString()} Ar</td>
+                    <td class="p-6 text-xs text-slate-400">${inv.details || '-'}</td>
+                    <td class="p-6 text-xs">${inv.deadline ? new Date(inv.deadline).toLocaleDateString() : '-'}</td>
+                    <td class="p-6"><span class="px-2 py-1 rounded text-[10px] font-bold ${delayStatus === 'EN RETARD' ? 'bg-rose-500/20 text-rose-500' : 'bg-slate-800'}">${delayStatus}</span></td>
+                    <td class="p-6 flex gap-3">
+                        <i onclick="editInvestment('${inv.id}', '${inv.date}', '${inv.investor}', '${inv.type}', ${inv.amount}, '${inv.details || ''}', '${inv.deadline || ''}', '${inv.status}')" class="fas fa-edit text-slate-600 hover:text-blue-500 cursor-pointer btn-action"></i>
+                        <i onclick="deleteRow('tresorerie','Investissements','${inv.id}')" class="fas fa-trash text-slate-600 hover:text-rose-500 cursor-pointer btn-action"></i>
+                    </td>
+                </tr>`;
+            }).join('');
+
+            document.getElementById('kpi-inv-total').textContent = totalInvest.toLocaleString() + " Ar";
+            document.getElementById('kpi-inv-out').textContent = totalOut.toLocaleString() + " Ar";
+            document.getElementById('kpi-inv-return').textContent = totalRet.toLocaleString() + " Ar";
+        }
+
+        async function submitInvoice(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
+            const idFac = "FAC-" + Date.now().toString().slice(-4);
+            const dateVal = e.target[0].value;
+            const collab = document.getElementById('invoice-collab').value;
+            const projet = document.getElementById('invoice-project').value;
+            const montant = parseFloat(document.getElementById('invoice-amount').value) || 0;
+            const echeance = e.target[5].value; // Date d'échéance is the 6th input (index 5)
+
+            const formData = { 
+                action: "addInvoice", 
+                data: {
+                    main: [idFac, dateVal, collab, 0, 0, montant, "En attente", projet, echeance],
+                    lines: [[idFac, "Prestation Globale (" + projet + ")", 1, "Ens", montant, montant]]
+                }
+            };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('invoice'); fetchData(); fetchWorkflow(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer la Vente"; }
+        }
+
+        function calcProformaLine(elem) {
+            const parent = elem.closest('.proforma-line');
+            const inputs = parent.querySelectorAll('input');
+            const qte = parseFloat(inputs[1].value) || 0;
+            const pu = parseFloat(inputs[3].value) || 0;
+            const total = qte * pu;
+            inputs[4].value = total;
+            updateProformaTotal();
+        }
+
+        async function submitProforma(e) {
+            e.preventDefault();
+            const lines = document.querySelectorAll('.proforma-line');
+            let totalAmount = 0;
+            let linesArr = [];
+            const idProf = "PROF-" + Date.now().toString().slice(-4);
+            lines.forEach(l => {
+                const inputs = l.querySelectorAll('input');
+                const detail = inputs[0].value;
+                const qte = parseFloat(inputs[1].value) || 0;
+                const unit = inputs[2].value;
+                const pu = parseFloat(inputs[3].value) || 0;
+                const tot = parseFloat(inputs[4].value) || 0;
+                totalAmount += tot;
+                linesArr.push([idProf, detail, qte, unit, pu, tot]);
+            });
+            if (totalAmount <= 0) { alert("Veuillez saisir un montant valide."); return; }
+
+            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
+            const formData = { 
+                action: "addInvoice", 
+                data: {
+                    main: [idProf, e.target[0].value, e.target[1].value, 0, 0, totalAmount, "Proforma", e.target[2].value, ""],
+                    lines: linesArr
+                }
+            };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('proforma'); fetchData(); fetchWorkflow(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer le Proforma"; }
+        }
+
+        function updateProformaTotal() {
+            let t = 0;
+            document.querySelectorAll('.proforma-line').forEach(l => {
+                t += parseFloat(l.querySelectorAll('input')[4].value) || 0;
+            });
+            document.getElementById('proforma-total-display').innerText = t.toLocaleString() + ' Ar';
+        }
+
+        function addProformaLine() {
+            const container = document.getElementById('proforma-lines');
+            const c = document.createElement('div');
+            c.className = 'proforma-line grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-900/40 p-3 rounded-xl sm:bg-transparent sm:p-0 border border-slate-800/50 sm:border-none mt-2';
+            c.innerHTML = `
+                <input type="text" placeholder="Détail (ex: Prestation A)" required class="sm:col-span-4 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm w-full">
+                <input type="number" placeholder="Qté" oninput="calcProformaLine(this)" required class="sm:col-span-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm w-full">
+                <input type="text" placeholder="Unité (ex: m2, Ens)" required class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm w-full">
+                <input type="number" placeholder="P.U (Ar)" oninput="calcProformaLine(this)" required class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm w-full">
+                <div class="flex sm:col-span-3 items-center gap-2 w-full justify-between sm:justify-end">
+                    <span class="sm:hidden text-xs font-bold text-slate-400">Total:</span>
+                    <input type="text" placeholder="Total (Ar)" readonly class="flex-1 sm:w-full bg-indigo-950/50 p-3 rounded-lg border border-indigo-800 text-indigo-300 font-bold text-sm text-right">
+                    <button type="button" onclick="if(document.querySelectorAll('.proforma-line').length>1) { this.closest('.proforma-line').remove(); updateProformaTotal(); }" class="text-rose-500/50 hover:text-rose-500 p-2 text-center"><i class="fas fa-times"></i></button>
+                </div>
+            `;
+            container.appendChild(c);
+        }
+
+        function calcExpenseLine(elem) {
+            const parent = elem.closest('.expense-line');
+            const inputs = parent.querySelectorAll('input');
+            const qte = parseFloat(inputs[1].value) || 0;
+            const pu = parseFloat(inputs[3].value) || 0;
+            const total = qte * pu;
+            inputs[4].value = total;
+            updateExpenseTotal();
+        }
+
+        function updateExpenseTotal() {
+            let t = 0;
+            document.querySelectorAll('.expense-line').forEach(l => {
+                t += parseFloat(l.querySelectorAll('input')[4].value) || 0;
+            });
+            const display = document.getElementById('expense-total-display');
+            if (display) display.textContent = t.toLocaleString() + " Ar";
+        }
+
+        function addExpenseLine() {
+            const container = document.getElementById('expense-lines');
+            const row = document.createElement('div');
+            row.className = 'expense-line grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-900/40 p-3 rounded-xl sm:bg-transparent sm:p-0 border border-slate-800/50 sm:border-none mt-2';
+            row.innerHTML = `
+                <input type="text" placeholder="Détail (ex: Peinture)" required class="sm:col-span-4 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                <input type="number" placeholder="Qté" oninput="calcExpenseLine(this)" required class="sm:col-span-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                <input type="text" placeholder="Unité (ex: Pot, m2)" required class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                <input type="number" placeholder="P.U (Ar)" oninput="calcExpenseLine(this)" required class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                <div class="flex sm:col-span-3 items-center gap-2 w-full justify-between sm:justify-end">
+                    <span class="sm:hidden text-xs font-bold text-slate-400">Total:</span>
+                    <input type="text" placeholder="Total (Ar)" readonly class="flex-1 sm:w-full bg-amber-950/50 p-3 rounded-lg border border-amber-800 text-amber-300 font-bold text-sm text-right">
+                    <button type="button" onclick="if(document.querySelectorAll('.expense-line').length>1) { this.closest('.expense-line').remove(); updateExpenseTotal(); }" class="text-rose-500/50 hover:text-rose-500 p-2 text-center"><i class="fas fa-times"></i></button>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        async function submitExpense(e) {
+            e.preventDefault();
+            const currentCash = parseFloat(document.getElementById('kpi-cash').textContent.replace(/[^0-9.-]+/g,"")) || 0;
+            
+            const lines = document.querySelectorAll('.expense-line');
+            let totalAmount = 0;
+            let rowsData = [];
+            
+            const dateAchat = e.target[0].value;
+            const monthAchat = e.target[1].value;
+            const collabAchat = document.getElementById('expense-collab').value;
+            const projetAchat = document.getElementById('expense-project').value;
+            
+            lines.forEach(line => {
+                const inputs = line.querySelectorAll('input');
+                const detail = inputs[0].value;
+                const qte = parseFloat(inputs[1].value) || 0;
+                const unit = inputs[2].value;
+                const pu = parseFloat(inputs[3].value) || 0;
+                const tot = parseFloat(inputs[4].value) || 0;
+                totalAmount += tot;
+                
+                const detailStr = `${detail} (${qte} ${unit} x ${pu.toLocaleString()} Ar)`;
+                
+                rowsData.push([
+                    dateAchat,
+                    collabAchat,
+                    "Achat Opérationnel",
+                    tot,
+                    "Espèces",
+                    "Payé",
+                    detailStr,
+                    collabAchat,
+                    "",
+                    projetAchat,
+                    qte,
+                    unit,
+                    pu
+                ]);
+            });
+
+            if (totalAmount > currentCash) {
+                alert("Erreur : Fonds insuffisants. L'achat total de " + totalAmount.toLocaleString() + " Ar dépasse votre disponibilité actuelle de " + currentCash.toLocaleString() + " Ar.");
+                return;
+            }
+
+            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
+            const formData = { 
+                action: "addExpense", 
+                month: monthAchat,
+                data: rowsData 
+            };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('expense'); fetchData(); } catch(err) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer l'Achat"; }
+        }
+
+        async function submitCash(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button'); btn.innerHTML = "...";
+            const formData = { action: "addCash", data: ["CSH-" + Date.now().toString().slice(-4), e.target[0].value, e.target[1].value, e.target[2].value, parseFloat(e.target[3].value) || 0, parseFloat(e.target[4].value) || 0, 0] };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('cash'); fetchFinance(); fetchData(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Valider l'Opération"; }
+        }
+
+        async function submitCollaborator(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button'); btn.innerHTML = "...";
+            const formData = { action: "addCollaborator", data: [e.target[0].value, e.target[1].value, e.target[2].value] };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('collaborator'); fetchCompaniesList(); fetchCompanies(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Ajouter Collaborateur"; }
+        }
+
+        async function submitInvestment(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
+            const formData = {
+                action: "addInvestment",
+                data: [
+                    "INV-" + Date.now().toString().slice(-4), // ID
+                    e.target[0].value, // Date
+                    e.target[2].value, // Investisseur
+                    e.target[1].value, // Type
+                    parseFloat(e.target[3].value) || 0, // Montant
+                    "", // Details vide
+                    "", // Echéance vide
+                    "En cours" // Statut
+                ]
+            };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('investment'); fetchInvestments(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Valider l'Investissement"; }
+        }
+
+        // Rest of unchanged UI logic functions
+        async function updateStatus(file, sheet, id, newStatus, colIndex) {
+            showLoading(true);
+            const params = { action: "updateStatus", file, sheet, id, newStatus, colIndex };
+            try {
+                await fetch(API_URL, { method: 'POST', body: JSON.stringify(params) });
+                if (sheet === 'Base facturation') fetchWorkflow();
+                if (sheet === 'suivi trésorerie') fetchFinance();
+                if (sheet === 'Investissements') fetchInvestments();
+                fetchData();
+            } catch (e) { alert("Erreur de synchronisation"); }
+            finally { showLoading(false); }
+        }
+
+        async function deleteRow(file, sheet, id) {
+            if (!confirm("Supprimer définitivement cette ligne du fichier Excel ?")) return;
+            showLoading(true);
+            const params = { action: "deleteRow", file, sheet, id };
+            try {
+                await fetch(API_URL, { method: 'POST', body: JSON.stringify(params) });
+                fetchData();
+                showSection(document.querySelector('.sidebar-item.active').getAttribute('onclick').match(/'([^']+)'/)[1]);
+            } catch (e) { alert("Erreur"); }
+            finally { showLoading(false); }
+        }
+
+        async function markAsPaid(id, currentStatus, project, amount) {
+            if (currentStatus === 'Payé') {
+                alert("Cette facture est déjà marquée comme payée.");
+                return;
+            }
+            if (currentStatus === 'Proforma') {
+                alert("Impossible de payer un Proforma. Créez d'abord une Vente officielle.");
+                return;
+            }
+            if (!confirm(`Confirmer le paiement de ${amount.toLocaleString()} Ar pour la facture ${id} ?\n\nCela va automatiquement l'ajouter à votre Trésorerie.`)) return;
+            
+            showLoading(true);
+            const statusParams = { action: "updateStatus", file: 'facturation', sheet: 'Base facturation', id: id, status: 'Payé', colIndex: 6 };
+            
+            const d = new Date();
+            const dateStr = d.toISOString().split('T')[0];
+            const cashData = [
+                "CSH-" + Date.now().toString().slice(-4),
+                dateStr,
+                "Paiement Facture " + id + " (" + project + ")",
+                "Encaissement Client",
+                amount,
+                0,
+                0
+            ];
+            const cashParams = { action: "addCash", data: cashData };
+
+            try {
+                await fetch(API_URL, { method: 'POST', body: JSON.stringify(statusParams) });
+                await fetch(API_URL, { method: 'POST', body: JSON.stringify(cashParams) });
+                fetchData(); 
+                fetchWorkflow();
+            } catch (e) { alert("Erreur lors de l'enregistrement du paiement"); }
+            finally { showLoading(false); }
+        }
+
+        function openExpenseNormal() {
+            openModal('expense');
+            const projInput = document.getElementById('expense-project');
+            if (projInput) {
+                projInput.value = "";
+                projInput.removeAttribute('readonly');
+                projInput.classList.remove('bg-slate-800', 'text-slate-400');
+            }
+        }
+
+        function quickExpense(proj) {
+            openModal('expense');
+            const projInput = document.getElementById('expense-project');
+            if (projInput) {
+                projInput.value = proj;
+                projInput.setAttribute('readonly', true);
+                projInput.classList.add('bg-slate-800', 'text-slate-400');
+            }
+        }
+
+        function editWorkflow(id, date, client, project, amount, dueDate) {
+            openModal('edit-workflow');
+            document.getElementById('edit-w-id').value = id;
+            if (date) {
+                try { document.getElementById('edit-w-date').value = new Date(date).toISOString().split('T')[0]; } catch(e){}
+            }
+            document.getElementById('edit-w-client').value = client || '';
+            document.getElementById('edit-w-project').value = project || '';
+            document.getElementById('edit-w-amount').value = parseFloat(amount) || 0;
+            if (dueDate) {
+                try { document.getElementById('edit-w-duedate').value = new Date(dueDate).toISOString().split('T')[0]; } catch(e){}
+            }
+        }
+
+        async function submitEditWorkflow(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
+            const id = document.getElementById('edit-w-id').value;
+            const dataObj = {
+                "Date": document.getElementById('edit-w-date').value,
+                "Client": document.getElementById('edit-w-client').value,
+                "Projet": document.getElementById('edit-w-project').value,
+                "Montant TTC": parseFloat(document.getElementById('edit-w-amount').value) || 0,
+                "Echéance": document.getElementById('edit-w-duedate').value
+            };
+            const formData = { action: "editEntry", file: "facturation", sheet: "Base facturation", id: id, data: dataObj };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('edit-workflow'); fetchData(); fetchWorkflow(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer les Modifications"; }
+        }
+
+        function editInvestment(id, date, investor, type, amount, details, deadline, status) {
+            openModal('edit-investment');
+            document.getElementById('edit-inv-id').value = id;
+            if (date) {
+                try { document.getElementById('edit-inv-date').value = new Date(date).toISOString().split('T')[0]; } catch(e){}
+            }
+            document.getElementById('edit-inv-investor').value = investor || '';
+            document.getElementById('edit-inv-type').value = type || 'Apport (Entrée)';
+            document.getElementById('edit-inv-amount').value = parseFloat(amount) || 0;
+            document.getElementById('edit-inv-details').value = details || '';
+            if (deadline) {
+                try { document.getElementById('edit-inv-deadline').value = new Date(deadline).toISOString().split('T')[0]; } catch(e){}
+            }
+            document.getElementById('edit-inv-status').value = status || 'Actif';
+        }
+
+        async function submitEditInvestment(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
+            const id = document.getElementById('edit-inv-id').value;
+            const statusVal = document.getElementById('edit-inv-status').value;
+            const amountVal = parseFloat(document.getElementById('edit-inv-amount').value) || 0;
+            const investorVal = document.getElementById('edit-inv-investor').value;
+            
+            const dataObj = {
+                "Date": document.getElementById('edit-inv-date').value,
+                "Investisseur": investorVal,
+                "Type": document.getElementById('edit-inv-type').value,
+                "Montant": amountVal,
+                "Détails / Notes": document.getElementById('edit-inv-details').value,
+                "Échéance de retour": document.getElementById('edit-inv-deadline').value,
+                "Statut": statusVal
+            };
+            
+            const formData = { action: "editEntry", file: "tresorerie", sheet: "Investissements", id: id, data: dataObj };
+            
+            try { 
+                await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); 
+                
+                if (statusVal === 'Payé (Remboursé)') {
+                    if (confirm(`Voulez-vous enregistrer automatiquement le remboursement de ${amountVal.toLocaleString()} Ar à ${investorVal} dans votre Trésorerie ?`)) {
+                        const d = new Date();
+                        const dateStr = d.toISOString().split('T')[0];
+                        const cashData = [
+                            "CSH-" + Date.now().toString().slice(-4),
+                            dateStr,
+                            "Remboursement Investissement " + id + " (" + investorVal + ")",
+                            "Remboursement Investisseur",
+                            0,
+                            amountVal,
+                            0
+                        ];
+                        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "addCash", data: cashData }) });
+                    }
+                }
+                
+                closeModal('edit-investment'); 
+                fetchData(); 
+                fetchInvestments(); 
+            } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer les Modifications"; }
+        }
+
+        let workflowDataCache = [];
+
+        function renderWorkflowTable() {
+            const search = (document.getElementById('workflow-search')?.value || '').toLowerCase();
+            const filter = document.getElementById('workflow-filter')?.value || 'all';
+
+            const filteredData = workflowDataCache.filter(w => {
+                // Search filter
+                const searchMatch = w.project.toLowerCase().includes(search) || 
+                                    (w.client && w.client.toLowerCase().includes(search));
+                
+                // Status filter
+                let statusMatch = true;
+                if (filter === 'proforma') {
+                    statusMatch = w.phaseVente.toLowerCase().includes('proforma');
+                } else if (filter === 'vente') {
+                    statusMatch = !w.phaseVente.toLowerCase().includes('proforma');
+                }
+                
+                return searchMatch && statusMatch;
+            });
+
+            document.getElementById('workflow-table-body').innerHTML = filteredData.map(w => `
+                <tr class="border-t border-slate-800">
+                    <td class="p-6 font-mono text-xs text-blue-400">${w.id}</td>
+                    <td class="p-6 font-bold cursor-pointer hover:text-blue-500" onclick="viewProjectDetail('${w.id}')">${w.project}</td>
+                    <td class="p-6 text-xs text-slate-300">${w.client || '-'}</td>
+                    <td class="p-6 text-xs text-slate-400">${w.fournisseurs || '-'}</td>
+                    <td class="p-6"><span class="text-[10px] bg-slate-800 px-2 py-1 rounded">${w.phaseAchat}</span><button onclick="quickExpense('${w.project}')" class="bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-white px-2 py-1 rounded font-bold text-[10px] ml-2 transition-all">+ Dépense</button></td>
+                    <td class="p-6">
+                        <button onclick="markAsPaid('${w.id}', '${w.phaseVente}', '${w.project}', ${w.revenue})" class="text-[10px] ${w.phaseVente === 'Payé' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'} px-2 py-1 rounded font-bold">
+                            ${w.phaseVente}
+                        </button>
+                    </td>
+                    <td class="p-6 text-emerald-400 font-bold">${(w.margin || 0).toLocaleString()} Ar</td>
+                    <td class="p-6 flex gap-3">
+                        <i onclick="editWorkflow('${w.id}', '${w.date || ''}', '${w.client || ''}', '${w.project}', ${w.revenue}, '${w.dueDate || ''}')" class="fas fa-edit text-slate-600 hover:text-blue-500 cursor-pointer btn-action"></i>
+                        <i onclick="deleteRow('facturation','Base facturation','${w.id}')" class="fas fa-trash text-slate-600 hover:text-rose-500 cursor-pointer btn-action"></i>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function fetchWorkflow() {
+            const cb = "cb_w_" + Date.now();
+            window[cb] = function (data) {
+                workflowDataCache = data;
+                renderWorkflowTable();
+                delete window[cb];
+            };
+            const s = document.createElement("script");
+            s.src = API_URL + "?action=getWorkflow&callback=" + cb;
+            document.body.appendChild(s);
+        }
+
+        function generateInvoicePDF(id, client, project, date, dueDate, lines, total, type) {
+            const div = document.createElement('div');
+            div.id = 'invoice-pdf-container';
+            div.className = 'p-10 bg-white text-slate-800 font-sans w-[800px] mx-auto';
+            div.style.color = '#1e293b';
+            
+            let linesHtml = lines.map(l => `
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px 8px; text-align: left;">${l[1]}</td>
+                    <td style="padding: 12px 8px; text-align: center;">${l[2]}</td>
+                    <td style="padding: 12px 8px; text-align: center;">${l[3]}</td>
+                    <td style="padding: 12px 8px; text-align: right;">${parseFloat(l[4]).toLocaleString()} Ar</td>
+                    <td style="padding: 12px 8px; text-align: right; font-weight: bold;">${parseFloat(l[5]).toLocaleString()} Ar</td>
+                </tr>
+            `).join('');
+
+            div.innerHTML = `
+                <!-- Header -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #1e3a8a; padding-bottom: 20px; margin-bottom: 30px;">
+                    <div>
+                        <h1 style="font-size: 28px; font-weight: 800; color: #1e3a8a; margin: 0;">TOTAL CONTROL ERP</h1>
+                        <p style="font-size: 12px; color: #64748b; margin: 4px 0 0 0;">Département Travaux & Ingénierie Financière</p>
+                        <p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">Antananarivo, Madagascar</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <h2 style="font-size: 24px; font-weight: 700; color: #0f172a; margin: 0; text-transform: uppercase;">${type === 'Proforma' ? 'PROFORMA / DEVIS' : 'FACTURE'}</h2>
+                        <p style="font-size: 14px; font-weight: bold; color: #3b82f6; margin: 4px 0 0 0;">N° ${id}</p>
+                        <p style="font-size: 12px; color: #64748b; margin: 8px 0 0 0;">Date : ${new Date(date).toLocaleDateString()}</p>
+                        <p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">Échéance : ${dueDate ? new Date(dueDate).toLocaleDateString() : 'N/A'}</p>
+                    </div>
+                </div>
+
+                <!-- Client & Project Info -->
+                <div style="display: flex; justify-content: space-between; margin-bottom: 40px; background-color: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <div>
+                        <h3 style="font-size: 12px; text-transform: uppercase; color: #64748b; margin: 0 0 8px 0;">Client / Destinataire</h3>
+                        <p style="font-size: 16px; font-weight: bold; color: #0f172a; margin: 0;">${client}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <h3 style="font-size: 12px; text-transform: uppercase; color: #64748b; margin: 0 0 8px 0;">Projet / Dossier</h3>
+                        <p style="font-size: 16px; font-weight: bold; color: #0f172a; margin: 0;">${project}</p>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px; font-size: 14px;">
+                    <thead>
+                        <tr style="background-color: #1e3a8a; color: white;">
+                            <th style="padding: 12px 8px; text-align: left; border-top-left-radius: 6px;">Désignation / Détail</th>
+                            <th style="padding: 12px 8px; text-align: center;">Qté</th>
+                            <th style="padding: 12px 8px; text-align: center;">Unité</th>
+                            <th style="padding: 12px 8px; text-align: right;">P.U (Ar)</th>
+                            <th style="padding: 12px 8px; text-align: right; border-top-right-radius: 6px;">Montant Total (Ar)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${linesHtml}
+                    </tbody>
+                </table>
+
+                <!-- Totals -->
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 50px;">
+                    <div style="width: 350px; background-color: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: #64748b;">
+                            <span>Total HT :</span>
+                            <span>${total.toLocaleString()} Ar</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: #64748b;">
+                            <span>TVA (0%) :</span>
+                            <span>0 Ar</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; border-top: 2px solid #cbd5e1; padding-top: 12px; font-size: 18px; font-weight: bold; color: #1e3a8a;">
+                            <span>NET À PAYER :</span>
+                            <span>${total.toLocaleString()} Ar</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div style="border-top: 1px solid #cbd5e1; padding-top: 20px; text-align: center; font-size: 11px; color: #94a3b8;">
+                    <p style="margin: 0 0 4px 0;">Arrêté la présente facture à la somme de : ${(total).toLocaleString()} Ariary.</p>
+                    <p style="margin: 0;">Conditions de paiement : Paiement à réception ou selon date d'échéance convenue. Merci de votre confiance.</p>
+                </div>
+            `;
+
+            document.body.appendChild(div);
+            
+            const opt = {
+                margin: 10,
+                filename: `${type === 'Proforma' ? 'Proforma' : 'Facture'}_${id}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(div).save().then(() => {
+                document.body.removeChild(div);
+            });
+        }
+
+        function viewProjectDetail(id) {
+            openModal('project-detail-drill');
+            const cont = document.getElementById('project-detail-content-drill');
+            cont.innerHTML = "<div class='flex justify-center p-10'><i class='fas fa-spinner animate-spin text-2xl text-blue-500'></i></div>";
+            const cb = "cb_pd_" + Date.now();
+            window[cb] = function (data) {
+                const inv = data.invoices[0] || [id, new Date(), "Client Inconnu", 0, 0, 0, "Statut", "Projet Inconnu", ""];
+                let totalRevenus = parseFloat(inv[5]) || 0;
+                let totalCouts = 0;
+                
+                const linesHtml = (data.lines || []).map(l => `<div class="bg-slate-900/50 p-3 rounded-xl flex justify-between text-sm"><span>${l[1]} (${l[2]} ${l[3]})</span><span class="font-bold text-emerald-400">${(parseFloat(l[5]) || 0).toLocaleString()} Ar</span></div>`).join('');
+                
+                const coutsHtml = (data.costs || []).map(c => {
+                    totalCouts += (parseFloat(c[3]) || 0);
+                    return `<div class="bg-slate-900/50 p-3 rounded-xl flex justify-between text-sm"><span>${c[1] || 'Achat'}</span><span class="font-bold text-rose-400">-${(c[3] || 0).toLocaleString()} Ar</span></div>`;
+                }).join('');
+
+                cont.innerHTML = `
+                <div class="flex justify-between items-center mb-6 bg-slate-800/40 p-4 rounded-2xl border border-slate-700/50">
+                    <div>
+                        <h4 class="font-bold text-lg text-blue-400">${inv[7] || 'Projet'}</h4>
+                        <p class="text-xs text-slate-400">Client : ${inv[2]} | Statut : <span class="text-amber-400 font-bold">${inv[6]}</span></p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick='generateInvoicePDF(${JSON.stringify(inv[0])}, ${JSON.stringify(inv[2])}, ${JSON.stringify(inv[7])}, ${JSON.stringify(inv[1])}, ${JSON.stringify(inv[8])}, ${JSON.stringify(data.lines || [])}, ${totalRevenus}, ${JSON.stringify(inv[6])})' class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 shadow-lg shadow-blue-500/20 transition-all">
+                            <i class="fas fa-file-pdf"></i> Générer Devis / Facture PDF
+                        </button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <h5 class="text-xs font-bold text-slate-500 uppercase mb-4">Lignes du Devis / Facture</h5>
+                        <div class="space-y-2 mb-4 max-h-60 overflow-y-auto custom-scroll pr-2">${linesHtml || '<p class="text-xs text-slate-500">Aucun détail</p>'}</div>
+                        <div class="border-t border-slate-700 pt-3 flex justify-between">
+                            <span class="font-bold text-sm">Total Facturé</span>
+                            <span class="font-bold text-emerald-400">${totalRevenus.toLocaleString()} Ar</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="text-xs font-bold text-slate-500 uppercase mb-4">Lignes d'achat (Coûts réels)</h5>
+                        <div class="space-y-2 mb-4 max-h-60 overflow-y-auto custom-scroll pr-2">${coutsHtml || '<p class="text-xs text-slate-500">Aucun coût</p>'}</div>
+                        <div class="border-t border-slate-700 pt-3 flex justify-between">
+                            <span class="font-bold text-sm">Total Coûts</span>
+                            <span class="font-bold text-rose-400">-${totalCouts.toLocaleString()} Ar</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 pt-6 border-t border-slate-800 flex justify-between items-center">
+                    <span class="text-slate-400 font-bold uppercase text-xs">Marge Nette du Projet</span>
+                    <span class="text-2xl font-bold ${totalRevenus - totalCouts >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${(totalRevenus - totalCouts).toLocaleString()} Ar</span>
+                </div>`;
+                delete window[cb];
+            };
+            const s = document.createElement("script");
+            s.src = API_URL + "?action=getProjectDetail&id=" + id + "&callback=" + cb;
+            document.body.appendChild(s);
+        }
+
+        function fetchStocks() {
+            const cb = "cb_s_" + Date.now();
+            window[cb] = function (data) {
+                renderStocksTable(data);
+                delete window[cb];
+            };
+            const s = document.createElement("script");
+            s.src = API_URL + "?action=getStocks&callback=" + cb;
+            document.body.appendChild(s);
+        }
+
+        function renderStocksTable(data) {
+            if(!data) return;
+            document.getElementById('stock-table-body').innerHTML = data.map(s => `
+                <tr class="border-t border-slate-800">
+                    <td class="p-6 font-semibold">${s.name}</td>
+                    <td class="p-6 font-bold text-lg">${s.current}</td>
+                    <td class="p-6 text-xs text-slate-500">${s.unit}</td>
+                    <td class="p-6"><span class="px-2 py-1 rounded-md text-[10px] font-bold ${s.current <= s.alert ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}">${s.current <= s.alert ? 'CRITIQUE' : 'OK'}</span></td>
+                    <td class="p-6 flex gap-2">
+                        <button onclick="adjustStock('${s.id}', 1)" class="bg-slate-800 w-8 h-8 rounded-lg">+</button>
+                        <button onclick="adjustStock('${s.id}', -1)" class="bg-slate-800 w-8 h-8 rounded-lg">-</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function adjustStock(id, qty) {
+            showLoading(true);
+            const params = { action: "updateStock", data: { id, qty, type: qty > 0 ? "IN" : "OUT" } };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(params) }); fetchStocks(); }
+            finally { showLoading(false); }
+        }
+
+        let financeDataCache = [];
+
+        function renderFinanceTable() {
+            const search = (document.getElementById('finance-search')?.value || '').toLowerCase();
+            const filter = document.getElementById('finance-filter')?.value || 'all';
+
+            const filteredData = financeDataCache.filter(h => {
+                const searchMatch = (h.label && h.label.toLowerCase().includes(search)) ||
+                                    (h.category && h.category.toLowerCase().includes(search));
+                
+                let filterMatch = true;
+                if (filter === 'in') filterMatch = h.in > 0;
+                if (filter === 'out') filterMatch = h.out > 0;
+
+                return searchMatch && filterMatch;
+            });
+
+            document.getElementById('finance-table-body').innerHTML = filteredData.map(h => `
+                <tr class="border-t border-slate-800 hover:bg-slate-800/30 transition-colors">
+                    <td class="p-6 text-xs text-slate-500">${h.date || '-'}</td>
+                    <td class="p-6 text-xs font-bold text-indigo-400">${h.category || 'Non catégorisé'}</td>
+                    <td class="p-6 font-semibold">${h.label}</td>
+                    <td class="p-6 text-right font-bold text-emerald-400">${h.in > 0 ? '+' + h.in.toLocaleString() + ' Ar' : ''}</td>
+                    <td class="p-6 text-right font-bold text-rose-400">${h.out > 0 ? '-' + h.out.toLocaleString() + ' Ar' : ''}</td>
+                    <td class="p-6 text-right font-bold text-blue-400">${(h.balance || 0).toLocaleString()} Ar</td>
+                    <td class="p-6 text-center"><i onclick="deleteRow('tresorerie','suivi trésorerie','${h.id || ''}')" class="fas fa-trash text-slate-700 hover:text-rose-500 cursor-pointer btn-action transition-all"></i></td>
+                </tr>
+            `).reverse().join('');
+        }
+
+        function fetchFinance() {
+            const cb = "cb_f_" + Date.now();
+            window[cb] = function (data) {
+                financeDataCache = data.history || [];
+                renderFinanceTable();
+                delete window[cb];
+            };
+            const s = document.createElement("script");
+            s.src = API_URL + "?action=getFinance&callback=" + cb;
+            document.body.appendChild(s);
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            const icon = document.getElementById('theme-icon');
+            if (icon) {
+                icon.className = next === 'dark' ? 'fas fa-sun text-yellow text-sm' : 'fas fa-moon text-teal text-sm';
+            }
+            if (mainChart) updateChartTheme(next);
+        }
+
+        function updateChartTheme(theme) {
+            if (!mainChart) return;
+            const isDark = theme === 'dark';
+            const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(77,77,77,0.1)';
+            const textColor = isDark ? '#ffd97d' : '#4d4d4d';
+            
+            mainChart.data.datasets[0].backgroundColor = isDark ? 'rgba(30, 142, 30, 0.1)' : 'rgba(30, 142, 30, 0.15)';
+            mainChart.data.datasets[1].backgroundColor = isDark ? 'rgba(238, 96, 85, 0.1)' : 'rgba(238, 96, 85, 0.15)';
+
+            mainChart.options.plugins.legend.labels.color = textColor;
+            mainChart.options.scales.y.grid.color = gridColor;
+            mainChart.options.scales.y.ticks.color = textColor;
+            mainChart.options.scales.x.ticks.color = textColor;
+            mainChart.update();
+        }
+
+        function initChart(chartData) {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            if (mainChart) mainChart.destroy();
+            
+            const labels = chartData ? chartData.labels : ['Jan','Feb','Mar','Apr','Mai'];
+            const revenus = chartData ? chartData.revenus : [0,0,0,0,0];
+            const depenses = chartData ? chartData.depenses : [0,0,0,0,0];
+
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const isDark = currentTheme === 'dark';
+            const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(77,77,77,0.1)';
+            const textColor = isDark ? '#ffd97d' : '#4d4d4d';
+
+            mainChart = new Chart(ctx, { 
+                type: 'line', 
+                data: { 
+                    labels: labels, 
+                    datasets: [
+                        { 
+                            label: 'Revenus', 
+                            data: revenus, 
+                            borderColor: '#1e8e1e', 
+                            borderWidth: 4, 
+                            fill: true, 
+                            backgroundColor: isDark ? 'rgba(30, 142, 30, 0.1)' : 'rgba(30, 142, 30, 0.15)', 
+                            tension: 0.4, 
+                            pointRadius: 4,
+                            pointBackgroundColor: '#1e8e1e'
+                        },
+                        { 
+                            label: 'Dépenses', 
+                            data: depenses, 
+                            borderColor: '#ee6055', 
+                            borderWidth: 4, 
+                            fill: true, 
+                            backgroundColor: isDark ? 'rgba(238, 96, 85, 0.1)' : 'rgba(238, 96, 85, 0.15)', 
+                            tension: 0.4, 
+                            pointRadius: 4,
+                            pointBackgroundColor: '#ee6055'
+                        }
+                    ] 
+                }, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { display: true, labels: { color: textColor, font: { family: 'Outfit', weight: 'bold' } } } 
+                    }, 
+                    scales: { 
+                        y: { grid: { color: gridColor }, ticks: { color: textColor, callback: value => value.toLocaleString() + ' Ar' } }, 
+                        x: { grid: { display: false }, ticks: { color: textColor } } 
+                    } 
+                } 
+            });
+        }
+
+        function initAchatsAnalysis(analysisData) {
+            if (!analysisData) return;
+            
+            // 1. Dépenses par catégorie (Doughnut Chart)
+            const ctxCat = document.getElementById('categoryChart');
+            if (ctxCat) {
+                if (categoryChart) categoryChart.destroy();
+                
+                const catLabels = Object.keys(analysisData.byCategory);
+                const catValues = Object.values(analysisData.byCategory);
+                
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+                const textColor = currentTheme === 'dark' ? '#ffd97d' : '#4d4d4d';
+                
+                categoryChart = new Chart(ctxCat.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: catLabels,
+                        datasets: [{
+                            data: catValues,
+                            backgroundColor: ['#0b939b', '#e6a817', '#ee6055', '#1e8e1e', '#8b5cf6', '#64748b', '#06b6d4'],
+                            borderWidth: 0,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: {
+                            legend: { 
+                                position: 'right',
+                                labels: { color: textColor, font: { family: 'Outfit', size: 10 }, boxWidth: 12 }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 2. Top Fournisseurs
+            const listEl = document.getElementById('top-suppliers-list');
+            if (listEl) {
+                const suppliers = Object.entries(analysisData.bySupplier)
+                    .map(([name, total]) => ({name, total}))
+                    .sort((a, b) => b.total - a.total)
+                    .slice(0, 5); // Take top 5
+                    
+                if (suppliers.length > 0) {
+                    listEl.innerHTML = suppliers.map((s, index) => `
+                        <div class="bg-slate-800/50 p-3 rounded-xl flex justify-between items-center border border-slate-700/50">
+                            <div class="flex items-center gap-3 overflow-hidden">
+                                <div class="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold text-amber-500">
+                                    #${index + 1}
+                                </div>
+                                <p class="text-xs font-bold text-slate-300 truncate w-32">${s.name}</p>
+                            </div>
+                            <span class="text-xs font-bold text-rose-400">${s.total.toLocaleString()} Ar</span>
+                        </div>
+                    `).join('');
+                } else {
+                    listEl.innerHTML = '<p class="text-xs text-slate-500">Aucune donnée fournisseur</p>';
+                }
+            }
+        }
+
+        window.onload = () => {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const icon = document.getElementById('theme-icon');
+            if (icon) icon.className = savedTheme === 'dark' ? 'fas fa-sun text-yellow text-sm' : 'fas fa-moon text-teal text-sm';
+            fetchData();
+        };
+    </script>
+</body>
+
+</html>
