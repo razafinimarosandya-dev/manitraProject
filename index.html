@@ -699,11 +699,6 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date d'échéance de
-                        paiement</label>
-                    <input id="expense-echeance" type="date"
-                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
                 </div>
                 <button type="submit"
                     class="w-full bg-amber-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-amber-500/20">Enregistrer
@@ -1047,6 +1042,16 @@
                 renderCompaniesList(data.companies, data.investments);
                 renderProjectsList(data.workflow);
                 
+                // 3. Tables & Caches
+                workflowDataCache = data.workflow || [];
+                if (typeof renderWorkflowTable === 'function') renderWorkflowTable();
+
+                financeDataCache = (data.finance && data.finance.history) ? data.finance.history : [];
+                if (typeof renderFinanceTable === 'function') renderFinanceTable();
+
+                if (typeof renderInvestmentsTable === 'function') renderInvestmentsTable(data.investments);
+                if (typeof renderStocksTable === 'function') renderStocksTable(data.stocks);
+                
                 showLoading(false);
                 delete window[cb];
             };
@@ -1096,7 +1101,7 @@
                     soldeHtml = `<span class="text-xs ${c.pending > 0 ? 'text-amber-500' : 'text-emerald-500'} font-bold">${(c.pending || 0).toLocaleString()} Ar</span><br><span class="text-[10px] text-slate-500">Reste à encaisser</span>`;
                 } else if (c.type.includes('Fournisseur')) {
                     cumulHtml = `<span class="text-xs text-rose-400 font-bold">${(c.total || 0).toLocaleString()} Ar</span><br><span class="text-[10px] text-slate-500">Total Achats</span>`;
-                    soldeHtml = `<span class="text-xs ${c.pending > 0 ? 'text-rose-500' : 'text-slate-500'} font-bold">${(c.pending || 0).toLocaleString()} Ar</span><br><span class="text-[10px] text-slate-500">Reste à payer</span>`;
+                    soldeHtml = `<span class="text-xs text-slate-500 font-bold">-</span><br><span class="text-[10px] text-slate-500">Payé comptant</span>`;
                 }
 
                 return `
@@ -1126,43 +1131,47 @@
         function fetchInvestments() {
             const cb = "cb_inv_" + Date.now();
             window[cb] = function (data) {
-                let totalInvest = 0, totalOut = 0, totalRet = 0;
-
-                document.getElementById('invest-table-body').innerHTML = data.map(inv => {
-                    if (inv.type.includes('Apport')) totalInvest += parseFloat(inv.amount) || 0;
-                    if (inv.type.includes('Sortie')) totalOut += parseFloat(inv.amount) || 0;
-                    if (inv.type.includes('Retour')) totalRet += parseFloat(inv.amount) || 0;
-
-                    let delayStatus = inv.status;
-                    if (inv.deadline && new Date(inv.deadline) < new Date() && !inv.status.includes('Payé')) {
-                        delayStatus = "EN RETARD";
-                    }
-
-                    return `
-                    <tr class="border-t border-slate-800">
-                        <td class="p-6 text-xs text-slate-500">${new Date(inv.date).toLocaleDateString()}</td>
-                        <td class="p-6 font-bold text-rose-400">${inv.investor}</td>
-                        <td class="p-6 text-xs">${inv.type}</td>
-                        <td class="p-6 font-bold">${(inv.amount || 0).toLocaleString()} Ar</td>
-                        <td class="p-6 text-xs text-slate-400">${inv.details || '-'}</td>
-                        <td class="p-6 text-xs">${inv.deadline ? new Date(inv.deadline).toLocaleDateString() : '-'}</td>
-                        <td class="p-6"><span class="px-2 py-1 rounded text-[10px] font-bold ${delayStatus === 'EN RETARD' ? 'bg-rose-500/20 text-rose-500' : 'bg-slate-800'}">${delayStatus}</span></td>
-                        <td class="p-6 flex gap-3">
-                            <i onclick="editInvestment('${inv.id}', '${inv.date}', '${inv.investor}', '${inv.type}', ${inv.amount}, '${inv.details || ''}', '${inv.deadline || ''}', '${inv.status}')" class="fas fa-edit text-slate-600 hover:text-blue-500 cursor-pointer btn-action"></i>
-                            <i onclick="deleteRow('tresorerie','Investissements','${inv.id}')" class="fas fa-trash text-slate-600 hover:text-rose-500 cursor-pointer btn-action"></i>
-                        </td>
-                    </tr>`;
-                }).join('');
-
-                document.getElementById('kpi-inv-total').textContent = totalInvest.toLocaleString() + " Ar";
-                document.getElementById('kpi-inv-out').textContent = totalOut.toLocaleString() + " Ar";
-                document.getElementById('kpi-inv-return').textContent = totalRet.toLocaleString() + " Ar";
-
+                renderInvestmentsTable(data);
                 delete window[cb];
             };
             const s = document.createElement("script");
             s.src = API_URL + "?action=getInvestments&callback=" + cb;
             document.body.appendChild(s);
+        }
+
+        function renderInvestmentsTable(data) {
+            if(!data) return;
+            let totalInvest = 0, totalOut = 0, totalRet = 0;
+
+            document.getElementById('invest-table-body').innerHTML = data.map(inv => {
+                if (inv.type.includes('Apport')) totalInvest += parseFloat(inv.amount) || 0;
+                if (inv.type.includes('Sortie')) totalOut += parseFloat(inv.amount) || 0;
+                if (inv.type.includes('Retour')) totalRet += parseFloat(inv.amount) || 0;
+
+                let delayStatus = inv.status;
+                if (inv.deadline && new Date(inv.deadline) < new Date() && !inv.status.includes('Payé')) {
+                    delayStatus = "EN RETARD";
+                }
+
+                return `
+                <tr class="border-t border-slate-800">
+                    <td class="p-6 text-xs text-slate-500">${new Date(inv.date).toLocaleDateString()}</td>
+                    <td class="p-6 font-bold text-rose-400">${inv.investor}</td>
+                    <td class="p-6 text-xs">${inv.type}</td>
+                    <td class="p-6 font-bold">${(inv.amount || 0).toLocaleString()} Ar</td>
+                    <td class="p-6 text-xs text-slate-400">${inv.details || '-'}</td>
+                    <td class="p-6 text-xs">${inv.deadline ? new Date(inv.deadline).toLocaleDateString() : '-'}</td>
+                    <td class="p-6"><span class="px-2 py-1 rounded text-[10px] font-bold ${delayStatus === 'EN RETARD' ? 'bg-rose-500/20 text-rose-500' : 'bg-slate-800'}">${delayStatus}</span></td>
+                    <td class="p-6 flex gap-3">
+                        <i onclick="editInvestment('${inv.id}', '${inv.date}', '${inv.investor}', '${inv.type}', ${inv.amount}, '${inv.details || ''}', '${inv.deadline || ''}', '${inv.status}')" class="fas fa-edit text-slate-600 hover:text-blue-500 cursor-pointer btn-action"></i>
+                        <i onclick="deleteRow('tresorerie','Investissements','${inv.id}')" class="fas fa-trash text-slate-600 hover:text-rose-500 cursor-pointer btn-action"></i>
+                    </td>
+                </tr>`;
+            }).join('');
+
+            document.getElementById('kpi-inv-total').textContent = totalInvest.toLocaleString() + " Ar";
+            document.getElementById('kpi-inv-out').textContent = totalOut.toLocaleString() + " Ar";
+            document.getElementById('kpi-inv-return').textContent = totalRet.toLocaleString() + " Ar";
         }
 
         async function submitInvoice(e) {
@@ -1299,7 +1308,6 @@
             const monthAchat = e.target[1].value;
             const collabAchat = document.getElementById('expense-collab').value;
             const projetAchat = document.getElementById('expense-project').value;
-            const echeanceAchat = document.getElementById('expense-echeance').value;
             
             lines.forEach(line => {
                 const inputs = line.querySelectorAll('input');
@@ -1318,10 +1326,10 @@
                     "Achat Opérationnel",
                     tot,
                     "Espèces",
-                    "En attente",
+                    "Payé",
                     detailStr,
                     collabAchat,
-                    echeanceAchat,
+                    "",
                     projetAchat,
                     qte,
                     unit,
@@ -1765,23 +1773,28 @@
         function fetchStocks() {
             const cb = "cb_s_" + Date.now();
             window[cb] = function (data) {
-                document.getElementById('stock-table-body').innerHTML = data.map(s => `
-                    <tr class="border-t border-slate-800">
-                        <td class="p-6 font-semibold">${s.name}</td>
-                        <td class="p-6 font-bold text-lg">${s.current}</td>
-                        <td class="p-6 text-xs text-slate-500">${s.unit}</td>
-                        <td class="p-6"><span class="px-2 py-1 rounded-md text-[10px] font-bold ${s.current <= s.alert ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}">${s.current <= s.alert ? 'CRITIQUE' : 'OK'}</span></td>
-                        <td class="p-6 flex gap-2">
-                            <button onclick="adjustStock('${s.id}', 1)" class="bg-slate-800 w-8 h-8 rounded-lg">+</button>
-                            <button onclick="adjustStock('${s.id}', -1)" class="bg-slate-800 w-8 h-8 rounded-lg">-</button>
-                        </td>
-                    </tr>
-                `).join('');
+                renderStocksTable(data);
                 delete window[cb];
             };
             const s = document.createElement("script");
             s.src = API_URL + "?action=getStocks&callback=" + cb;
             document.body.appendChild(s);
+        }
+
+        function renderStocksTable(data) {
+            if(!data) return;
+            document.getElementById('stock-table-body').innerHTML = data.map(s => `
+                <tr class="border-t border-slate-800">
+                    <td class="p-6 font-semibold">${s.name}</td>
+                    <td class="p-6 font-bold text-lg">${s.current}</td>
+                    <td class="p-6 text-xs text-slate-500">${s.unit}</td>
+                    <td class="p-6"><span class="px-2 py-1 rounded-md text-[10px] font-bold ${s.current <= s.alert ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}">${s.current <= s.alert ? 'CRITIQUE' : 'OK'}</span></td>
+                    <td class="p-6 flex gap-2">
+                        <button onclick="adjustStock('${s.id}', 1)" class="bg-slate-800 w-8 h-8 rounded-lg">+</button>
+                        <button onclick="adjustStock('${s.id}', -1)" class="bg-slate-800 w-8 h-8 rounded-lg">-</button>
+                    </td>
+                </tr>
+            `).join('');
         }
 
         async function adjustStock(id, qty) {
