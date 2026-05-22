@@ -876,10 +876,22 @@
             document.getElementById('dashboard-alerts').innerHTML = alertsHtml || '<p class="text-xs text-emerald-500"><i class="fas fa-check-circle"></i> Tout est au vert ! Aucun retard.</p>';
         }
 
-        function renderCompaniesList(companiesData) {
-            const clients = companiesData.filter(c => c.type.toLowerCase().includes('client'));
-            const fournisseurs = companiesData.filter(c => c.type.toLowerCase().includes('fournisseur'));
-            const investisseurs = companiesData.filter(c => c.type.toLowerCase().includes('investisseur'));
+        function renderCompaniesList(companiesData, investmentsData = []) {
+            const clients = companiesData.filter(c => c.type && c.type.toLowerCase().includes('client'));
+            const fournisseurs = companiesData.filter(c => c.type && c.type.toLowerCase().includes('fournisseur'));
+            
+            // Collecte des investisseurs (Base clients + Historique)
+            const investisseursMap = new Map();
+            companiesData.filter(c => c.type && c.type.toLowerCase().includes('investisseur')).forEach(c => investisseursMap.set(c.name, c));
+            
+            if (investmentsData && investmentsData.length > 0) {
+                investmentsData.forEach(inv => {
+                    if (inv.investor && !investisseursMap.has(inv.investor)) {
+                        investisseursMap.set(inv.investor, { name: inv.investor });
+                    }
+                });
+            }
+            const investisseurs = Array.from(investisseursMap.values());
 
             const invCollab = document.getElementById('invoice-collab');
             if(invCollab) invCollab.innerHTML = `<option value="">Sélectionnez un Client...</option>` + clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
@@ -926,7 +938,7 @@
                 
                 // 2. Widgets & Lists
                 renderDashboardWidgets(data.workflow);
-                renderCompaniesList(data.companies);
+                renderCompaniesList(data.companies, data.investments);
                 
                 showLoading(false);
                 delete window[cb];
@@ -941,11 +953,11 @@
         }
 
         function fetchCompaniesList() {
-            // Keep empty function to prevent errors from other modules calling it
+            initGlobalData();
         }
 
         function fetchDashboardWidgets() {
-            // Keep empty function to prevent errors from other modules calling it
+            initGlobalData();
         }
 
         function fetchCompanies() {
