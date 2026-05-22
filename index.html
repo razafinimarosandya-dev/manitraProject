@@ -322,6 +322,22 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- NEW ROW: Analyse des Achats -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mt-6">
+                    <div class="glass p-6 rounded-3xl h-[300px]">
+                        <h4 class="text-sm font-bold text-amber-500 mb-4 flex items-center gap-2"><i class="fas fa-chart-pie"></i> Dépenses par Catégorie</h4>
+                        <div class="h-[220px]">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass p-6 rounded-3xl h-[300px] overflow-y-auto custom-scroll">
+                        <h4 class="text-sm font-bold text-amber-500 mb-4 flex items-center gap-2"><i class="fas fa-medal"></i> Top Fournisseurs</h4>
+                        <div id="top-suppliers-list" class="space-y-3">
+                            <p class="text-xs text-slate-400 italic">Analyse en cours...</p>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <!-- SECTION : COLLABORATEURS -->
@@ -777,6 +793,7 @@
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbxwlNp4nFB6TFMgfCBeoWzCgsw98KJrkm8iR9NoQHAtCB9DUsDSmuwYJErsHx21h3tM/exec";
         let mainChart = null;
+        let categoryChart = null;
 
         function toggleSidebar() {
             const sb = document.getElementById('sidebar');
@@ -846,6 +863,9 @@
                 }
 
                 initChart(data.cashFlow);
+                if (data.achatsAnalysis) {
+                    initAchatsAnalysis(data.achatsAnalysis);
+                }
                 delete window[cb];
             };
             const s = document.createElement("script");
@@ -1684,6 +1704,71 @@
                     } 
                 } 
             });
+        }
+
+        function initAchatsAnalysis(analysisData) {
+            if (!analysisData) return;
+            
+            // 1. Dépenses par catégorie (Doughnut Chart)
+            const ctxCat = document.getElementById('categoryChart');
+            if (ctxCat) {
+                if (categoryChart) categoryChart.destroy();
+                
+                const catLabels = Object.keys(analysisData.byCategory);
+                const catValues = Object.values(analysisData.byCategory);
+                
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+                const textColor = currentTheme === 'dark' ? '#ffd97d' : '#4d4d4d';
+                
+                categoryChart = new Chart(ctxCat.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: catLabels,
+                        datasets: [{
+                            data: catValues,
+                            backgroundColor: ['#0b939b', '#e6a817', '#ee6055', '#1e8e1e', '#8b5cf6', '#64748b', '#06b6d4'],
+                            borderWidth: 0,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: {
+                            legend: { 
+                                position: 'right',
+                                labels: { color: textColor, font: { family: 'Outfit', size: 10 }, boxWidth: 12 }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // 2. Top Fournisseurs
+            const listEl = document.getElementById('top-suppliers-list');
+            if (listEl) {
+                const suppliers = Object.entries(analysisData.bySupplier)
+                    .map(([name, total]) => ({name, total}))
+                    .sort((a, b) => b.total - a.total)
+                    .slice(0, 5); // Take top 5
+                    
+                if (suppliers.length > 0) {
+                    listEl.innerHTML = suppliers.map((s, index) => `
+                        <div class="bg-slate-800/50 p-3 rounded-xl flex justify-between items-center border border-slate-700/50">
+                            <div class="flex items-center gap-3 overflow-hidden">
+                                <div class="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold text-amber-500">
+                                    #${index + 1}
+                                </div>
+                                <p class="text-xs font-bold text-slate-300 truncate w-32">${s.name}</p>
+                            </div>
+                            <span class="text-xs font-bold text-rose-400">${s.total.toLocaleString()} Ar</span>
+                        </div>
+                    `).join('');
+                } else {
+                    listEl.innerHTML = '<p class="text-xs text-slate-500">Aucune donnée fournisseur</p>';
+                }
+            }
         }
 
         window.onload = () => {
