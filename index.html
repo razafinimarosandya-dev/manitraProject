@@ -1074,12 +1074,12 @@
             const filter = (document.getElementById('company-filter')?.value || 'all').toLowerCase();
 
             const filteredData = companiesDataCache.filter(c => {
-                const searchMatch = c.name.toLowerCase().includes(search) || 
-                                    (c.contact && c.contact.toLowerCase().includes(search));
+                const searchMatch = String(c.name || '').toLowerCase().includes(search) || 
+                                    (c.contact && String(c.contact).toLowerCase().includes(search));
                 
                 let filterMatch = true;
                 if (filter !== 'all') {
-                    filterMatch = c.type && c.type.toLowerCase().includes(filter);
+                    filterMatch = c.type && String(c.type).toLowerCase().includes(filter);
                 }
 
                 return searchMatch && filterMatch;
