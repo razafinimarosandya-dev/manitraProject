@@ -898,7 +898,7 @@
 
         function renderDashboardWidgets(workflowData) {
             // Top Projects
-            const topProjects = workflowData.filter(p => p.status !== "Proforma").sort((a,b) => (b.revenue - b.cost) - (a.revenue - a.cost)).slice(0,3);
+            const topProjects = workflowData.filter(p => p.status && !p.status.toLowerCase().includes("proforma")).sort((a,b) => (b.revenue - b.cost) - (a.revenue - a.cost)).slice(0,3);
             const projHtml = topProjects.map(p => `
                 <div class="bg-slate-800/50 p-3 rounded-xl flex justify-between items-center border border-slate-700/50">
                     <div class="overflow-hidden">
@@ -1923,11 +1923,20 @@
 
         function viewFinanceDetails(index) {
             const rowData = financeDataCache[index];
-            if (!rowData || !rowData.rawData) return;
+            if (!rowData) return;
+            
+            let raw = rowData.rawData;
+            let headers = financeHeadersCache;
+
+            // Fallback au cas où le backend n'a pas encore été redéployé
+            if (!raw) {
+                raw = [rowData.id, rowData.date, rowData.category, rowData.label, rowData.in, rowData.out, rowData.balance];
+                headers = ["ID", "Date", "Catégorie", "Désignation", "Entrées", "Sorties", "Solde"];
+            }
             
             let html = '';
-            rowData.rawData.forEach((val, i) => {
-                const headerName = financeHeadersCache[i] || `Colonne ${i + 1}`;
+            raw.forEach((val, i) => {
+                const headerName = headers[i] || `Colonne ${i + 1}`;
                 
                 let displayVal = val;
                 if (displayVal instanceof Date || (typeof displayVal === 'string' && displayVal.match(/^\d{4}-\d{2}-\d{2}T/))) {
