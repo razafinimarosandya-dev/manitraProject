@@ -1721,104 +1721,42 @@
             document.body.appendChild(s);
         }
 
-        function generateInvoicePDF(id, client, project, date, dueDate, lines, total, type) {
-            const div = document.createElement('div');
-            div.id = 'invoice-pdf-container';
-            div.className = 'p-10 bg-white text-slate-800 font-sans w-[800px] mx-auto';
-            div.style.color = '#1e293b';
-            
-            let linesHtml = lines.map(l => `
-                <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 12px 8px; text-align: left;">${l[1]}</td>
-                    <td style="padding: 12px 8px; text-align: center;">${l[2]}</td>
-                    <td style="padding: 12px 8px; text-align: center;">${l[3]}</td>
-                    <td style="padding: 12px 8px; text-align: right;">${parseFloat(l[4]).toLocaleString()} Ar</td>
-                    <td style="padding: 12px 8px; text-align: right; font-weight: bold;">${parseFloat(l[5]).toLocaleString()} Ar</td>
-                </tr>
-            `).join('');
-
-            div.innerHTML = `
-                <!-- Header -->
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #1e3a8a; padding-bottom: 20px; margin-bottom: 30px;">
-                    <div>
-                        <h1 style="font-size: 28px; font-weight: 800; color: #1e3a8a; margin: 0;">TOTAL CONTROL ERP</h1>
-                        <p style="font-size: 12px; color: #64748b; margin: 4px 0 0 0;">Département Travaux & Ingénierie Financière</p>
-                        <p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">Antananarivo, Madagascar</p>
-                    </div>
-                    <div style="text-align: right;">
-                        <h2 style="font-size: 24px; font-weight: 700; color: #0f172a; margin: 0; text-transform: uppercase;">${type === 'Proforma' ? 'PROFORMA / DEVIS' : 'FACTURE'}</h2>
-                        <p style="font-size: 14px; font-weight: bold; color: #3b82f6; margin: 4px 0 0 0;">N° ${id}</p>
-                        <p style="font-size: 12px; color: #64748b; margin: 8px 0 0 0;">Date : ${new Date(date).toLocaleDateString()}</p>
-                        <p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">Échéance : ${dueDate ? new Date(dueDate).toLocaleDateString() : 'N/A'}</p>
-                    </div>
-                </div>
-
-                <!-- Client & Project Info -->
-                <div style="display: flex; justify-content: space-between; margin-bottom: 40px; background-color: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                    <div>
-                        <h3 style="font-size: 12px; text-transform: uppercase; color: #64748b; margin: 0 0 8px 0;">Client / Destinataire</h3>
-                        <p style="font-size: 16px; font-weight: bold; color: #0f172a; margin: 0;">${client}</p>
-                    </div>
-                    <div style="text-align: right;">
-                        <h3 style="font-size: 12px; text-transform: uppercase; color: #64748b; margin: 0 0 8px 0;">Projet / Dossier</h3>
-                        <p style="font-size: 16px; font-weight: bold; color: #0f172a; margin: 0;">${project}</p>
-                    </div>
-                </div>
-
-                <!-- Table -->
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px; font-size: 14px;">
-                    <thead>
-                        <tr style="background-color: #1e3a8a; color: white;">
-                            <th style="padding: 12px 8px; text-align: left; border-top-left-radius: 6px;">Désignation / Détail</th>
-                            <th style="padding: 12px 8px; text-align: center;">Qté</th>
-                            <th style="padding: 12px 8px; text-align: center;">Unité</th>
-                            <th style="padding: 12px 8px; text-align: right;">P.U (Ar)</th>
-                            <th style="padding: 12px 8px; text-align: right; border-top-right-radius: 6px;">Montant Total (Ar)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${linesHtml}
-                    </tbody>
-                </table>
-
-                <!-- Totals -->
-                <div style="display: flex; justify-content: flex-end; margin-bottom: 50px;">
-                    <div style="width: 350px; background-color: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: #64748b;">
-                            <span>Total HT :</span>
-                            <span>${total.toLocaleString()} Ar</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: #64748b;">
-                            <span>TVA (0%) :</span>
-                            <span>0 Ar</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; border-top: 2px solid #cbd5e1; padding-top: 12px; font-size: 18px; font-weight: bold; color: #1e3a8a;">
-                            <span>NET À PAYER :</span>
-                            <span>${total.toLocaleString()} Ar</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div style="border-top: 1px solid #cbd5e1; padding-top: 20px; text-align: center; font-size: 11px; color: #94a3b8;">
-                    <p style="margin: 0 0 4px 0;">Arrêté la présente facture à la somme de : ${(total).toLocaleString()} Ariary.</p>
-                    <p style="margin: 0;">Conditions de paiement : Paiement à réception ou selon date d'échéance convenue. Merci de votre confiance.</p>
-                </div>
-            `;
-
-            document.body.appendChild(div);
-            
-            const opt = {
-                margin: 10,
-                filename: `${type === 'Proforma' ? 'Proforma' : 'Facture'}_${id}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        async function requestSheetPDF(type, id, client, project, date, dueDate, lines, total) {
+            showLoading(true);
+            const formData = {
+                action: "generateSheetPDF",
+                type: type,
+                id: id,
+                client: client,
+                project: project,
+                date: date,
+                dueDate: dueDate,
+                lines: lines,
+                total: total
             };
 
-            html2pdf().set(opt).from(div).save().then(() => {
-                document.body.removeChild(div);
-            });
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(formData)
+                });
+                const result = await response.json();
+                
+                if (result.error) {
+                    alert("Erreur lors de la génération du PDF : " + result.error);
+                } else if (result.success && result.pdfBase64) {
+                    // Télécharger le PDF reçu en base64
+                    const linkSource = `data:application/pdf;base64,${result.pdfBase64}`;
+                    const downloadLink = document.createElement("a");
+                    downloadLink.href = linkSource;
+                    downloadLink.download = result.filename || `${type}_${id}.pdf`;
+                    downloadLink.click();
+                }
+            } catch (err) {
+                alert("Erreur de connexion lors de la génération du PDF.");
+            } finally {
+                showLoading(false);
+            }
         }
 
         function viewProjectDetail(id) {
@@ -1845,8 +1783,11 @@
                         <p class="text-xs text-slate-400">Client : ${inv[2]} | Statut : <span class="text-amber-400 font-bold">${inv[6]}</span></p>
                     </div>
                     <div class="flex gap-3">
-                        <button onclick='generateInvoicePDF(${JSON.stringify(inv[0])}, ${JSON.stringify(inv[2])}, ${JSON.stringify(inv[7])}, ${JSON.stringify(inv[1])}, ${JSON.stringify(inv[8])}, ${JSON.stringify(data.lines || [])}, ${totalRevenus}, ${JSON.stringify(inv[6])})' class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 shadow-lg shadow-blue-500/20 transition-all">
-                            <i class="fas fa-file-pdf"></i> Générer Devis / Facture PDF
+                        <button onclick='requestSheetPDF("PROFORMA", ${JSON.stringify(inv[0])}, ${JSON.stringify(inv[2])}, ${JSON.stringify(inv[7])}, ${JSON.stringify(inv[1])}, ${JSON.stringify(inv[8])}, ${JSON.stringify(data.lines || [])}, ${totalRevenus})' class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 shadow-lg shadow-indigo-500/20 transition-all">
+                            <i class="fas fa-file-invoice"></i> Générer Devis (PDF)
+                        </button>
+                        <button onclick='requestSheetPDF("FACTURE", ${JSON.stringify(inv[0])}, ${JSON.stringify(inv[2])}, ${JSON.stringify(inv[7])}, ${JSON.stringify(inv[1])}, ${JSON.stringify(inv[8])}, ${JSON.stringify(data.lines || [])}, ${totalRevenus})' class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 shadow-lg shadow-blue-500/20 transition-all">
+                            <i class="fas fa-file-invoice-dollar"></i> Générer Facture (PDF)
                         </button>
                     </div>
                 </div>
