@@ -1934,7 +1934,7 @@
                 headers = ["ID", "Date", "Catégorie", "Désignation", "Entrées", "Sorties", "Solde"];
             }
             
-            let html = '';
+            let html = `<div class="p-2 mb-2 bg-red-500/20 text-red-200 text-xs font-mono break-words rounded">DEBUG: ${JSON.stringify(raw)}</div>`;
             raw.forEach((val, i) => {
                 const headerName = headers[i] || `Colonne ${i + 1}`;
                 
