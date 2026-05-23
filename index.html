@@ -719,12 +719,8 @@
                     class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
                 <input type="text" placeholder="Libellé de l'opération" required
                     class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
-                <select
+                <input type="text" placeholder="Catégorie de l'opération (ex: Encaissement Client, Divers...)" required
                     class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
-                    <option>Opération Courante</option>
-                    <option>Encaissement Client</option>
-                    <option>Paiement Fournisseur</option>
-                </select>
                 <div class="grid grid-cols-2 gap-4">
                     <input type="number" placeholder="Entrée (+)"
                         class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-sm">
@@ -747,15 +743,23 @@
             <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-handshake text-purple-500"></i>
                 Nouveau Partenaire</h4>
             <form onsubmit="submitCollaborator(event)" class="space-y-4">
-                <input type="text" placeholder="Nom de l'entreprise ou du contact" required
+                <input id="collab-name" type="text" placeholder="Nom de l'entreprise ou du contact" required
                     class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
-                <select
+                <select id="collab-type" onchange="toggleClientFields(this.value)"
                     class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
                     <option value="Client">Client</option>
                     <option value="Fournisseur">Fournisseur</option>
                     <option value="Investisseur">Investisseur</option>
                 </select>
-                <input type="text" placeholder="Contact (Téléphone, Email...)"
+                <div id="client-extra-fields" class="space-y-4 bg-purple-500/5 p-4 rounded-xl border border-purple-500/20 transition-all">
+                    <input id="collab-nif" type="text" placeholder="NIF"
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
+                    <input id="collab-stat" type="text" placeholder="STAT"
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
+                    <input id="collab-adresse" type="text" placeholder="Adresse complète"
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
+                </div>
+                <input id="collab-contact" type="text" placeholder="Contact (Téléphone, Email...)"
                     class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
                 <button type="submit"
                     class="w-full bg-purple-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-purple-500/20">Ajouter
@@ -1385,10 +1389,35 @@
             try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('cash'); fetchFinance(); fetchData(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Valider l'Opération"; }
         }
 
+        function toggleClientFields(val) {
+            const container = document.getElementById('client-extra-fields');
+            if (val === 'Client') {
+                container.classList.remove('hidden');
+                container.classList.add('space-y-4');
+            } else {
+                container.classList.add('hidden');
+                container.classList.remove('space-y-4');
+                document.getElementById('collab-nif').value = '';
+                document.getElementById('collab-stat').value = '';
+                document.getElementById('collab-adresse').value = '';
+            }
+        }
+
         async function submitCollaborator(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button'); btn.innerHTML = "...";
-            const formData = { action: "addCollaborator", data: [e.target[0].value, e.target[1].value, e.target[2].value] };
+            const name = document.getElementById('collab-name').value;
+            const type = document.getElementById('collab-type').value;
+            const contact = document.getElementById('collab-contact').value;
+            
+            let nif = "", stat = "", adresse = "";
+            if (type === "Client") {
+                nif = document.getElementById('collab-nif').value;
+                stat = document.getElementById('collab-stat').value;
+                adresse = document.getElementById('collab-adresse').value;
+            }
+
+            const formData = { action: "addCollaborator", data: [name, type, contact, nif, stat, adresse] };
             try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('collaborator'); fetchCompaniesList(); fetchCompanies(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Ajouter Collaborateur"; }
         }
 
@@ -1934,7 +1963,7 @@
                 headers = ["ID", "Date", "Catégorie", "Désignation", "Entrées", "Sorties", "Solde"];
             }
             
-            let html = `<div class="p-2 mb-2 bg-red-500/20 text-red-200 text-xs font-mono break-words rounded">DEBUG: ${JSON.stringify(raw)}</div>`;
+            let html = '';
             raw.forEach((val, i) => {
                 const headerName = headers[i] || `Colonne ${i + 1}`;
                 
