@@ -1939,6 +1939,10 @@
                 const headerName = headers[i] || `Colonne ${i + 1}`;
                 
                 let displayVal = val;
+                if (typeof displayVal === 'string') {
+                    displayVal = displayVal.trim();
+                }
+                
                 if (displayVal instanceof Date || (typeof displayVal === 'string' && displayVal.match(/^\d{4}-\d{2}-\d{2}T/))) {
                     try { displayVal = new Date(displayVal).toLocaleDateString(); } catch(e){}
                 } else if (typeof displayVal === 'number' && !headerName.toLowerCase().includes('id')) {
@@ -1946,7 +1950,7 @@
                 }
                 
                 if (displayVal === undefined || displayVal === null || displayVal === '') {
-                    displayVal = '<span class="italic text-slate-600">Vide</span>';
+                    displayVal = '<span class="italic text-slate-500">Vide</span>';
                 }
 
                 html += `
