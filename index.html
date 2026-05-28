@@ -1721,7 +1721,7 @@
             document.body.appendChild(s);
         }
 
-        async function requestSheetPDF(type, id, client, project, date, dueDate, lines, total) {
+        async function requestSheetPDF(type, id, client, project, date, dueDate, lines, total, paymentType = "numerique") {
             showLoading(true);
             const formData = {
                 action: "generateSheetPDF",
@@ -1732,7 +1732,8 @@
                 date: date,
                 dueDate: dueDate,
                 lines: lines,
-                total: total
+                total: total,
+                paymentType: paymentType
             };
 
             try {
@@ -1786,9 +1787,15 @@
                         <button onclick='requestSheetPDF("PROFORMA", ${JSON.stringify(inv[0])}, ${JSON.stringify(inv[2])}, ${JSON.stringify(inv[7])}, ${JSON.stringify(inv[1])}, ${JSON.stringify(inv[8])}, ${JSON.stringify(data.lines || [])}, ${totalRevenus})' class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 shadow-lg shadow-indigo-500/20 transition-all">
                             <i class="fas fa-file-invoice"></i> Générer Devis (PDF)
                         </button>
-                        <button onclick='requestSheetPDF("FACTURE", ${JSON.stringify(inv[0])}, ${JSON.stringify(inv[2])}, ${JSON.stringify(inv[7])}, ${JSON.stringify(inv[1])}, ${JSON.stringify(inv[8])}, ${JSON.stringify(data.lines || [])}, ${totalRevenus})' class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 shadow-lg shadow-blue-500/20 transition-all">
-                            <i class="fas fa-file-invoice-dollar"></i> Générer Facture (PDF)
-                        </button>
+                        <div class="flex items-center gap-2 bg-slate-900/50 p-1 rounded-xl border border-slate-700/50">
+                            <select id="payment-method-select" class="bg-transparent text-xs text-white outline-none font-bold px-2 cursor-pointer">
+                                <option value="numerique" class="bg-slate-800">Numérique</option>
+                                <option value="espece" class="bg-slate-800">Espèce</option>
+                            </select>
+                            <button onclick='requestSheetPDF("FACTURE", ${JSON.stringify(inv[0])}, ${JSON.stringify(inv[2])}, ${JSON.stringify(inv[7])}, ${JSON.stringify(inv[1])}, ${JSON.stringify(inv[8])}, ${JSON.stringify(data.lines || [])}, ${totalRevenus}, document.getElementById("payment-method-select").value)' class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg font-bold text-xs flex items-center gap-2 shadow-lg shadow-blue-500/20 transition-all">
+                                <i class="fas fa-file-invoice-dollar"></i> Générer Facture
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-8">
