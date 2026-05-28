@@ -1173,7 +1173,7 @@
                     <td class="p-6">${cumulHtml}</td>
                     <td class="p-6">${soldeHtml}</td>
                     <td class="p-6">
-                        <button onclick="openEditCollaborator('${c.name.replace(/'/g, "\\'")}', '${(c.contact || '').replace(/'/g, "\\'")}')" class="text-blue-400 hover:text-blue-300 font-bold text-xs flex items-center gap-2 transition-colors">
+                        <button onclick="openEditCollaborator('${String(c.name || '').replace(/'/g, "\\'")}', '${String(c.contact || '').replace(/'/g, "\\'")}')" class="text-blue-400 hover:text-blue-300 font-bold text-xs flex items-center gap-2 transition-colors">
                             <i class="fas fa-edit"></i> Modifier
                         </button>
                     </td>
