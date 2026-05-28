@@ -933,15 +933,21 @@
         let globalDataCache = null;
 
         function renderDashboardWidgets(workflowData) {
-            // Top Projects
-            const topProjects = workflowData.filter(p => p.status && !p.status.toLowerCase().includes("proforma")).sort((a,b) => (b.revenue - b.cost) - (a.revenue - a.cost)).slice(0,3);
+            // Top Projects (Meilleures ventes par revenu)
+            const topProjects = workflowData.filter(p => p.status && !p.status.toLowerCase().includes("proforma")).sort((a,b) => (b.revenue || 0) - (a.revenue || 0)).slice(0,3);
             const projHtml = topProjects.map(p => `
-                <div class="bg-slate-800/50 p-3 rounded-xl flex justify-between items-center border border-slate-700/50">
-                    <div class="overflow-hidden">
-                        <p class="text-xs font-bold text-blue-300 truncate w-24">${p.project}</p>
-                        <p class="text-[10px] text-slate-400 truncate w-24">${p.client}</p>
+                <div class="bg-slate-800/50 p-3 rounded-xl flex flex-col gap-2 border border-slate-700/50">
+                    <div class="flex justify-between items-start">
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-bold text-blue-300 truncate w-32">${p.project}</p>
+                            <p class="text-[10px] text-slate-400 truncate w-32">${p.client}</p>
+                        </div>
+                        <span class="text-xs font-bold ${(p.revenue - p.cost) >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${(p.revenue - p.cost).toLocaleString()} Ar</span>
                     </div>
-                    <span class="text-xs font-bold ${(p.revenue - p.cost) >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${(p.revenue - p.cost).toLocaleString()} Ar</span>
+                    <div class="flex justify-between items-center text-[9px] text-slate-500 pt-1 border-t border-slate-700/50">
+                        <span>Créé le: <span class="text-slate-300">${p.date ? new Date(p.date).toLocaleDateString() : '-'}</span></span>
+                        <span>Échéance: <span class="${p.dueDate && new Date(p.dueDate) < new Date() && p.phaseVente !== 'Payé' ? 'text-rose-400 font-bold' : 'text-slate-300'}">${p.dueDate ? new Date(p.dueDate).toLocaleDateString() : '-'}</span></span>
+                    </div>
                 </div>
             `).join('');
             document.getElementById('dashboard-top-projects').innerHTML = projHtml || '<p class="text-xs text-slate-500">Aucun projet actif</p>';
