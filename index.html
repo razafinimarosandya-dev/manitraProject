@@ -50,8 +50,9 @@
             --c-red: #ee6055;
             --c-red-400: #d4534a;
             --c-red-600: #b33b34;
-            
-            --c-yellow: #e6a817; /* Dérivé ambre foncé de ffd97d pour un contraste parfait sur fond blanc */
+
+            --c-yellow: #e6a817;
+            /* Dérivé ambre foncé de ffd97d pour un contraste parfait sur fond blanc */
             --c-yellow-400: #e6a817;
             --c-yellow-600: #c58f12;
 
@@ -70,7 +71,8 @@
             --c-slate-900: rgba(77, 77, 77, 0.05);
             --c-slate-950: rgba(77, 77, 77, 0.08);
 
-            --c-white: #4d4d4d; /* text-white devient text-main (4d4d4d) sur fond blanc pour être 100% lisible */
+            --c-white: #4d4d4d;
+            /* text-white devient text-main (4d4d4d) sur fond blanc pour être 100% lisible */
         }
 
         [data-theme="dark"] {
@@ -91,7 +93,7 @@
             --c-red: #ee6055;
             --c-red-400: #ee6055;
             --c-red-600: #d4534a;
-            
+
             --c-yellow: #ffd97d;
             --c-yellow-400: #ffd97d;
             --c-yellow-600: #e6c370;
@@ -149,12 +151,17 @@
             font-weight: 600;
         }
 
-        input, select, textarea {
+        input,
+        select,
+        textarea {
             background: var(--bg-input) !important;
             border: 1px solid var(--border-glass) !important;
             color: var(--text-main) !important;
         }
-        input:focus, select:focus, textarea:focus {
+
+        input:focus,
+        select:focus,
+        textarea:focus {
             border-color: #0b939b !important;
             outline: none;
         }
@@ -199,14 +206,17 @@
     </div>
 
     <!-- SIDEBAR & BACKDROP MOBILE -->
-    <div id="sidebar-backdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[140] lg:hidden hidden"></div>
-    <aside id="sidebar" class="w-72 glass border-r border-slate-800 flex flex-col p-6 z-[150] fixed inset-y-0 left-0 lg:relative lg:translate-x-0 -translate-x-full transition-all duration-300 ease-in-out">
+    <div id="sidebar-backdrop" onclick="toggleSidebar()"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[140] lg:hidden hidden"></div>
+    <aside id="sidebar"
+        class="w-72 glass border-r border-slate-800 flex flex-col p-6 z-[150] fixed inset-y-0 left-0 lg:relative lg:translate-x-0 -translate-x-full transition-all duration-300 ease-in-out">
         <div class="flex items-center gap-3 mb-10 px-2">
             <div
                 class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <i class="fas fa-shield-alt text-white text-xl"></i>
             </div>
-            <h1 class="text-xl font-bold tracking-tight">Financial Tech <span class="text-blue-500 text-xs">ERP V6</span></h1>
+            <h1 class="text-xl font-bold tracking-tight">Financial Tech <span class="text-blue-500 text-xs">ERP
+                    V6</span></h1>
         </div>
 
         <nav class="flex-1 custom-scroll overflow-y-auto space-y-1">
@@ -218,17 +228,21 @@
                 class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-user-friends w-5"></i>
                 Partenaires</div>
             <div onclick="showSection('workflow', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm">
-                <i class="fas fa-project-diagram w-5"></i> Workflow</div>
+                <i class="fas fa-project-diagram w-5"></i> Workflow
+            </div>
             <div onclick="showSection('stocks', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i
                     class="fas fa-boxes w-5"></i> Inventaire</div>
             <div onclick="showSection('finance', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm">
-                <i class="fas fa-wallet w-5"></i> Trésorerie</div>
+                <i class="fas fa-wallet w-5"></i> Trésorerie
+            </div>
             <div onclick="showSection('investissements', this)"
                 class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-chart-pie w-5"></i>
                 Investissements</div>
 
             <p class="text-[10px] uppercase font-bold text-slate-500 mt-8 mb-4 px-2 tracking-widest">Saisies Rapides</p>
-            <button onclick="openProformaNormal()" class="w-full bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-indigo-600 hover:text-white transition-all">+ Proforma / Devis</button>
+            <button onclick="openProformaNormal()"
+                class="w-full bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-indigo-600 hover:text-white transition-all">+
+                Proforma / Devis</button>
             <button onclick="openModal('invoice')"
                 class="w-full bg-blue-600/20 border border-blue-500/30 text-blue-400 py-2 rounded-xl text-xs font-bold mb-2 hover:bg-blue-600 hover:text-white transition-all">+
                 Vente</button>
@@ -251,8 +265,10 @@
     <main class="flex-1 flex flex-col overflow-hidden">
         <header class="h-20 glass border-b border-slate-800 flex items-center justify-between px-4 lg:px-8">
             <div class="flex items-center gap-3 lg:gap-4">
-                <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white text-xl p-2 mr-1"><i class="fas fa-bars"></i></button>
-                <h2 id="section-title" class="text-base lg:text-lg font-bold truncate max-w-[150px] sm:max-w-none">Tableau de Bord</h2>
+                <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white text-xl p-2 mr-1"><i
+                        class="fas fa-bars"></i></button>
+                <h2 id="section-title" class="text-base lg:text-lg font-bold truncate max-w-[150px] sm:max-w-none">
+                    Tableau de Bord</h2>
                 <div class="flex items-center gap-2">
                     <select id="period-selector" onchange="fetchData()"
                         class="rounded-lg text-[10px] px-3 py-1.5 outline-none font-bold uppercase tracking-wider cursor-pointer shadow-sm">
@@ -262,7 +278,8 @@
                         <option value="Avril">Avril 2026</option>
                         <option value="Mai" selected>Mai 2026</option>
                     </select>
-                    <button onclick="toggleTheme()" class="p-1 px-2.5 rounded-lg border border-glass bg-input hover:opacity-80 transition-all cursor-pointer shadow-sm">
+                    <button onclick="toggleTheme()"
+                        class="p-1 px-2.5 rounded-lg border border-glass bg-input hover:opacity-80 transition-all cursor-pointer shadow-sm">
                         <i id="theme-icon" class="fas fa-sun text-yellow text-sm"></i>
                     </button>
                 </div>
@@ -291,11 +308,13 @@
                         <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Dépenses Mois</p>
                         <h3 id="kpi-expenses" class="text-2xl font-bold text-rose-500 truncate">0 Ar</h3>
                     </div>
-                    <div class="glass p-6 rounded-3xl border border-blue-500/30 bg-blue-900/10 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
+                    <div
+                        class="glass p-6 rounded-3xl border border-blue-500/30 bg-blue-900/10 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
                         <p class="text-[10px] text-blue-400 font-bold uppercase mb-2">Bénéfice Net</p>
                         <h3 id="kpi-profit" class="text-2xl font-bold truncate">0 Ar</h3>
                     </div>
-                    <div class="glass p-6 rounded-3xl border border-emerald-500/30 bg-emerald-900/10 shadow-[0_0_15px_rgba(16,185,129,0.15)] sm:col-span-2 lg:col-span-1">
+                    <div
+                        class="glass p-6 rounded-3xl border border-emerald-500/30 bg-emerald-900/10 shadow-[0_0_15px_rgba(16,185,129,0.15)] sm:col-span-2 lg:col-span-1">
                         <p class="text-[10px] text-emerald-400 font-bold uppercase mb-2">Disponibilité</p>
                         <h3 id="kpi-cash" class="text-2xl font-bold text-white truncate">0 Ar</h3>
                     </div>
@@ -308,31 +327,35 @@
                     <div class="col-span-1 space-y-6">
                         <!-- Alertes -->
                         <div class="glass p-6 rounded-3xl h-[188px] overflow-y-auto custom-scroll">
-                            <h4 class="text-sm font-bold text-rose-500 mb-4 flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i> Alertes & Urgences</h4>
+                            <h4 class="text-sm font-bold text-rose-500 mb-4 flex items-center gap-2"><i
+                                    class="fas fa-exclamation-triangle"></i> Alertes & Urgences</h4>
                             <div id="dashboard-alerts" class="space-y-3">
                                 <p class="text-xs text-slate-400 italic">Analyse en cours...</p>
                             </div>
                         </div>
                         <!-- Top Projets -->
                         <div class="glass p-6 rounded-3xl h-[188px] overflow-y-auto custom-scroll">
-                            <h4 class="text-sm font-bold text-blue-400 mb-4 flex items-center gap-2"><i class="fas fa-trophy"></i> Top Dossiers</h4>
+                            <h4 class="text-sm font-bold text-blue-400 mb-4 flex items-center gap-2"><i
+                                    class="fas fa-trophy"></i> Top Dossiers</h4>
                             <div id="dashboard-top-projects" class="space-y-3">
                                 <p class="text-xs text-slate-400 italic">Analyse en cours...</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- NEW ROW: Analyse des Achats -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mt-6">
                     <div class="glass p-6 rounded-3xl h-[300px]">
-                        <h4 class="text-sm font-bold text-amber-500 mb-4 flex items-center gap-2"><i class="fas fa-chart-pie"></i> Dépenses par Catégorie</h4>
+                        <h4 class="text-sm font-bold text-amber-500 mb-4 flex items-center gap-2"><i
+                                class="fas fa-chart-pie"></i> Dépenses par Catégorie</h4>
                         <div class="h-[220px]">
                             <canvas id="categoryChart"></canvas>
                         </div>
                     </div>
                     <div class="glass p-6 rounded-3xl h-[300px] overflow-y-auto custom-scroll">
-                        <h4 class="text-sm font-bold text-amber-500 mb-4 flex items-center gap-2"><i class="fas fa-medal"></i> Top Fournisseurs</h4>
+                        <h4 class="text-sm font-bold text-amber-500 mb-4 flex items-center gap-2"><i
+                                class="fas fa-medal"></i> Top Fournisseurs</h4>
                         <div id="top-suppliers-list" class="space-y-3">
                             <p class="text-xs text-slate-400 italic">Analyse en cours...</p>
                         </div>
@@ -345,8 +368,11 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h3 class="text-xl font-bold">Partenaires Commerciaux</h3>
                     <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                        <input type="text" id="company-search" oninput="renderCompaniesTable()" placeholder="Rechercher un nom..." class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm w-full sm:w-64">
-                        <select id="company-filter" onchange="renderCompaniesTable()" class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm w-full sm:w-auto">
+                        <input type="text" id="company-search" oninput="renderCompaniesTable()"
+                            placeholder="Rechercher un nom..."
+                            class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm w-full sm:w-64">
+                        <select id="company-filter" onchange="renderCompaniesTable()"
+                            class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm w-full sm:w-auto">
                             <option value="all">Tous les types</option>
                             <option value="client">Client</option>
                             <option value="fournisseur">Fournisseur</option>
@@ -363,7 +389,7 @@
                                 <th class="p-6">Contact</th>
                                 <th class="p-6">Cumul</th>
                                 <th class="p-6">Solde en cours</th>
-                                <th class="p-6">Statut</th>
+                                <th class="p-6">Action</th>
                             </tr>
                         </thead>
                         <tbody id="company-table-body"></tbody>
@@ -376,8 +402,11 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h3 class="text-xl font-bold">Suivi Opérationnel</h3>
                     <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                        <input type="text" id="workflow-search" oninput="renderWorkflowTable()" placeholder="Rechercher projet, client..." class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm w-full sm:w-64">
-                        <select id="workflow-filter" onchange="renderWorkflowTable()" class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm w-full sm:w-auto">
+                        <input type="text" id="workflow-search" oninput="renderWorkflowTable()"
+                            placeholder="Rechercher projet, client..."
+                            class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm w-full sm:w-64">
+                        <select id="workflow-filter" onchange="renderWorkflowTable()"
+                            class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm w-full sm:w-auto">
                             <option value="all">Tous les statuts</option>
                             <option value="vente">Ventes (En cours / Payées)</option>
                             <option value="proforma">Proformas Uniquement</option>
@@ -431,8 +460,11 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h3 class="text-xl font-bold">Historique Bancaire & Cash</h3>
                     <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                        <input type="text" id="finance-search" oninput="renderFinanceTable()" placeholder="Rechercher une opération..." class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm w-full sm:w-64">
-                        <select id="finance-filter" onchange="renderFinanceTable()" class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm w-full sm:w-auto">
+                        <input type="text" id="finance-search" oninput="renderFinanceTable()"
+                            placeholder="Rechercher une opération..."
+                            class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm w-full sm:w-64">
+                        <select id="finance-filter" onchange="renderFinanceTable()"
+                            class="bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm w-full sm:w-auto">
                             <option value="all">Toutes les opérations</option>
                             <option value="in">Entrées d'argent (+)</option>
                             <option value="out">Sorties d'argent (-)</option>
@@ -501,25 +533,34 @@
     <!-- MODALS -->
 
     <!-- Modal Invoice -->
-    <div id="modal-invoice" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <div id="modal-invoice"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
         <div class="glass w-full max-w-xl rounded-3xl p-8 border border-blue-500/20 shadow-2xl">
-            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-file-invoice text-blue-500"></i> Nouvelle Facture de Vente</h4>
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-file-invoice text-blue-500"></i>
+                Nouvelle Facture de Vente</h4>
             <form onsubmit="submitInvoice(event)" class="space-y-4">
-                <input type="date" onchange="autoSetInvoiceDueDate(this)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
-                <select id="invoice-collab" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <input type="date" onchange="autoSetInvoiceDueDate(this)" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <select id="invoice-collab" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
                     <option value="">Sélectionnez un Client...</option>
                 </select>
-                <select id="invoice-project" onchange="autoFillInvoiceData()" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <select id="invoice-project" onchange="autoFillInvoiceData()" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
                     <option value="">Sélectionnez un Projet en cours...</option>
                 </select>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Montant de la Vente (Ar)</label>
-                        <input id="invoice-amount" type="number" placeholder="Montant TTC (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm font-bold text-emerald-400">
+                        <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Montant de la
+                            Vente (Ar)</label>
+                        <input id="invoice-amount" type="number" placeholder="Montant TTC (Ar)" required
+                            class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm font-bold text-emerald-400">
                     </div>
                     <div>
-                        <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Total Achat (Ar)</label>
-                        <input id="invoice-cost" type="text" readonly placeholder="Calcul automatique..." class="w-full bg-slate-950/50 p-4 rounded-xl border border-slate-800 text-sm font-bold text-rose-400">
+                        <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Total Achat
+                            (Ar)</label>
+                        <input id="invoice-cost" type="text" readonly placeholder="Calcul automatique..."
+                            class="w-full bg-slate-950/50 p-4 rounded-xl border border-slate-800 text-sm font-bold text-rose-400">
                     </div>
                 </div>
                 <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50 text-right">
@@ -527,32 +568,46 @@
                     <span id="invoice-profit" class="text-xl font-bold text-slate-300">0 Ar</span>
                 </div>
                 <div>
-                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date d'échéance de paiement</label>
-                    <input id="invoice-due-date" type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date d'échéance de
+                        paiement</label>
+                    <input id="invoice-due-date" type="date" required
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/20">Enregistrer la Vente</button>
-                <button type="button" onclick="closeModal('invoice')" class="w-full text-slate-500 text-xs py-2">Fermer</button>
+                <button type="submit"
+                    class="w-full bg-blue-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/20">Enregistrer
+                    la Vente</button>
+                <button type="button" onclick="closeModal('invoice')"
+                    class="w-full text-slate-500 text-xs py-2">Fermer</button>
             </form>
         </div>
     </div>
 
     <!-- Modal Proforma -->
-    <div id="modal-proforma" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
-        <div class="glass w-full max-w-3xl rounded-3xl p-6 lg:p-8 border border-indigo-500/20 shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
-            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-file-alt text-indigo-500"></i> Nouveau Proforma / Devis</h4>
+    <div id="modal-proforma"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div
+            class="glass w-full max-w-3xl rounded-3xl p-6 lg:p-8 border border-indigo-500/20 shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-file-alt text-indigo-500"></i>
+                Nouveau Proforma / Devis</h4>
             <form onsubmit="submitProforma(event)" class="space-y-4">
-                <input type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm">
-                <select id="proforma-collab" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm">
+                <input type="date" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm">
+                <select id="proforma-collab" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm">
                     <option value="">Sélectionnez un Client...</option>
                 </select>
-                <input id="proforma-project" type="text" placeholder="Projet / Description" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm">
-                
+                <input id="proforma-project" type="text" placeholder="Projet / Description" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 text-sm">
+
                 <div class="bg-slate-800/20 p-4 rounded-xl border border-slate-700/50">
                     <div class="flex justify-between items-center mb-3">
-                        <label class="block text-[10px] uppercase font-bold text-slate-400">Lignes du Devis (Détails & Montants)</label>
-                        <button type="button" onclick="addProformaLine()" class="text-xs text-indigo-500 font-bold hover:text-indigo-400">+ Ajouter une ligne</button>
+                        <label class="block text-[10px] uppercase font-bold text-slate-400">Lignes du Devis (Détails &
+                            Montants)</label>
+                        <button type="button" onclick="addProformaLine()"
+                            class="text-xs text-indigo-500 font-bold hover:text-indigo-400">+ Ajouter une ligne</button>
                     </div>
-                    <div class="hidden sm:grid sm:grid-cols-12 gap-2 px-1 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    <div
+                        class="hidden sm:grid sm:grid-cols-12 gap-2 px-1 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                         <div class="col-span-4">Détail de l'article / prestation</div>
                         <div class="col-span-2">Qté</div>
                         <div class="col-span-1">Unité</div>
@@ -560,15 +615,24 @@
                         <div class="col-span-3 text-right pr-8">Total (Ar)</div>
                     </div>
                     <div id="proforma-lines" class="space-y-3 max-h-60 overflow-y-auto custom-scroll pr-2">
-                        <div class="proforma-line grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-900/40 p-3 rounded-xl sm:bg-transparent sm:p-0 border border-slate-800/50 sm:border-none">
-                            <input type="text" placeholder="Détail (ex: Prestation A)" required class="sm:col-span-4 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm w-full">
-                            <input type="number" placeholder="Qté" oninput="calcProformaLine(this)" required class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm w-full">
-                            <input type="text" placeholder="Unité (ex: m2, Ens)" required class="sm:col-span-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm w-full">
-                            <input type="number" placeholder="P.U (Ar)" oninput="calcProformaLine(this)" required class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm w-full">
+                        <div
+                            class="proforma-line grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-900/40 p-3 rounded-xl sm:bg-transparent sm:p-0 border border-slate-800/50 sm:border-none">
+                            <input type="text" placeholder="Détail (ex: Prestation A)" required
+                                class="sm:col-span-4 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm w-full">
+                            <input type="number" placeholder="Qté" oninput="calcProformaLine(this)" required
+                                class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm w-full">
+                            <input type="text" placeholder="Unité (ex: m2, Ens)" required
+                                class="sm:col-span-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm w-full">
+                            <input type="number" placeholder="P.U (Ar)" oninput="calcProformaLine(this)" required
+                                class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-indigo-500 text-sm w-full">
                             <div class="flex sm:col-span-3 items-center gap-2 w-full justify-between sm:justify-end">
                                 <span class="sm:hidden text-xs font-bold text-slate-400">Total:</span>
-                                <input type="text" placeholder="Total (Ar)" readonly class="flex-1 sm:w-full bg-indigo-950/50 p-3 rounded-lg border border-indigo-800 text-indigo-300 font-bold text-sm text-right">
-                                <button type="button" onclick="if(document.querySelectorAll('.proforma-line').length>1) { this.closest('.proforma-line').remove(); updateProformaTotal(); }" class="text-rose-500/50 hover:text-rose-500 p-2 text-center"><i class="fas fa-times"></i></button>
+                                <input type="text" placeholder="Total (Ar)" readonly
+                                    class="flex-1 sm:w-full bg-indigo-950/50 p-3 rounded-lg border border-indigo-800 text-indigo-300 font-bold text-sm text-right">
+                                <button type="button"
+                                    onclick="if(document.querySelectorAll('.proforma-line').length>1) { this.closest('.proforma-line').remove(); updateProformaTotal(); }"
+                                    class="text-rose-500/50 hover:text-rose-500 p-2 text-center"><i
+                                        class="fas fa-times"></i></button>
                             </div>
                         </div>
                     </div>
@@ -578,58 +642,87 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-indigo-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-indigo-500/20">Enregistrer le Proforma</button>
-                <button type="button" onclick="closeModal('proforma')" class="w-full text-slate-500 text-xs py-2">Fermer</button>
+                <button type="submit"
+                    class="w-full bg-indigo-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-indigo-500/20">Enregistrer
+                    le Proforma</button>
+                <button type="button" onclick="closeModal('proforma')"
+                    class="w-full text-slate-500 text-xs py-2">Fermer</button>
             </form>
         </div>
     </div>
 
     <!-- Modal Edit Workflow -->
-    <div id="modal-edit-workflow" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <div id="modal-edit-workflow"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
         <div class="glass w-full max-w-xl rounded-3xl p-8 border border-blue-500/20 shadow-2xl">
-            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-edit text-blue-500"></i> Modifier le Projet / Vente</h4>
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-edit text-blue-500"></i>
+                Modifier le Projet / Vente</h4>
             <form onsubmit="submitEditWorkflow(event)" class="space-y-4">
-                <input id="edit-w-id" type="text" readonly class="w-full bg-slate-950/50 p-4 rounded-xl border border-slate-800 text-slate-500 font-mono text-sm">
-                <input id="edit-w-date" type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
-                <input id="edit-w-client" type="text" placeholder="Nom du Client" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
-                <input id="edit-w-project" type="text" placeholder="Nom du Projet" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
-                <input id="edit-w-amount" type="number" placeholder="Montant TTC (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <input id="edit-w-id" type="text" readonly
+                    class="w-full bg-slate-950/50 p-4 rounded-xl border border-slate-800 text-slate-500 font-mono text-sm">
+                <input id="edit-w-date" type="date" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <input id="edit-w-client" type="text" placeholder="Nom du Client" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <input id="edit-w-project" type="text" placeholder="Nom du Projet" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                <input id="edit-w-amount" type="number" placeholder="Montant TTC (Ar)" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
                 <div>
-                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date d'échéance</label>
-                    <input id="edit-w-duedate" type="date" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Date
+                        d'échéance</label>
+                    <input id="edit-w-duedate" type="date"
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/20">Enregistrer les Modifications</button>
-                <button type="button" onclick="closeModal('edit-workflow')" class="w-full text-slate-500 text-xs py-2">Annuler</button>
+                <button type="submit"
+                    class="w-full bg-blue-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/20">Enregistrer
+                    les Modifications</button>
+                <button type="button" onclick="closeModal('edit-workflow')"
+                    class="w-full text-slate-500 text-xs py-2">Annuler</button>
             </form>
         </div>
     </div>
 
     <!-- Modal Edit Investment -->
-    <div id="modal-edit-investment" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <div id="modal-edit-investment"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
         <div class="glass w-full max-w-xl rounded-3xl p-8 border border-rose-500/20 shadow-2xl">
-            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-edit text-rose-500"></i> Modifier l'Investissement</h4>
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-edit text-rose-500"></i>
+                Modifier l'Investissement</h4>
             <form onsubmit="submitEditInvestment(event)" class="space-y-4">
-                <input id="edit-inv-id" type="text" readonly class="w-full bg-slate-950/50 p-4 rounded-xl border border-slate-800 text-slate-500 font-mono text-sm">
-                <input id="edit-inv-date" type="date" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
-                <input id="edit-inv-investor" type="text" placeholder="Investisseur" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
-                <select id="edit-inv-type" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <input id="edit-inv-id" type="text" readonly
+                    class="w-full bg-slate-950/50 p-4 rounded-xl border border-slate-800 text-slate-500 font-mono text-sm">
+                <input id="edit-inv-date" type="date" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <input id="edit-inv-investor" type="text" placeholder="Investisseur" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <select id="edit-inv-type" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
                     <option value="Apport (Entrée)">Apport (Entrée)</option>
                     <option value="Sortie (Achat / Dépense)">Sortie (Achat / Dépense)</option>
                     <option value="Retour (ROI / Remboursement)">Retour (ROI / Remboursement)</option>
                 </select>
-                <input id="edit-inv-amount" type="number" placeholder="Montant (Ar)" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
-                <input id="edit-inv-details" type="text" placeholder="Détails / Notes" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <input id="edit-inv-amount" type="number" placeholder="Montant (Ar)" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <input id="edit-inv-details" type="text" placeholder="Détails / Notes"
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
                 <div>
-                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Échéance Retour</label>
-                    <input id="edit-inv-deadline" type="date" class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Échéance
+                        Retour</label>
+                    <input id="edit-inv-deadline" type="date"
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
                 </div>
-                <select id="edit-inv-status" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
+                <select id="edit-inv-status" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-rose-500 text-sm">
                     <option value="Actif">Actif</option>
                     <option value="En cours">En cours</option>
                     <option value="Payé (Remboursé)">Payé (Remboursé)</option>
                 </select>
-                <button type="submit" class="w-full bg-rose-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-rose-500/20">Enregistrer les Modifications</button>
-                <button type="button" onclick="closeModal('edit-investment')" class="w-full text-slate-500 text-xs py-2">Annuler</button>
+                <button type="submit"
+                    class="w-full bg-rose-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-rose-500/20">Enregistrer
+                    les Modifications</button>
+                <button type="button" onclick="closeModal('edit-investment')"
+                    class="w-full text-slate-500 text-xs py-2">Annuler</button>
             </form>
         </div>
     </div>
@@ -637,7 +730,8 @@
     <!-- Modal Expense -->
     <div id="modal-expense"
         class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
-        <div class="glass w-full max-w-3xl rounded-3xl p-6 lg:p-8 border border-amber-500/20 shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
+        <div
+            class="glass w-full max-w-3xl rounded-3xl p-6 lg:p-8 border border-amber-500/20 shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
             <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i
                     class="fas fa-shopping-cart text-amber-500"></i> Nouvel Achat / Charge</h4>
             <form onsubmit="submitExpense(event)" class="space-y-4">
@@ -664,16 +758,20 @@
                     class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
                     <option value="">Sélectionnez un Fournisseur...</option>
                 </select>
-                <select id="expense-project" required class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
+                <select id="expense-project" required
+                    class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
                     <option value="">Sélectionnez un Projet en cours...</option>
                 </select>
-                
+
                 <div class="bg-slate-800/20 p-4 rounded-xl border border-slate-700/50">
                     <div class="flex justify-between items-center mb-3">
-                        <label class="block text-[10px] uppercase font-bold text-slate-400">Lignes d'achat (Détails & Montants)</label>
-                        <button type="button" onclick="addExpenseLine()" class="text-xs text-amber-500 font-bold hover:text-amber-400">+ Ajouter une ligne</button>
+                        <label class="block text-[10px] uppercase font-bold text-slate-400">Lignes d'achat (Détails &
+                            Montants)</label>
+                        <button type="button" onclick="addExpenseLine()"
+                            class="text-xs text-amber-500 font-bold hover:text-amber-400">+ Ajouter une ligne</button>
                     </div>
-                    <div class="hidden sm:grid sm:grid-cols-12 gap-2 px-1 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    <div
+                        class="hidden sm:grid sm:grid-cols-12 gap-2 px-1 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                         <div class="col-span-4">Détail de l'article / achat</div>
                         <div class="col-span-2">Qté</div>
                         <div class="col-span-1">Unité</div>
@@ -681,15 +779,24 @@
                         <div class="col-span-3 text-right pr-8">Total (Ar)</div>
                     </div>
                     <div id="expense-lines" class="space-y-3 max-h-60 overflow-y-auto custom-scroll pr-2">
-                        <div class="expense-line grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-900/40 p-3 rounded-xl sm:bg-transparent sm:p-0 border border-slate-800/50 sm:border-none">
-                            <input type="text" placeholder="Détail (ex: Ciment)" required class="sm:col-span-4 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
-                            <input type="number" placeholder="Qté" oninput="calcExpenseLine(this)" required class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
-                            <input type="text" placeholder="Unité (ex: Sac, m2)" required class="sm:col-span-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
-                            <input type="number" placeholder="P.U (Ar)" oninput="calcExpenseLine(this)" required class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                        <div
+                            class="expense-line grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-900/40 p-3 rounded-xl sm:bg-transparent sm:p-0 border border-slate-800/50 sm:border-none">
+                            <input type="text" placeholder="Détail (ex: Ciment)" required
+                                class="sm:col-span-4 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                            <input type="number" placeholder="Qté" oninput="calcExpenseLine(this)" required
+                                class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                            <input type="text" placeholder="Unité (ex: Sac, m2)" required
+                                class="sm:col-span-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                            <input type="number" placeholder="P.U (Ar)" oninput="calcExpenseLine(this)" required
+                                class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
                             <div class="flex sm:col-span-3 items-center gap-2 w-full justify-between sm:justify-end">
                                 <span class="sm:hidden text-xs font-bold text-slate-400">Total:</span>
-                                <input type="text" placeholder="Total (Ar)" readonly class="flex-1 sm:w-full bg-amber-950/50 p-3 rounded-lg border border-amber-800 text-amber-300 font-bold text-sm text-right">
-                                <button type="button" onclick="if(document.querySelectorAll('.expense-line').length>1) { this.closest('.expense-line').remove(); updateExpenseTotal(); }" class="text-rose-500/50 hover:text-rose-500 p-2 text-center"><i class="fas fa-times"></i></button>
+                                <input type="text" placeholder="Total (Ar)" readonly
+                                    class="flex-1 sm:w-full bg-amber-950/50 p-3 rounded-lg border border-amber-800 text-amber-300 font-bold text-sm text-right">
+                                <button type="button"
+                                    onclick="if(document.querySelectorAll('.expense-line').length>1) { this.closest('.expense-line').remove(); updateExpenseTotal(); }"
+                                    class="text-rose-500/50 hover:text-rose-500 p-2 text-center"><i
+                                        class="fas fa-times"></i></button>
                             </div>
                         </div>
                     </div>
@@ -751,7 +858,8 @@
                     <option value="Fournisseur">Fournisseur</option>
                     <option value="Investisseur">Investisseur</option>
                 </select>
-                <div id="client-extra-fields" class="space-y-4 bg-purple-500/5 p-4 rounded-xl border border-purple-500/20 transition-all">
+                <div id="client-extra-fields"
+                    class="space-y-4 bg-purple-500/5 p-4 rounded-xl border border-purple-500/20 transition-all">
                     <input id="collab-nif" type="text" placeholder="NIF"
                         class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-purple-500 text-sm">
                     <input id="collab-stat" type="text" placeholder="STAT"
@@ -770,18 +878,53 @@
         </div>
     </div>
 
+    <!-- Modal Edit Collaborator -->
+    <div id="modal-edit-collaborator"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass w-full max-w-xl rounded-3xl p-8 border border-blue-500/20 shadow-2xl">
+            <h4 class="text-xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-user-edit text-blue-500"></i>
+                Modifier Partenaire</h4>
+            <form onsubmit="submitEditCollaborator(event)" class="space-y-4">
+                <!-- ID caché (ancien nom) -->
+                <input id="edit-collab-old-name" type="hidden">
+                
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Entreprise</label>
+                    <input id="edit-collab-name" type="text" placeholder="Nom de l'entreprise ou du contact" required
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1 pl-2">Contact</label>
+                    <input id="edit-collab-contact" type="text" placeholder="Contact (Téléphone, Email...)"
+                        class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-blue-500 text-sm">
+                </div>
+                
+                <button type="submit"
+                    class="w-full bg-blue-600 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/20">Enregistrer
+                    Modifications</button>
+                <button type="button" onclick="closeModal('edit-collaborator')"
+                    class="w-full text-slate-500 text-xs py-2">Annuler</button>
+            </form>
+        </div>
+    </div>
+
+
     <!-- Modal Project Detail -->
-    <div id="modal-project-detail" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <div id="modal-project-detail"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
         <div class="glass w-full max-w-2xl rounded-3xl p-8 border border-blue-500/20 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
-                <h4 class="text-xl font-bold flex items-center gap-3"><i class="fas fa-folder-open text-blue-500"></i> Détails du Dossier</h4>
-                <button onclick="closeModal('project-detail')" class="text-slate-500 hover:text-white"><i class="fas fa-times"></i></button>
+                <h4 class="text-xl font-bold flex items-center gap-3"><i class="fas fa-folder-open text-blue-500"></i>
+                    Détails du Dossier</h4>
+                <button onclick="closeModal('project-detail')" class="text-slate-500 hover:text-white"><i
+                        class="fas fa-times"></i></button>
             </div>
             <div id="project-detail-content" class="min-h-[200px]">
                 <!-- Contenu injecté via JS -->
             </div>
             <div class="mt-6 pt-6 border-t border-slate-800 text-center">
-                <button type="button" onclick="closeModal('project-detail')" class="text-slate-500 text-xs py-2 hover:text-white">Fermer la vue</button>
+                <button type="button" onclick="closeModal('project-detail')"
+                    class="text-slate-500 text-xs py-2 hover:text-white">Fermer la vue</button>
             </div>
         </div>
     </div>
@@ -825,24 +968,29 @@
         class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
         <div class="glass w-full max-w-4xl rounded-3xl p-10">
             <div class="flex justify-between items-center mb-8">
-                <h4 class="text-2xl font-bold">Détails du Dossier</h4><button onclick="closeModal('project-detail-drill')"
-                    class="text-2xl hover:text-rose-500">&times;</button>
+                <h4 class="text-2xl font-bold">Détails du Dossier</h4><button
+                    onclick="closeModal('project-detail-drill')" class="text-2xl hover:text-rose-500">&times;</button>
             </div>
             <div id="project-detail-content-drill"></div>
         </div>
     </div>
     <!-- Modal Finance Detail -->
-    <div id="modal-finance-detail" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
+    <div id="modal-finance-detail"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
         <div class="glass w-full max-w-2xl rounded-3xl p-8 border border-blue-500/20 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
-                <h4 class="text-xl font-bold flex items-center gap-3"><i class="fas fa-search-dollar text-blue-500"></i> Détails de la ligne</h4>
-                <button onclick="closeModal('finance-detail')" class="text-slate-500 hover:text-white"><i class="fas fa-times"></i></button>
+                <h4 class="text-xl font-bold flex items-center gap-3"><i class="fas fa-search-dollar text-blue-500"></i>
+                    Détails de la ligne</h4>
+                <button onclick="closeModal('finance-detail')" class="text-slate-500 hover:text-white"><i
+                        class="fas fa-times"></i></button>
             </div>
-            <div id="finance-detail-content" class="min-h-[100px] max-h-[60vh] overflow-y-auto custom-scroll space-y-3 pr-2">
+            <div id="finance-detail-content"
+                class="min-h-[100px] max-h-[60vh] overflow-y-auto custom-scroll space-y-3 pr-2">
                 <!-- Contenu injecté via JS -->
             </div>
             <div class="mt-6 pt-6 border-t border-slate-800 text-center">
-                <button type="button" onclick="closeModal('finance-detail')" class="w-full bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl font-bold text-sm transition-all">Fermer</button>
+                <button type="button" onclick="closeModal('finance-detail')"
+                    class="w-full bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl font-bold text-sm transition-all">Fermer</button>
             </div>
         </div>
     </div>
@@ -892,9 +1040,9 @@
             if (id === 'investissements') fetchInvestments();
         }
 
-        function openModal(id) { 
+        function openModal(id) {
             document.querySelectorAll('[id^="modal-"]').forEach(m => m.classList.add('hidden'));
-            document.getElementById('modal-' + id).classList.remove('hidden'); 
+            document.getElementById('modal-' + id).classList.remove('hidden');
         }
         function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); }
 
@@ -902,7 +1050,7 @@
 
         function renderDashboardWidgets(workflowData) {
             // Top Projects
-            const topProjects = workflowData.filter(p => p.status && !p.status.toLowerCase().includes("proforma")).sort((a,b) => (b.revenue - b.cost) - (a.revenue - a.cost)).slice(0,3);
+            const topProjects = workflowData.filter(p => p.status && !p.status.toLowerCase().includes("proforma")).sort((a, b) => (b.revenue - b.cost) - (a.revenue - a.cost)).slice(0, 3);
             const projHtml = topProjects.map(p => `
                 <div class="bg-slate-800/50 p-3 rounded-xl flex justify-between items-center border border-slate-700/50">
                     <div class="overflow-hidden">
@@ -913,7 +1061,7 @@
                 </div>
             `).join('');
             document.getElementById('dashboard-top-projects').innerHTML = projHtml || '<p class="text-xs text-slate-500">Aucun projet actif</p>';
-            
+
             // Alerts
             let alertsHtml = '';
             const unpaid = workflowData.filter(p => p.status && p.status.includes('En attente'));
@@ -928,14 +1076,14 @@
                     </div>
                 </div>`).join('');
             }
-            
+
             document.getElementById('dashboard-alerts').innerHTML = alertsHtml || '<p class="text-xs text-emerald-500"><i class="fas fa-check-circle"></i> Tout est au vert ! Aucun retard.</p>';
         }
 
         function renderProjectsList(workflowData) {
             // Get all projects that are not fully paid/finished
             const activeProjects = workflowData.filter(p => p.project && !p.status.includes('Payé'));
-            
+
             // Deduplicate project names (just in case)
             const uniqueProjects = [];
             const projectMap = new Map();
@@ -946,14 +1094,14 @@
                 }
             });
 
-            const optionsHtml = `<option value="">Sélectionnez un Projet en cours...</option>` + 
+            const optionsHtml = `<option value="">Sélectionnez un Projet en cours...</option>` +
                 uniqueProjects.map(p => `<option value="${p.project}">${p.project} (Client: ${p.client})</option>`).join('');
 
             const expProj = document.getElementById('expense-project');
-            if(expProj) expProj.innerHTML = optionsHtml;
+            if (expProj) expProj.innerHTML = optionsHtml;
 
             const invProj = document.getElementById('invoice-project');
-            if(invProj) invProj.innerHTML = optionsHtml;
+            if (invProj) invProj.innerHTML = optionsHtml;
         }
 
         function autoSetInvoiceDueDate(elem) {
@@ -961,7 +1109,7 @@
             const selectedDate = new Date(elem.value);
             // Add 21 days
             selectedDate.setDate(selectedDate.getDate() + 21);
-            
+
             const dueDateInput = document.getElementById('invoice-due-date');
             if (dueDateInput) {
                 // Format back to YYYY-MM-DD
@@ -972,11 +1120,11 @@
         function autoFillInvoiceData() {
             const projectSelect = document.getElementById('invoice-project');
             const projectName = projectSelect.value;
-            
+
             const amountInput = document.getElementById('invoice-amount');
             const costInput = document.getElementById('invoice-cost');
             const profitDisplay = document.getElementById('invoice-profit');
-            
+
             if (!projectName || !globalDataCache || !globalDataCache.workflow) {
                 amountInput.value = '';
                 costInput.value = '';
@@ -994,7 +1142,7 @@
                 amountInput.value = revenue;
                 costInput.value = cost.toLocaleString() + ' Ar';
                 profitDisplay.textContent = profit.toLocaleString() + ' Ar';
-                
+
                 if (profit >= 0) {
                     profitDisplay.className = 'text-xl font-bold text-emerald-400';
                 } else {
@@ -1006,11 +1154,11 @@
         function renderCompaniesList(companiesData, investmentsData = []) {
             const clients = companiesData.filter(c => c.type && c.type.toLowerCase().includes('client'));
             const fournisseurs = companiesData.filter(c => c.type && c.type.toLowerCase().includes('fournisseur'));
-            
+
             // Collecte des investisseurs (Base clients + Historique)
             const investisseursMap = new Map();
             companiesData.filter(c => c.type && c.type.toLowerCase().includes('investisseur')).forEach(c => investisseursMap.set(c.name, c));
-            
+
             if (investmentsData && investmentsData.length > 0) {
                 investmentsData.forEach(inv => {
                     if (inv.investor && !investisseursMap.has(inv.investor)) {
@@ -1021,16 +1169,16 @@
             const investisseurs = Array.from(investisseursMap.values());
 
             const invCollab = document.getElementById('invoice-collab');
-            if(invCollab) invCollab.innerHTML = `<option value="">Sélectionnez un Client...</option>` + clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-            
+            if (invCollab) invCollab.innerHTML = `<option value="">Sélectionnez un Client...</option>` + clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+
             const profCollab = document.getElementById('proforma-collab');
-            if(profCollab) profCollab.innerHTML = `<option value="">Sélectionnez un Client...</option>` + clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            if (profCollab) profCollab.innerHTML = `<option value="">Sélectionnez un Client...</option>` + clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
 
             const expCollab = document.getElementById('expense-collab');
-            if(expCollab) expCollab.innerHTML = `<option value="">Sélectionnez un Fournisseur...</option>` + fournisseurs.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-            
+            if (expCollab) expCollab.innerHTML = `<option value="">Sélectionnez un Fournisseur...</option>` + fournisseurs.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+
             const investCollab = document.getElementById('investment-collab');
-            if(investCollab) investCollab.innerHTML = `<option value="">Sélectionnez un Investisseur...</option>` + investisseurs.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            if (investCollab) investCollab.innerHTML = `<option value="">Sélectionnez un Investisseur...</option>` + investisseurs.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
         }
 
         async function initGlobalData() {
@@ -1039,14 +1187,14 @@
             const cb = "cb_all_" + Date.now();
             window[cb] = function (data) {
                 globalDataCache = data;
-                
+
                 // 1. Dashboard
                 const dash = data.dashboard;
                 document.getElementById('kpi-revenue').textContent = (dash.kpis.revenue || 0).toLocaleString() + " Ar";
                 document.getElementById('kpi-pending').textContent = (dash.kpis.pending || 0).toLocaleString() + " Ar";
                 document.getElementById('kpi-expenses').textContent = (dash.kpis.expenses || 0).toLocaleString() + " Ar";
                 document.getElementById('kpi-cash').textContent = (dash.kpis.cash || 0).toLocaleString() + " Ar";
-                
+
                 const profit = (dash.kpis.revenue || 0) - (dash.kpis.expenses || 0);
                 const kpiProfit = document.getElementById('kpi-profit');
                 kpiProfit.textContent = profit.toLocaleString() + " Ar";
@@ -1062,16 +1210,16 @@
                 if (dash.achatsAnalysis) {
                     initAchatsAnalysis(dash.achatsAnalysis);
                 }
-                
+
                 // 2. Widgets & Lists
                 renderDashboardWidgets(data.workflow);
-                
+
                 companiesDataCache = data.companies || [];
                 renderCompaniesTable();
-                
+
                 renderCompaniesList(data.companies, data.investments);
                 renderProjectsList(data.workflow);
-                
+
                 // 3. Tables & Caches
                 workflowDataCache = data.workflow || [];
                 if (typeof renderWorkflowTable === 'function') renderWorkflowTable();
@@ -1082,7 +1230,7 @@
 
                 if (typeof renderInvestmentsTable === 'function') renderInvestmentsTable(data.investments);
                 if (typeof renderStocksTable === 'function') renderStocksTable(data.stocks);
-                
+
                 showLoading(false);
                 delete window[cb];
             };
@@ -1110,9 +1258,9 @@
             const filter = (document.getElementById('company-filter')?.value || 'all').toLowerCase();
 
             const filteredData = companiesDataCache.filter(c => {
-                const searchMatch = String(c.name || '').toLowerCase().includes(search) || 
-                                    (c.contact && String(c.contact).toLowerCase().includes(search));
-                
+                const searchMatch = String(c.name || '').toLowerCase().includes(search) ||
+                    (c.contact && String(c.contact).toLowerCase().includes(search));
+
                 let filterMatch = true;
                 if (filter !== 'all') {
                     filterMatch = c.type && String(c.type).toLowerCase().includes(filter);
@@ -1142,7 +1290,11 @@
                     <td class="p-6 text-xs text-slate-400">${c.contact || '-'}</td>
                     <td class="p-6">${cumulHtml}</td>
                     <td class="p-6">${soldeHtml}</td>
-                    <td class="p-6"><span class="px-2 py-1 rounded bg-slate-800 text-[10px]">${c.status}</span></td>
+                    <td class="p-6">
+                        <button onclick="openEditCollaborator('${c.name.replace(/'/g, "\\'")}', '${(c.contact || '').replace(/'/g, "\\'")}')" class="text-blue-400 hover:text-blue-300 font-bold text-xs flex items-center gap-2 transition-colors">
+                            <i class="fas fa-edit"></i> Modifier
+                        </button>
+                    </td>
                 </tr>`;
             }).join('');
         }
@@ -1171,7 +1323,7 @@
         }
 
         function renderInvestmentsTable(data) {
-            if(!data) return;
+            if (!data) return;
             let totalInvest = 0, totalOut = 0, totalRet = 0;
 
             document.getElementById('invest-table-body').innerHTML = data.map(inv => {
@@ -1215,8 +1367,8 @@
             const montant = parseFloat(document.getElementById('invoice-amount').value) || 0;
             const echeance = e.target[5].value; // Date d'échéance is the 6th input (index 5)
 
-            const formData = { 
-                action: "addInvoice", 
+            const formData = {
+                action: "addInvoice",
                 data: {
                     main: [idFac, dateVal, collab, 0, 0, montant, "En attente", projet, echeance],
                     lines: [[idFac, "Prestation Globale (" + projet + ")", 1, "Ens", montant, montant]]
@@ -1254,8 +1406,8 @@
             if (totalAmount <= 0) { alert("Veuillez saisir un montant valide."); return; }
 
             const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
-            const formData = { 
-                action: "addInvoice", 
+            const formData = {
+                action: "addInvoice",
                 data: {
                     main: [idProf, e.target[0].value, e.target[1].value, 0, 0, totalAmount, "Proforma", e.target[2].value, ""],
                     lines: linesArr
@@ -1329,17 +1481,17 @@
 
         async function submitExpense(e) {
             e.preventDefault();
-            const currentCash = parseFloat(document.getElementById('kpi-cash').textContent.replace(/[^0-9.-]+/g,"")) || 0;
-            
+            const currentCash = parseFloat(document.getElementById('kpi-cash').textContent.replace(/[^0-9.-]+/g, "")) || 0;
+
             const lines = document.querySelectorAll('.expense-line');
             let totalAmount = 0;
             let rowsData = [];
-            
+
             const dateAchat = e.target[0].value;
             const monthAchat = e.target[1].value;
             const collabAchat = document.getElementById('expense-collab').value;
             const projetAchat = document.getElementById('expense-project').value;
-            
+
             lines.forEach(line => {
                 const inputs = line.querySelectorAll('input');
                 const detail = inputs[0].value;
@@ -1348,9 +1500,9 @@
                 const pu = parseFloat(inputs[3].value) || 0;
                 const tot = parseFloat(inputs[4].value) || 0;
                 totalAmount += tot;
-                
+
                 const detailStr = `${detail} (${qte} ${unit} x ${pu.toLocaleString()} Ar)`;
-                
+
                 rowsData.push([
                     dateAchat,
                     collabAchat,
@@ -1374,12 +1526,12 @@
             }
 
             const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
-            const formData = { 
-                action: "addExpense", 
+            const formData = {
+                action: "addExpense",
                 month: monthAchat,
-                data: rowsData 
+                data: rowsData
             };
-            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('expense'); fetchData(); } catch(err) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer l'Achat"; }
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('expense'); fetchData(); } catch (err) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer l'Achat"; }
         }
 
         async function submitCash(e) {
@@ -1405,20 +1557,55 @@
 
         async function submitCollaborator(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button'); btn.innerHTML = "...";
+            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
             const name = document.getElementById('collab-name').value;
             const type = document.getElementById('collab-type').value;
             const contact = document.getElementById('collab-contact').value;
-            
-            let nif = "", stat = "", adresse = "";
-            if (type === "Client") {
-                nif = document.getElementById('collab-nif').value;
-                stat = document.getElementById('collab-stat').value;
-                adresse = document.getElementById('collab-adresse').value;
-            }
+            const nif = document.getElementById('collab-nif').value;
+            const stat = document.getElementById('collab-stat').value;
+            const adresse = document.getElementById('collab-adresse').value;
 
             const formData = { action: "addCollaborator", data: [name, type, contact, nif, stat, adresse] };
-            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('collaborator'); fetchCompaniesList(); fetchCompanies(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Ajouter Collaborateur"; }
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('collaborator'); fetchData(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Ajouter Collaborateur"; }
+        }
+
+        function openEditCollaborator(name, contact) {
+            document.getElementById('edit-collab-old-name').value = name;
+            document.getElementById('edit-collab-name').value = name;
+            document.getElementById('edit-collab-contact').value = contact;
+            openModal('edit-collaborator');
+        }
+
+        async function submitEditCollaborator(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "...";
+            
+            const oldName = document.getElementById('edit-collab-old-name').value;
+            const newName = document.getElementById('edit-collab-name').value;
+            const newContact = document.getElementById('edit-collab-contact').value;
+
+            const formData = {
+                action: "editEntry",
+                file: "facturation",
+                sheet: "Base clients",
+                id: oldName,
+                data: {
+                    "Nom du Partenaire": newName,
+                    "Contact": newContact
+                }
+            };
+
+            try {
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) });
+                closeModal('edit-collaborator');
+                fetchData(); // Reloads all data to reflect changes
+            } catch (err) {
+                alert("Erreur lors de la modification");
+            } finally {
+                btn.innerHTML = originalText;
+            }
         }
 
         async function submitInvestment(e) {
@@ -1476,10 +1663,10 @@
                 return;
             }
             if (!confirm(`Confirmer le paiement de ${amount.toLocaleString()} Ar pour la facture ${id} ?\n\nCela va automatiquement l'ajouter à votre Trésorerie.`)) return;
-            
+
             showLoading(true);
             const statusParams = { action: "updateStatus", file: 'facturation', sheet: 'Base facturation', id: id, status: 'Payé', colIndex: 6 };
-            
+
             const d = new Date();
             const dateStr = d.toISOString().split('T')[0];
             const cashData = [
@@ -1496,7 +1683,7 @@
             try {
                 await fetch(API_URL, { method: 'POST', body: JSON.stringify(statusParams) });
                 await fetch(API_URL, { method: 'POST', body: JSON.stringify(cashParams) });
-                fetchData(); 
+                fetchData();
                 fetchWorkflow();
             } catch (e) { alert("Erreur lors de l'enregistrement du paiement"); }
             finally { showLoading(false); }
@@ -1504,7 +1691,7 @@
 
         function resetProformaForm() {
             const form = document.querySelector('#modal-proforma form');
-            if(form) form.reset();
+            if (form) form.reset();
             const container = document.getElementById('proforma-lines');
             if (container) {
                 container.innerHTML = `
@@ -1532,7 +1719,7 @@
 
         function resetExpenseForm() {
             const form = document.querySelector('#modal-expense form');
-            if(form) form.reset();
+            if (form) form.reset();
             const container = document.getElementById('expense-lines');
             if (container) {
                 container.innerHTML = `
@@ -1579,13 +1766,13 @@
             openModal('edit-workflow');
             document.getElementById('edit-w-id').value = id;
             if (date) {
-                try { document.getElementById('edit-w-date').value = new Date(date).toISOString().split('T')[0]; } catch(e){}
+                try { document.getElementById('edit-w-date').value = new Date(date).toISOString().split('T')[0]; } catch (e) { }
             }
             document.getElementById('edit-w-client').value = client || '';
             document.getElementById('edit-w-project').value = project || '';
             document.getElementById('edit-w-amount').value = parseFloat(amount) || 0;
             if (dueDate) {
-                try { document.getElementById('edit-w-duedate').value = new Date(dueDate).toISOString().split('T')[0]; } catch(e){}
+                try { document.getElementById('edit-w-duedate').value = new Date(dueDate).toISOString().split('T')[0]; } catch (e) { }
             }
         }
 
@@ -1608,14 +1795,14 @@
             openModal('edit-investment');
             document.getElementById('edit-inv-id').value = id;
             if (date) {
-                try { document.getElementById('edit-inv-date').value = new Date(date).toISOString().split('T')[0]; } catch(e){}
+                try { document.getElementById('edit-inv-date').value = new Date(date).toISOString().split('T')[0]; } catch (e) { }
             }
             document.getElementById('edit-inv-investor').value = investor || '';
             document.getElementById('edit-inv-type').value = type || 'Apport (Entrée)';
             document.getElementById('edit-inv-amount').value = parseFloat(amount) || 0;
             document.getElementById('edit-inv-details').value = details || '';
             if (deadline) {
-                try { document.getElementById('edit-inv-deadline').value = new Date(deadline).toISOString().split('T')[0]; } catch(e){}
+                try { document.getElementById('edit-inv-deadline').value = new Date(deadline).toISOString().split('T')[0]; } catch (e) { }
             }
             document.getElementById('edit-inv-status').value = status || 'Actif';
         }
@@ -1627,7 +1814,7 @@
             const statusVal = document.getElementById('edit-inv-status').value;
             const amountVal = parseFloat(document.getElementById('edit-inv-amount').value) || 0;
             const investorVal = document.getElementById('edit-inv-investor').value;
-            
+
             const dataObj = {
                 "Date": document.getElementById('edit-inv-date').value,
                 "Investisseur": investorVal,
@@ -1637,12 +1824,12 @@
                 "Échéance de retour": document.getElementById('edit-inv-deadline').value,
                 "Statut": statusVal
             };
-            
+
             const formData = { action: "editEntry", file: "tresorerie", sheet: "Investissements", id: id, data: dataObj };
-            
-            try { 
-                await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); 
-                
+
+            try {
+                await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) });
+
                 if (statusVal === 'Payé (Remboursé)') {
                     if (confirm(`Voulez-vous enregistrer automatiquement le remboursement de ${amountVal.toLocaleString()} Ar à ${investorVal} dans votre Trésorerie ?`)) {
                         const d = new Date();
@@ -1659,10 +1846,10 @@
                         await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "addCash", data: cashData }) });
                     }
                 }
-                
-                closeModal('edit-investment'); 
-                fetchData(); 
-                fetchInvestments(); 
+
+                closeModal('edit-investment');
+                fetchData();
+                fetchInvestments();
             } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer les Modifications"; }
         }
 
@@ -1674,9 +1861,9 @@
 
             const filteredData = workflowDataCache.filter(w => {
                 // Search filter
-                const searchMatch = w.project.toLowerCase().includes(search) || 
-                                    (w.client && w.client.toLowerCase().includes(search));
-                
+                const searchMatch = w.project.toLowerCase().includes(search) ||
+                    (w.client && w.client.toLowerCase().includes(search));
+
                 // Status filter
                 let statusMatch = true;
                 if (filter === 'proforma') {
@@ -1684,7 +1871,7 @@
                 } else if (filter === 'vente') {
                     statusMatch = !w.phaseVente.toLowerCase().includes('proforma');
                 }
-                
+
                 return searchMatch && statusMatch;
             });
 
@@ -1721,7 +1908,7 @@
             document.body.appendChild(s);
         }
 
-        async function requestSheetPDF(type, id, client, project, date, dueDate, lines, total, paymentType = "numerique") {
+        async function requestSheetPDF(type, id, client, project, date, dueDate, lines, total) {
             showLoading(true);
             const formData = {
                 action: "generateSheetPDF",
@@ -1732,8 +1919,7 @@
                 date: date,
                 dueDate: dueDate,
                 lines: lines,
-                total: total,
-                paymentType: paymentType
+                total: total
             };
 
             try {
@@ -1742,7 +1928,7 @@
                     body: JSON.stringify(formData)
                 });
                 const result = await response.json();
-                
+
                 if (result.error) {
                     alert("Erreur lors de la génération du PDF : " + result.error);
                 } else if (result.success && result.pdfBase64) {
@@ -1769,9 +1955,9 @@
                 const inv = data.invoices[0] || [id, new Date(), "Client Inconnu", 0, 0, 0, "Statut", "Projet Inconnu", ""];
                 let totalRevenus = parseFloat(inv[5]) || 0;
                 let totalCouts = 0;
-                
+
                 const linesHtml = (data.lines || []).map(l => `<div class="bg-slate-900/50 p-3 rounded-xl flex justify-between text-sm"><span>${l[1]} (${l[2]} ${l[3]})</span><span class="font-bold text-emerald-400">${(parseFloat(l[5]) || 0).toLocaleString()} Ar</span></div>`).join('');
-                
+
                 const coutsHtml = (data.costs || []).map(c => {
                     totalCouts += (parseFloat(c[3]) || 0);
                     return `<div class="bg-slate-900/50 p-3 rounded-xl flex justify-between text-sm"><span>${c[1] || 'Achat'}</span><span class="font-bold text-rose-400">-${(c[3] || 0).toLocaleString()} Ar</span></div>`;
@@ -1783,22 +1969,13 @@
                         <h4 class="font-bold text-lg text-blue-400">${inv[7] || 'Projet'}</h4>
                         <p class="text-xs text-slate-400">Client : ${inv[2]} | Statut : <span class="text-amber-400 font-bold">${inv[6]}</span></p>
                     </div>
-                    <div class="flex flex-col items-end gap-3">
-                        <div class="flex items-center gap-2 bg-slate-900/80 p-2 rounded-xl border border-slate-700/50 shadow-inner">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider"><i class="fas fa-wallet mr-1"></i> Mode de paiement :</span>
-                            <select id="payment-method-select" class="bg-transparent text-xs text-blue-400 outline-none font-bold px-2 cursor-pointer">
-                                <option value="numerique" class="bg-slate-800">Numérique (Virement/Chèque)</option>
-                                <option value="espece" class="bg-slate-800">Espèce</option>
-                            </select>
-                        </div>
-                        <div class="flex gap-3">
-                            <button onclick='requestSheetPDF("PROFORMA", ${JSON.stringify(inv[0])}, ${JSON.stringify(inv[2])}, ${JSON.stringify(inv[7])}, ${JSON.stringify(inv[1])}, ${JSON.stringify(inv[8])}, ${JSON.stringify(data.lines || [])}, ${totalRevenus}, document.getElementById("payment-method-select").value)' class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 shadow-lg shadow-indigo-500/20 transition-all">
-                                <i class="fas fa-file-invoice"></i> Générer Devis (PDF)
-                            </button>
-                            <button onclick='requestSheetPDF("FACTURE", ${JSON.stringify(inv[0])}, ${JSON.stringify(inv[2])}, ${JSON.stringify(inv[7])}, ${JSON.stringify(inv[1])}, ${JSON.stringify(inv[8])}, ${JSON.stringify(data.lines || [])}, ${totalRevenus}, document.getElementById("payment-method-select").value)' class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 shadow-lg shadow-blue-500/20 transition-all">
-                                <i class="fas fa-file-invoice-dollar"></i> Générer Facture (PDF)
-                            </button>
-                        </div>
+                    <div class="flex gap-3">
+                        <button onclick='requestSheetPDF("PROFORMA", ${JSON.stringify(inv[0])}, ${JSON.stringify(inv[2])}, ${JSON.stringify(inv[7])}, ${JSON.stringify(inv[1])}, ${JSON.stringify(inv[8])}, ${JSON.stringify(data.lines || [])}, ${totalRevenus})' class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 shadow-lg shadow-indigo-500/20 transition-all">
+                            <i class="fas fa-file-invoice"></i> Générer Devis (PDF)
+                        </button>
+                        <button onclick='requestSheetPDF("FACTURE", ${JSON.stringify(inv[0])}, ${JSON.stringify(inv[2])}, ${JSON.stringify(inv[7])}, ${JSON.stringify(inv[1])}, ${JSON.stringify(inv[8])}, ${JSON.stringify(data.lines || [])}, ${totalRevenus})' class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 shadow-lg shadow-blue-500/20 transition-all">
+                            <i class="fas fa-file-invoice-dollar"></i> Générer Facture (PDF)
+                        </button>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-8">
@@ -1842,7 +2019,7 @@
         }
 
         function renderStocksTable(data) {
-            if(!data) return;
+            if (!data) return;
             document.getElementById('stock-table-body').innerHTML = data.map(s => `
                 <tr class="border-t border-slate-800">
                     <td class="p-6 font-semibold">${s.name}</td>
@@ -1873,8 +2050,8 @@
 
             const filteredData = financeDataCache.filter(h => {
                 const searchMatch = (h.label && h.label.toLowerCase().includes(search)) ||
-                                    (h.category && h.category.toLowerCase().includes(search));
-                
+                    (h.category && h.category.toLowerCase().includes(search));
+
                 let filterMatch = true;
                 if (filter === 'in') filterMatch = h.in > 0;
                 if (filter === 'out') filterMatch = h.out > 0;
@@ -1904,7 +2081,7 @@
         function viewFinanceDetails(index) {
             const rowData = financeDataCache[index];
             if (!rowData) return;
-            
+
             let raw = rowData.rawData;
             let headers = financeHeadersCache;
 
@@ -1913,22 +2090,22 @@
                 raw = [rowData.id, rowData.date, rowData.category, rowData.label, rowData.in, rowData.out, rowData.balance];
                 headers = ["ID", "Date", "Catégorie", "Désignation", "Entrées", "Sorties", "Solde"];
             }
-            
+
             let html = '';
             raw.forEach((val, i) => {
                 const headerName = headers[i] || `Colonne ${i + 1}`;
-                
+
                 let displayVal = val;
                 if (typeof displayVal === 'string') {
                     displayVal = displayVal.trim();
                 }
-                
+
                 if (displayVal instanceof Date || (typeof displayVal === 'string' && displayVal.match(/^\d{4}-\d{2}-\d{2}T/))) {
-                    try { displayVal = new Date(displayVal).toLocaleDateString(); } catch(e){}
+                    try { displayVal = new Date(displayVal).toLocaleDateString(); } catch (e) { }
                 } else if (typeof displayVal === 'number' && !headerName.toLowerCase().includes('id')) {
                     displayVal = displayVal.toLocaleString() + ' Ar';
                 }
-                
+
                 if (displayVal === undefined || displayVal === null || displayVal === '') {
                     displayVal = '<span class="italic text-slate-500">Vide</span>';
                 }
@@ -1939,7 +2116,7 @@
                     <span class="text-sm font-semibold text-right w-2/3 break-words text-white">${displayVal}</span>
                 </div>`;
             });
-            
+
             document.getElementById('finance-detail-content').innerHTML = html;
             openModal('finance-detail');
         }
@@ -1974,7 +2151,7 @@
             const isDark = theme === 'dark';
             const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(77,77,77,0.1)';
             const textColor = isDark ? '#ffd97d' : '#4d4d4d';
-            
+
             mainChart.data.datasets[0].backgroundColor = isDark ? 'rgba(30, 142, 30, 0.1)' : 'rgba(30, 142, 30, 0.15)';
             mainChart.data.datasets[1].backgroundColor = isDark ? 'rgba(238, 96, 85, 0.1)' : 'rgba(238, 96, 85, 0.15)';
 
@@ -1988,73 +2165,73 @@
         function initChart(chartData) {
             const ctx = document.getElementById('mainChart').getContext('2d');
             if (mainChart) mainChart.destroy();
-            
-            const labels = chartData ? chartData.labels : ['Jan','Feb','Mar','Apr','Mai'];
-            const revenus = chartData ? chartData.revenus : [0,0,0,0,0];
-            const depenses = chartData ? chartData.depenses : [0,0,0,0,0];
+
+            const labels = chartData ? chartData.labels : ['Jan', 'Feb', 'Mar', 'Apr', 'Mai'];
+            const revenus = chartData ? chartData.revenus : [0, 0, 0, 0, 0];
+            const depenses = chartData ? chartData.depenses : [0, 0, 0, 0, 0];
 
             const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
             const isDark = currentTheme === 'dark';
             const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(77,77,77,0.1)';
             const textColor = isDark ? '#ffd97d' : '#4d4d4d';
 
-            mainChart = new Chart(ctx, { 
-                type: 'line', 
-                data: { 
-                    labels: labels, 
+            mainChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
                     datasets: [
-                        { 
-                            label: 'Revenus', 
-                            data: revenus, 
-                            borderColor: '#1e8e1e', 
-                            borderWidth: 4, 
-                            fill: true, 
-                            backgroundColor: isDark ? 'rgba(30, 142, 30, 0.1)' : 'rgba(30, 142, 30, 0.15)', 
-                            tension: 0.4, 
+                        {
+                            label: 'Revenus',
+                            data: revenus,
+                            borderColor: '#1e8e1e',
+                            borderWidth: 4,
+                            fill: true,
+                            backgroundColor: isDark ? 'rgba(30, 142, 30, 0.1)' : 'rgba(30, 142, 30, 0.15)',
+                            tension: 0.4,
                             pointRadius: 4,
                             pointBackgroundColor: '#1e8e1e'
                         },
-                        { 
-                            label: 'Dépenses', 
-                            data: depenses, 
-                            borderColor: '#ee6055', 
-                            borderWidth: 4, 
-                            fill: true, 
-                            backgroundColor: isDark ? 'rgba(238, 96, 85, 0.1)' : 'rgba(238, 96, 85, 0.15)', 
-                            tension: 0.4, 
+                        {
+                            label: 'Dépenses',
+                            data: depenses,
+                            borderColor: '#ee6055',
+                            borderWidth: 4,
+                            fill: true,
+                            backgroundColor: isDark ? 'rgba(238, 96, 85, 0.1)' : 'rgba(238, 96, 85, 0.15)',
+                            tension: 0.4,
                             pointRadius: 4,
                             pointBackgroundColor: '#ee6055'
                         }
-                    ] 
-                }, 
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { 
-                        legend: { display: true, labels: { color: textColor, font: { family: 'Outfit', weight: 'bold' } } } 
-                    }, 
-                    scales: { 
-                        y: { grid: { color: gridColor }, ticks: { color: textColor, callback: value => value.toLocaleString() + ' Ar' } }, 
-                        x: { grid: { display: false }, ticks: { color: textColor } } 
-                    } 
-                } 
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, labels: { color: textColor, font: { family: 'Outfit', weight: 'bold' } } }
+                    },
+                    scales: {
+                        y: { grid: { color: gridColor }, ticks: { color: textColor, callback: value => value.toLocaleString() + ' Ar' } },
+                        x: { grid: { display: false }, ticks: { color: textColor } }
+                    }
+                }
             });
         }
 
         function initAchatsAnalysis(analysisData) {
             if (!analysisData) return;
-            
+
             // 1. Dépenses par catégorie (Doughnut Chart)
             const ctxCat = document.getElementById('categoryChart');
             if (ctxCat) {
                 if (categoryChart) categoryChart.destroy();
-                
+
                 const catLabels = Object.keys(analysisData.byCategory);
                 const catValues = Object.values(analysisData.byCategory);
-                
+
                 const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
                 const textColor = currentTheme === 'dark' ? '#ffd97d' : '#4d4d4d';
-                
+
                 categoryChart = new Chart(ctxCat.getContext('2d'), {
                     type: 'doughnut',
                     data: {
@@ -2071,7 +2248,7 @@
                         maintainAspectRatio: false,
                         cutout: '65%',
                         plugins: {
-                            legend: { 
+                            legend: {
                                 position: 'right',
                                 labels: { color: textColor, font: { family: 'Outfit', size: 10 }, boxWidth: 12 }
                             }
@@ -2079,15 +2256,15 @@
                     }
                 });
             }
-            
+
             // 2. Top Fournisseurs
             const listEl = document.getElementById('top-suppliers-list');
             if (listEl) {
                 const suppliers = Object.entries(analysisData.bySupplier)
-                    .map(([name, total]) => ({name, total}))
+                    .map(([name, total]) => ({ name, total }))
                     .sort((a, b) => b.total - a.total)
                     .slice(0, 5); // Take top 5
-                    
+
                 if (suppliers.length > 0) {
                     listEl.innerHTML = suppliers.map((s, index) => `
                         <div class="bg-slate-800/50 p-3 rounded-xl flex justify-between items-center border border-slate-700/50">
