@@ -1521,7 +1521,10 @@
 
         async function submitInvoice(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
+            const btn = e.target.querySelector('button[type="submit"]'); 
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.innerHTML = "...";
             const idFac = "FAC-" + Date.now().toString().slice(-4);
             const dateVal = e.target[0].value;
             const collab = document.getElementById('invoice-collab').value;
@@ -1537,7 +1540,7 @@
                     lines: [[idFac, "Prestation Globale (" + projet + ")", 1, "Ens", montant, montant]]
                 }
             };
-            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('invoice'); fetchData(); fetchWorkflow(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer la Vente"; }
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('invoice'); fetchData(); fetchWorkflow(); } catch (e) { alert("Erreur"); } finally { btn.disabled = false; btn.innerHTML = "Enregistrer la Vente"; }
         }
 
         function calcProformaLine(elem) {
@@ -1569,7 +1572,10 @@
             });
             if (totalAmount <= 0) { alert("Veuillez saisir un montant valide."); return; }
 
-            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
+            const btn = e.target.querySelector('button[type="submit"]'); 
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.innerHTML = "...";
             const formData = {
                 action: "addInvoice",
                 data: {
@@ -1577,7 +1583,7 @@
                     lines: linesArr
                 }
             };
-            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('proforma'); fetchData(); fetchWorkflow(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer le Proforma"; }
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('proforma'); fetchData(); fetchWorkflow(); } catch (e) { alert("Erreur"); } finally { btn.disabled = false; btn.innerHTML = "Enregistrer le Proforma"; }
         }
 
         function updateProformaTotal() {
@@ -1845,15 +1851,18 @@
                 month: monthAchat + " " + year,
                 data: rowsData
             };
-            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('expense'); fetchData(); } catch (err) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer l'Achat"; }
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('expense'); fetchData(); } catch (err) { alert("Erreur"); } finally { btn.disabled = false; btn.innerHTML = "Enregistrer l'Achat"; }
         }
 
         async function submitCash(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button'); btn.innerHTML = "...";
+            const btn = e.target.querySelector('button'); 
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.innerHTML = "...";
             const u = localStorage.getItem('erp_username') || "Inconnu";
             const formData = { action: "addCash", data: ["CSH-" + Date.now().toString().slice(-4), e.target[0].value, e.target[1].value, e.target[2].value + " [Par: " + u + "]", parseFloat(e.target[3].value) || 0, parseFloat(e.target[4].value) || 0, 0] };
-            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('cash'); fetchFinance(); fetchData(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Valider l'Opération"; }
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('cash'); fetchFinance(); fetchData(); } catch (e) { alert("Erreur"); } finally { btn.disabled = false; btn.innerHTML = "Valider l'Opération"; }
         }
 
         function toggleClientFields(val) {
@@ -1872,7 +1881,10 @@
 
         async function submitCollaborator(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button'); btn.innerHTML = "...";
+            const btn = e.target.querySelector('button'); 
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.innerHTML = "...";
             const name = document.getElementById('collab-name').value;
             const type = document.getElementById('collab-type').value;
             const contact = document.getElementById('collab-contact').value;
@@ -1885,7 +1897,7 @@
             }
 
             const formData = { action: "addCollaborator", data: [name, type, contact, nif, stat, adresse] };
-            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('collaborator'); fetchCompaniesList(); fetchCompanies(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Ajouter Collaborateur"; }
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('collaborator'); fetchCompaniesList(); fetchCompanies(); } catch (e) { alert("Erreur"); } finally { btn.disabled = false; btn.innerHTML = "Ajouter Collaborateur"; }
         }
 
         function openEditCollaborator(name, contact) {
@@ -1898,6 +1910,8 @@
         async function submitEditCollaborator(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
+            if (btn.disabled) return;
+            btn.disabled = true;
             const originalText = btn.innerHTML;
             btn.innerHTML = "...";
 
@@ -1929,7 +1943,10 @@
 
         async function submitInvestment(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
+            const btn = e.target.querySelector('button[type="submit"]'); 
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.innerHTML = "...";
             const formData = {
                 action: "addInvestment",
                 data: [
@@ -1943,7 +1960,7 @@
                     "En cours" // Statut
                 ]
             };
-            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('investment'); fetchInvestments(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Valider l'Investissement"; }
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('investment'); fetchInvestments(); } catch (e) { alert("Erreur"); } finally { btn.disabled = false; btn.innerHTML = "Valider l'Investissement"; }
         }
 
         // Rest of unchanged UI logic functions
@@ -2098,7 +2115,10 @@
 
         async function submitEditWorkflow(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
+            const btn = e.target.querySelector('button[type="submit"]'); 
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.innerHTML = "...";
             const id = document.getElementById('edit-w-id').value;
             const dataObj = {
                 "Date": document.getElementById('edit-w-date').value,
@@ -2108,7 +2128,7 @@
                 "Echéance": document.getElementById('edit-w-duedate').value
             };
             const formData = { action: "editEntry", file: "facturation", sheet: "Base facturation", id: id, data: dataObj };
-            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('edit-workflow'); fetchData(); fetchWorkflow(); } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer les Modifications"; }
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('edit-workflow'); fetchData(); fetchWorkflow(); } catch (e) { alert("Erreur"); } finally { btn.disabled = false; btn.innerHTML = "Enregistrer les Modifications"; }
         }
 
         function editInvestment(id, date, investor, type, amount, details, deadline, status) {
@@ -2129,7 +2149,10 @@
 
         async function submitEditInvestment(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
+            const btn = e.target.querySelector('button[type="submit"]'); 
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.innerHTML = "...";
             const id = document.getElementById('edit-inv-id').value;
             const statusVal = document.getElementById('edit-inv-status').value;
             const amountVal = parseFloat(document.getElementById('edit-inv-amount').value) || 0;
@@ -2170,7 +2193,7 @@
                 closeModal('edit-investment');
                 fetchData();
                 fetchInvestments();
-            } catch (e) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer les Modifications"; }
+            } catch (e) { alert("Erreur"); } finally { btn.disabled = false; btn.innerHTML = "Enregistrer les Modifications"; }
         }
 
         let workflowDataCache = [];
