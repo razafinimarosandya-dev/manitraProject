@@ -871,7 +871,7 @@
                     class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
                     <option value="">Sélectionnez un Fournisseur (Filtre Global)...</option>
                 </select>
-                <select id="expense-project" required onchange="loadProformaLinesForExpense(this.value)"
+                <select id="expense-project" required onchange="loadProformaLinesForExpense(this)"
                     class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
                     <option value="">Sélectionnez un Projet en cours...</option>
                 </select>
@@ -1210,7 +1210,7 @@
             });
 
             const optionsHtml = `<option value="">Sélectionnez un Projet en cours...</option>` +
-                uniqueProjects.map(p => `<option value="${p.project}">${p.project} (Client: ${p.client})</option>`).join('');
+                uniqueProjects.map(p => `<option value="${p.project}" data-id="${p.id}">${p.project} (Client: ${p.client})</option>`).join('');
 
             const expProj = document.getElementById('expense-project');
             if (expProj) expProj.innerHTML = optionsHtml;
@@ -1652,13 +1652,22 @@
             return companiesDataCache.filter(c => c.type === "Fournisseur").map(c => `<option value="${c.name}">${c.name}</option>`).join('');
         }
 
-        function loadProformaLinesForExpense(projectId) {
+        function loadProformaLinesForExpense(selectElem) {
             const container = document.getElementById('expense-lines');
-            if(!projectId) {
+            if(!selectElem || !selectElem.value) {
                 container.innerHTML = '<div class="text-center p-8 text-slate-500 text-sm italic">Sélectionnez un projet pour importer les lignes.</div>';
                 updateExpenseTotal();
                 return;
             }
+            const selectedOption = selectElem.options[selectElem.selectedIndex];
+            const projectId = selectedOption ? selectedOption.getAttribute('data-id') : null;
+            
+            if(!projectId) {
+                container.innerHTML = '<div class="text-center p-8 text-slate-500 text-sm italic">ID de projet introuvable.</div>';
+                updateExpenseTotal();
+                return;
+            }
+            
             container.innerHTML = "<div class='flex justify-center p-8'><i class='fas fa-spinner animate-spin text-amber-500 text-2xl'></i></div>";
             
             doJSONPFetch('getProjectDetail', function(data) {
@@ -2069,6 +2078,7 @@
                 projInput.value = proj;
                 projInput.setAttribute('readonly', true);
                 projInput.classList.add('bg-slate-800', 'text-slate-400');
+                loadProformaLinesForExpense(projInput);
             }
         }
 
