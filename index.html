@@ -867,55 +867,51 @@
                         <option value="Décembre">Décembre</option>
                     </select>
                 </div>
-                <select id="expense-collab" required
+                <select id="expense-collab" onchange="filterExpenseLines()"
                     class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
-                    <option value="">Sélectionnez un Fournisseur...</option>
+                    <option value="">Sélectionnez un Fournisseur (Filtre Global)...</option>
                 </select>
-                <select id="expense-project" required
+                <select id="expense-project" required onchange="loadProformaLinesForExpense(this.value)"
                     class="w-full bg-slate-900/50 p-4 rounded-xl border border-slate-800 outline-none focus:border-amber-500 text-sm">
                     <option value="">Sélectionnez un Projet en cours...</option>
                 </select>
 
                 <div class="bg-slate-800/20 p-4 rounded-xl border border-slate-700/50">
                     <div class="flex justify-between items-center mb-3">
-                        <label class="block text-[10px] uppercase font-bold text-slate-400">Lignes d'achat (Détails &
-                            Montants)</label>
-                        <button type="button" onclick="addExpenseLine()"
-                            class="text-xs text-amber-500 font-bold hover:text-amber-400">+ Ajouter une ligne</button>
-                    </div>
-                    <div
-                        class="hidden sm:grid sm:grid-cols-12 gap-2 px-1 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                        <div class="col-span-4">Détail de l'article / achat</div>
-                        <div class="col-span-2">Qté</div>
-                        <div class="col-span-1">Unité</div>
-                        <div class="col-span-2">Prix Unit. (Ar)</div>
-                        <div class="col-span-3 text-right pr-8">Total (Ar)</div>
-                    </div>
-                    <div id="expense-lines" class="space-y-3 max-h-60 overflow-y-auto custom-scroll pr-2">
-                        <div
-                            class="expense-line grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-900/40 p-3 rounded-xl sm:bg-transparent sm:p-0 border border-slate-800/50 sm:border-none">
-                            <input type="text" placeholder="Détail (ex: Ciment)" required
-                                class="sm:col-span-4 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
-                            <input type="number" placeholder="Qté" oninput="calcExpenseLine(this)" required
-                                class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
-                            <input type="text" placeholder="Unité (ex: Sac, m2)" required
-                                class="sm:col-span-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
-                            <input type="number" placeholder="P.U (Ar)" oninput="calcExpenseLine(this)" required
-                                class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
-                            <div class="flex sm:col-span-3 items-center gap-2 w-full justify-between sm:justify-end">
-                                <span class="sm:hidden text-xs font-bold text-slate-400">Total:</span>
-                                <input type="text" placeholder="Total (Ar)" readonly
-                                    class="flex-1 sm:w-full bg-amber-950/50 p-3 rounded-lg border border-amber-800 text-amber-300 font-bold text-sm text-right">
-                                <button type="button"
-                                    onclick="if(document.querySelectorAll('.expense-line').length>1) { this.closest('.expense-line').remove(); updateExpenseTotal(); }"
-                                    class="text-rose-500/50 hover:text-rose-500 p-2 text-center"><i
-                                        class="fas fa-times"></i></button>
-                            </div>
+                        <div>
+                            <label class="block text-[10px] uppercase font-bold text-slate-400">Lignes d'achat (Importées du Proforma)</label>
+                            <span id="expense-line-counter" class="text-xs text-amber-500 font-bold">Lignes affichées : 0/0</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="selectAllExpenseLines(true)" class="text-[10px] text-emerald-400 font-bold hover:text-emerald-300 px-2 py-1 bg-emerald-500/10 rounded">Tout cocher</button>
+                            <button type="button" onclick="selectAllExpenseLines(false)" class="text-[10px] text-rose-400 font-bold hover:text-rose-300 px-2 py-1 bg-rose-500/10 rounded">Tout décocher</button>
+                            <button type="button" onclick="addExpenseLine(true)" class="text-[10px] text-amber-500 font-bold hover:text-amber-400 px-2 py-1 bg-amber-500/10 rounded ml-2">+ Ajouter vide</button>
                         </div>
                     </div>
-                    <div class="mt-3 text-right">
-                        <span class="text-[10px] text-slate-500 uppercase font-bold mr-2">Total estimé:</span>
-                        <span id="expense-total-display" class="font-bold text-amber-500 text-lg">0 Ar</span>
+                    <div class="hidden sm:grid sm:grid-cols-12 gap-2 px-1 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        <div class="col-span-4">Coche & Détail de l'achat</div>
+                        <div class="col-span-1">Qté</div>
+                        <div class="col-span-1">Unité</div>
+                        <div class="col-span-2">Prix Unit. (Ar)</div>
+                        <div class="col-span-2">Fournisseur</div>
+                        <div class="col-span-2 text-right pr-8">Total (Ar)</div>
+                    </div>
+                    <div id="expense-lines" class="space-y-3 max-h-60 overflow-y-auto custom-scroll pr-2">
+                        <div class="text-center p-8 text-slate-500 text-sm italic">Sélectionnez un projet pour importer les lignes.</div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-slate-700 grid grid-cols-1 sm:grid-cols-3 gap-4 text-right">
+                        <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-700/50">
+                            <span class="block text-[10px] text-slate-500 uppercase font-bold">Total Global Projet</span>
+                            <span id="expense-total-global" class="font-bold text-slate-400 text-lg">0 Ar</span>
+                        </div>
+                        <div class="bg-blue-900/10 p-3 rounded-xl border border-blue-500/20">
+                            <span class="block text-[10px] text-blue-400/70 uppercase font-bold">Total Fournisseur (Filtre)</span>
+                            <span id="expense-total-fournisseur" class="font-bold text-blue-400 text-lg">0 Ar</span>
+                        </div>
+                        <div class="bg-amber-900/20 p-3 rounded-xl border border-amber-500/30">
+                            <span class="block text-[10px] text-amber-500/70 uppercase font-bold">Total Sélectionné (À PAYER)</span>
+                            <span id="expense-total-display" class="font-bold text-amber-500 text-xl">0 Ar</span>
+                        </div>
                     </div>
                 </div>
 
@@ -1612,39 +1608,168 @@
 
         function calcExpenseLine(elem) {
             const parent = elem.closest('.expense-line');
-            const inputs = parent.querySelectorAll('input');
-            const qte = parseFloat(inputs[1].value) || 0;
-            const pu = parseFloat(inputs[3].value) || 0;
-            const total = qte * pu;
-            inputs[4].value = total;
+            const qte = parseFloat(parent.querySelector('.line-qte').value) || 0;
+            const pu = parseFloat(parent.querySelector('.line-pu').value) || 0;
+            parent.querySelector('.line-total').value = qte * pu;
             updateExpenseTotal();
         }
 
         function updateExpenseTotal() {
-            let t = 0;
+            const globalSupplier = document.getElementById('expense-collab').value;
+            let totalGlobal = 0;
+            let totalFournisseur = 0;
+            let totalSelected = 0;
+            
             document.querySelectorAll('.expense-line').forEach(l => {
-                t += parseFloat(l.querySelectorAll('input')[4].value) || 0;
+                const total = parseFloat(l.querySelector('.line-total').value) || 0;
+                const isChecked = l.querySelector('.line-checkbox') ? l.querySelector('.line-checkbox').checked : false;
+                const supplierSelect = l.querySelector('.line-supplier');
+                const lineSupplier = supplierSelect ? supplierSelect.value : "";
+                
+                totalGlobal += total;
+                if(globalSupplier !== "" && lineSupplier === globalSupplier) {
+                    totalFournisseur += total;
+                }
+                
+                if(isChecked) {
+                    totalSelected += total;
+                }
             });
-            const display = document.getElementById('expense-total-display');
-            if (display) display.textContent = t.toLocaleString() + " Ar";
+            
+            document.getElementById('expense-total-global').textContent = totalGlobal.toLocaleString() + " Ar";
+            
+            const fDisplay = document.getElementById('expense-total-fournisseur');
+            if(globalSupplier === "") {
+                fDisplay.textContent = "-";
+            } else {
+                fDisplay.textContent = totalFournisseur.toLocaleString() + " Ar";
+            }
+            
+            document.getElementById('expense-total-display').textContent = totalSelected.toLocaleString() + " Ar";
         }
 
-        function addExpenseLine() {
+        function getSuppliersOptionsHTML() {
+            return companiesDataCache.filter(c => c.type === "Fournisseur").map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+        }
+
+        function loadProformaLinesForExpense(projectId) {
             const container = document.getElementById('expense-lines');
+            if(!projectId) {
+                container.innerHTML = '<div class="text-center p-8 text-slate-500 text-sm italic">Sélectionnez un projet pour importer les lignes.</div>';
+                updateExpenseTotal();
+                return;
+            }
+            container.innerHTML = "<div class='flex justify-center p-8'><i class='fas fa-spinner animate-spin text-amber-500 text-2xl'></i></div>";
+            
+            doJSONPFetch('getProjectDetail', function(data) {
+                if(!data || !data.lines || data.lines.length === 0) {
+                    container.innerHTML = '<div class="text-center p-8 text-slate-500 text-sm italic">Aucune ligne de proforma trouvée pour ce projet.</div>';
+                    updateExpenseTotal();
+                    return;
+                }
+                
+                let html = '';
+                let index = 1;
+                data.lines.forEach(l => {
+                    const detail = l[1] || '';
+                    const qte = l[2] || 0;
+                    const unit = l[3] || '';
+                    const pu = l[4] || 0;
+                    const total = qte * pu;
+                    
+                    html += `
+                        <div class="expense-line grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-900/40 p-3 rounded-xl sm:bg-transparent sm:p-0 border border-slate-800/50 sm:border-none group transition-all">
+                            <div class="sm:col-span-4 flex items-center gap-2">
+                                <input type="checkbox" class="line-checkbox w-4 h-4 rounded border-slate-700 text-amber-500 focus:ring-amber-500 bg-slate-900/80 cursor-pointer" onchange="updateExpenseTotal()">
+                                <span class="line-number text-[10px] text-slate-500 font-mono w-4">${index}</span>
+                                <input type="text" placeholder="Détail" required value="${detail.replace(/"/g, '&quot;')}" class="line-detail bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                            </div>
+                            <input type="number" placeholder="Qté" value="${qte}" oninput="calcExpenseLine(this)" required class="line-qte sm:col-span-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                            <input type="text" placeholder="Unité" value="${unit.replace(/"/g, '&quot;')}" required class="line-unit sm:col-span-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                            <input type="number" placeholder="P.U (Ar)" value="${pu}" oninput="calcExpenseLine(this)" required class="line-pu sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                            <select required onchange="filterExpenseLines()" class="line-supplier sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full text-[11px]">
+                                <option value="">Fournisseur...</option>
+                                ${getSuppliersOptionsHTML()}
+                            </select>
+                            <div class="flex sm:col-span-2 items-center gap-2 w-full justify-between sm:justify-end">
+                                <span class="sm:hidden text-xs font-bold text-slate-400">Total:</span>
+                                <input type="text" placeholder="Total (Ar)" value="${total}" readonly class="line-total flex-1 sm:w-full bg-amber-950/50 p-3 rounded-lg border border-amber-800 text-amber-300 font-bold text-sm text-right">
+                                <button type="button" onclick="this.closest('.expense-line').remove(); updateExpenseTotal();" class="text-rose-500/50 hover:text-rose-500 p-2 text-center"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                    `;
+                    index++;
+                });
+                container.innerHTML = html;
+                filterExpenseLines();
+            }, "&id=" + projectId);
+        }
+
+        function filterExpenseLines() {
+            const globalSupplier = document.getElementById('expense-collab').value;
+            const lines = document.querySelectorAll('.expense-line');
+            let visibleCount = 0;
+            
+            lines.forEach(l => {
+                const supplierSelect = l.querySelector('.line-supplier');
+                const lineSupplier = supplierSelect ? supplierSelect.value : "";
+                if(globalSupplier === "" || globalSupplier === lineSupplier) {
+                    l.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    l.classList.add('hidden');
+                }
+            });
+            
+            document.getElementById('expense-line-counter').textContent = `Lignes affichées : ${visibleCount}/${lines.length}`;
+            updateExpenseTotal();
+        }
+
+        function selectAllExpenseLines(check) {
+            const globalSupplier = document.getElementById('expense-collab').value;
+            document.querySelectorAll('.expense-line').forEach(l => {
+                const supplierSelect = l.querySelector('.line-supplier');
+                const lineSupplier = supplierSelect ? supplierSelect.value : "";
+                if(globalSupplier === "" || globalSupplier === lineSupplier) {
+                    const cb = l.querySelector('.line-checkbox');
+                    if(cb) cb.checked = check;
+                }
+            });
+            updateExpenseTotal();
+        }
+
+        function addExpenseLine(empty = false) {
+            const container = document.getElementById('expense-lines');
+            if(container.querySelector('.italic')) container.innerHTML = '';
+            
+            const index = container.querySelectorAll('.expense-line').length + 1;
             const row = document.createElement('div');
-            row.className = 'expense-line grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-900/40 p-3 rounded-xl sm:bg-transparent sm:p-0 border border-slate-800/50 sm:border-none mt-2';
+            row.className = 'expense-line grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-900/40 p-3 rounded-xl sm:bg-transparent sm:p-0 border border-slate-800/50 sm:border-none mt-2 group transition-all';
             row.innerHTML = `
-                <input type="text" placeholder="Détail (ex: Peinture)" required class="sm:col-span-4 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
-                <input type="number" placeholder="Qté" oninput="calcExpenseLine(this)" required class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
-                <input type="text" placeholder="Unité (ex: Pot, m2)" required class="sm:col-span-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
-                <input type="number" placeholder="P.U (Ar)" oninput="calcExpenseLine(this)" required class="sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
-                <div class="flex sm:col-span-3 items-center gap-2 w-full justify-between sm:justify-end">
+                <div class="sm:col-span-4 flex items-center gap-2">
+                    <input type="checkbox" class="line-checkbox w-4 h-4 rounded border-slate-700 text-amber-500 focus:ring-amber-500 bg-slate-900/80 cursor-pointer" onchange="updateExpenseTotal()">
+                    <span class="line-number text-[10px] text-slate-500 font-mono w-4">${index}</span>
+                    <input type="text" placeholder="Détail (ex: Peinture)" required class="line-detail bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                </div>
+                <input type="number" placeholder="Qté" oninput="calcExpenseLine(this)" required class="line-qte sm:col-span-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                <input type="text" placeholder="Unité (ex: Pot, m2)" required class="line-unit sm:col-span-1 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                <input type="number" placeholder="P.U (Ar)" oninput="calcExpenseLine(this)" required class="line-pu sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full">
+                <select required onchange="filterExpenseLines()" class="line-supplier sm:col-span-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 outline-none focus:border-amber-500 text-sm w-full text-[11px]">
+                    <option value="">Fournisseur...</option>
+                    ${getSuppliersOptionsHTML()}
+                </select>
+                <div class="flex sm:col-span-2 items-center gap-2 w-full justify-between sm:justify-end">
                     <span class="sm:hidden text-xs font-bold text-slate-400">Total:</span>
-                    <input type="text" placeholder="Total (Ar)" readonly class="flex-1 sm:w-full bg-amber-950/50 p-3 rounded-lg border border-amber-800 text-amber-300 font-bold text-sm text-right">
-                    <button type="button" onclick="if(document.querySelectorAll('.expense-line').length>1) { this.closest('.expense-line').remove(); updateExpenseTotal(); }" class="text-rose-500/50 hover:text-rose-500 p-2 text-center"><i class="fas fa-times"></i></button>
+                    <input type="text" placeholder="Total (Ar)" readonly class="line-total flex-1 sm:w-full bg-amber-950/50 p-3 rounded-lg border border-amber-800 text-amber-300 font-bold text-sm text-right">
+                    <button type="button" onclick="this.closest('.expense-line').remove(); filterExpenseLines(); updateExpenseTotal();" class="text-rose-500/50 hover:text-rose-500 p-2 text-center"><i class="fas fa-times"></i></button>
                 </div>
             `;
             container.appendChild(row);
+            filterExpenseLines();
+            if(empty) {
+                row.querySelector('.line-checkbox').checked = true;
+                updateExpenseTotal();
+            }
         }
 
         async function submitExpense(e) {
@@ -1657,20 +1782,25 @@
 
             const dateAchat = e.target[0].value;
             const monthAchat = e.target[1].value;
-            const collabAchat = document.getElementById('expense-collab').value;
             const projetAchat = document.getElementById('expense-project').value;
 
             lines.forEach(line => {
-                const inputs = line.querySelectorAll('input');
+                const cb = line.querySelector('.line-checkbox');
+                if(!cb || !cb.checked) return;
+
                 const u = localStorage.getItem('erp_username') || "Inconnu";
-                const detail = inputs[0].value + " [Par: " + u + "]";
-                const qte = parseFloat(inputs[1].value) || 0;
-                const unit = inputs[2].value;
-                const pu = parseFloat(inputs[3].value) || 0;
-                const tot = parseFloat(inputs[4].value) || 0;
+                const detailInput = line.querySelector('.line-detail').value;
+                const detail = detailInput + " [Par: " + u + "]";
+                const qte = parseFloat(line.querySelector('.line-qte').value) || 0;
+                const unit = line.querySelector('.line-unit').value;
+                const pu = parseFloat(line.querySelector('.line-pu').value) || 0;
+                const tot = parseFloat(line.querySelector('.line-total').value) || 0;
+                const supplierSelect = line.querySelector('.line-supplier');
+                const collabAchat = supplierSelect ? supplierSelect.value : "";
+                
                 totalAmount += tot;
 
-                const detailStr = `${detail} (${qte} ${unit} x ${pu.toLocaleString()} Ar)`;
+                const detailStr = \`\${detail} (\${qte} \${unit} x \${pu.toLocaleString()} Ar)\`;
 
                 rowsData.push([
                     dateAchat,
@@ -1689,9 +1819,15 @@
                 ]);
             });
 
-            if (totalAmount > currentCash) {
-                alert("Erreur : Fonds insuffisants. L'achat total de " + totalAmount.toLocaleString() + " Ar dépasse votre disponibilité actuelle de " + currentCash.toLocaleString() + " Ar.");
+            if(rowsData.length === 0) {
+                alert("Veuillez cocher au moins une ligne à enregistrer.");
                 return;
+            }
+
+            if (totalAmount > currentCash) {
+                if(!confirm("ATTENTION : Le total sélectionné (" + totalAmount.toLocaleString() + " Ar) dépasse votre disponibilité en caisse estimée de " + currentCash.toLocaleString() + " Ar. Voulez-vous continuer ?")) {
+                    return;
+                }
             }
 
             const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
