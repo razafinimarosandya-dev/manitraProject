@@ -286,10 +286,11 @@
                 <i class="fas fa-wallet w-5"></i> Trésorerie
             </div>
             <div onclick="showSection('investissements', this)"
+                class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-chart-pie w-5"></i>
                 Investissements</div>
-            <div onclick="showSection('logs', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm">
-                <i class="fas fa-history w-5"></i> Journal d'Activité
-            </div>
+            <div onclick="showSection('logs', this)"
+                class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-history w-5"></i>
+                Journal d'Activité</div>
 
             <p class="text-[10px] uppercase font-bold text-slate-500 mt-8 mb-4 px-2 tracking-widest">Saisies Rapides</p>
             <button onclick="openProformaNormal()"
@@ -609,35 +610,31 @@
                 </div>
             </section>
 
-            <!-- SECTION LOGS (NOUVEAU) -->
-            <section id="section-logs" class="hidden h-full flex flex-col p-4 lg:p-8">
-                <div class="glass rounded-2xl p-6 border border-slate-800 shadow-xl flex-1 flex flex-col overflow-hidden">
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700">
-                                <i class="fas fa-history text-slate-400"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-lg text-white">Journal d'Activité</h3>
-                                <p class="text-xs text-slate-400">Historique complet des actions effectuées</p>
-                            </div>
-                        </div>
-                        <button onclick="exportTableToExcel('logs-table', 'Journal_Activite')" class="bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-600 hover:text-white transition-all flex items-center gap-2">
-                            <i class="fas fa-file-excel"></i> Exporter
+            <!-- SECTION LOGS -->
+            <section id="section-logs" class="hidden h-full flex flex-col p-4 lg:p-8 overflow-y-auto">
+                <div class="glass p-6 rounded-2xl border border-slate-700/50 mb-6 flex-shrink-0">
+                    <h3 class="text-xl font-bold mb-4"><i class="fas fa-history text-indigo-500 mr-2"></i> Journal d'Activité</h3>
+                    <p class="text-xs text-slate-400">Suivez en temps réel toutes les actions effectuées sur l'ERP.</p>
+                    <div class="mt-4 flex items-center justify-between">
+                        <button onclick="fetchLogs()" class="bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all">
+                            <i class="fas fa-sync-alt mr-2"></i>Rafraîchir
                         </button>
                     </div>
-
+                </div>
+                
+                <div class="glass flex-1 rounded-2xl border border-slate-700/50 flex flex-col overflow-hidden">
                     <div class="overflow-x-auto flex-1 custom-scroll">
-                        <table class="w-full text-left border-collapse min-w-[800px]" id="logs-table">
-                            <thead>
-                                <tr class="border-b border-slate-800/50">
-                                    <th class="py-4 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider sticky top-0 bg-slate-900/90 backdrop-blur-md z-10 w-48">Date & Heure</th>
-                                    <th class="py-4 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider sticky top-0 bg-slate-900/90 backdrop-blur-md z-10 w-40">Utilisateur</th>
-                                    <th class="py-4 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider sticky top-0 bg-slate-900/90 backdrop-blur-md z-10 w-48">Type d'Action</th>
-                                    <th class="py-4 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider sticky top-0 bg-slate-900/90 backdrop-blur-md z-10">Détails</th>
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <thead class="bg-slate-800/50 text-xs uppercase text-slate-400 sticky top-0 z-10 backdrop-blur-md">
+                                <tr>
+                                    <th class="p-4 font-bold tracking-wider rounded-tl-xl">Date & Heure</th>
+                                    <th class="p-4 font-bold tracking-wider">Utilisateur</th>
+                                    <th class="p-4 font-bold tracking-wider">Type d'Action</th>
+                                    <th class="p-4 font-bold tracking-wider rounded-tr-xl">Détails</th>
                                 </tr>
                             </thead>
-                            <tbody id="logs-tbody" class="divide-y divide-slate-800/30">
+                            <tbody id="logs-table-body" class="divide-y divide-slate-700/50">
+                                <!-- JS Renders -->
                             </tbody>
                         </table>
                     </div>
@@ -1153,6 +1150,7 @@
             if (id === 'stocks') fetchStocks();
             if (id === 'finance') fetchFinance();
             if (id === 'investissements') fetchInvestments();
+            if (id === 'logs') fetchLogs();
         }
 
         function openModal(id) {
@@ -1355,7 +1353,6 @@
 
                 if (typeof renderInvestmentsTable === 'function') renderInvestmentsTable(data.investments);
                 if (typeof renderStocksTable === 'function') renderStocksTable(data.stocks);
-                if (typeof renderLogsTable === 'function') renderLogsTable(data.logs);
 
                 showLoading(false);
                 delete window[cb];
@@ -1376,8 +1373,58 @@
             initGlobalData();
         }
 
+        function doJSONPFetch(action, callbackFunc) {
+            const cb = "cb_" + action + "_" + Date.now() + Math.floor(Math.random()*1000);
+            window[cb] = function(data) {
+                if (data && data.error === "Unauthorized") {
+                    logout();
+                    return;
+                }
+                callbackFunc(data);
+                delete window[cb];
+            };
+            const u = encodeURIComponent(localStorage.getItem('erp_username') || "");
+            const p = encodeURIComponent(localStorage.getItem('erp_password') || "");
+            const year = document.getElementById('year-selector') ? document.getElementById('year-selector').value : new Date().getFullYear();
+            
+            const s = document.createElement("script");
+            s.src = API_URL + "?action=" + action + "&year=" + year + "&username=" + u + "&password=" + p + "&callback=" + cb;
+            document.body.appendChild(s);
+        }
+
         function fetchDashboardWidgets() {
             initGlobalData();
+        }
+
+        function fetchLogs() {
+            showLoading(true);
+            doJSONPFetch("getLogs", function(data) {
+                renderLogsTable(data);
+                showLoading(false);
+            });
+        }
+
+        function renderLogsTable(data) {
+            const tbody = document.getElementById('logs-table-body');
+            if(!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-500 italic">Aucun historique disponible</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = data.map(log => {
+                let badgeColor = "bg-slate-500/20 text-slate-400";
+                if(log.action.includes('Expense')) badgeColor = "bg-amber-500/20 text-amber-400";
+                if(log.action.includes('Invoice') || log.action.includes('Proforma')) badgeColor = "bg-blue-500/20 text-blue-400";
+                if(log.action.includes('Status')) badgeColor = "bg-emerald-500/20 text-emerald-400";
+                if(log.action.includes('Cash')) badgeColor = "bg-emerald-500/20 text-emerald-400";
+
+                return `
+                <tr class="hover:bg-slate-800/30 transition-colors group">
+                    <td class="p-4"><span class="font-mono text-xs text-slate-400">${log.date}</span></td>
+                    <td class="p-4"><span class="font-bold text-white bg-slate-800 px-2 py-1 rounded-md text-xs border border-slate-700">${log.user}</span></td>
+                    <td class="p-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${badgeColor}">${log.action}</span></td>
+                    <td class="p-4"><span class="text-xs text-slate-300 truncate block max-w-sm" title="${log.details}">${log.details}</span></td>
+                </tr>`;
+            }).join('');
         }
 
         let companiesDataCache = [];
@@ -1429,26 +1476,16 @@
         }
 
         function fetchCompanies() {
-            const cb = "cb_c_" + Date.now();
-            window[cb] = function (data) {
+            doJSONPFetch("getCompanies", function(data) {
                 companiesDataCache = data;
                 renderCompaniesTable();
-                delete window[cb];
-            };
-            const s = document.createElement("script");
-            s.src = API_URL + "?action=getCompanies&callback=" + cb;
-            document.body.appendChild(s);
+            });
         }
 
         function fetchInvestments() {
-            const cb = "cb_inv_" + Date.now();
-            window[cb] = function (data) {
+            doJSONPFetch("getInvestments", function(data) {
                 renderInvestmentsTable(data);
-                delete window[cb];
-            };
-            const s = document.createElement("script");
-            s.src = API_URL + "?action=getInvestments&callback=" + cb;
-            document.body.appendChild(s);
+            });
         }
 
         function renderInvestmentsTable(data) {
@@ -2033,15 +2070,10 @@
         }
 
         function fetchWorkflow() {
-            const cb = "cb_w_" + Date.now();
-            window[cb] = function (data) {
+            doJSONPFetch("getWorkflow", function(data) {
                 workflowDataCache = data;
                 renderWorkflowTable();
-                delete window[cb];
-            };
-            const s = document.createElement("script");
-            s.src = API_URL + "?action=getWorkflow&callback=" + cb;
-            document.body.appendChild(s);
+            });
         }
 
         async function requestSheetPDF(type, id, client, project, date, dueDate, lines, total, paymentType = "numerique") {
@@ -2154,14 +2186,9 @@
         }
 
         function fetchStocks() {
-            const cb = "cb_s_" + Date.now();
-            window[cb] = function (data) {
+            doJSONPFetch("getStocks", function(data) {
                 renderStocksTable(data);
-                delete window[cb];
-            };
-            const s = document.createElement("script");
-            s.src = API_URL + "?action=getStocks&callback=" + cb;
-            document.body.appendChild(s);
+            });
         }
 
         function renderStocksTable(data) {
@@ -2268,16 +2295,11 @@
         }
 
         function fetchFinance() {
-            const cb = "cb_f_" + Date.now();
-            window[cb] = function (data) {
+            doJSONPFetch("getFinance", function(data) {
                 financeHeadersCache = data.headers || [];
                 financeDataCache = data.history || [];
                 renderFinanceTable();
-                delete window[cb];
-            };
-            const s = document.createElement("script");
-            s.src = API_URL + "?action=getFinance&callback=" + cb;
-            document.body.appendChild(s);
+            });
         }
 
         function toggleTheme() {
@@ -2479,45 +2501,6 @@
                 <option value="Décembre">Décembre ${year}</option>
             `;
             periodSelect.value = currentVal || 'Mai';
-        }
-
-        // --- RENDER LOGS TABLE ---
-        function renderLogsTable(logs) {
-            const tbody = document.getElementById('logs-tbody');
-            if (!tbody) return;
-            
-            if (!logs || logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-500 text-sm">Aucun historique disponible.</td></tr>`;
-                return;
-            }
-
-            let html = '';
-            logs.forEach(log => {
-                let actionBadge = `<span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">${log.action}</span>`;
-                
-                if (log.action.includes('Statut')) actionBadge = `<span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20"><i class="fas fa-sync-alt mr-1"></i> ${log.action}</span>`;
-                else if (log.action.includes('Achat') || log.action.includes('Dépense')) actionBadge = `<span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-400 border border-rose-500/20"><i class="fas fa-shopping-cart mr-1"></i> ${log.action}</span>`;
-                else if (log.action.includes('Facture') || log.action.includes('Proforma')) actionBadge = `<span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20"><i class="fas fa-file-invoice mr-1"></i> ${log.action}</span>`;
-                else if (log.action.includes('Cash')) actionBadge = `<span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fas fa-money-bill-wave mr-1"></i> ${log.action}</span>`;
-                else if (log.action.includes('Suppression')) actionBadge = `<span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-red-500/10 text-red-500 border border-red-500/20"><i class="fas fa-trash mr-1"></i> ${log.action}</span>`;
-                
-                html += `
-                    <tr class="hover:bg-slate-800/30 transition-colors group">
-                        <td class="py-3 px-4 text-xs text-slate-400 font-medium whitespace-nowrap">${log.date}</td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center gap-2">
-                                <div class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] font-bold border border-indigo-500/30">
-                                    ${String(log.user).substring(0, 2).toUpperCase()}
-                                </div>
-                                <span class="text-sm font-bold text-white">${log.user}</span>
-                            </div>
-                        </td>
-                        <td class="py-3 px-4">${actionBadge}</td>
-                        <td class="py-3 px-4 text-xs text-slate-300 font-medium">${log.details}</td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
         }
 
         // LOGIN SYSTEM & FETCH INTERCEPTOR
