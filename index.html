@@ -286,8 +286,10 @@
                 <i class="fas fa-wallet w-5"></i> Trésorerie
             </div>
             <div onclick="showSection('investissements', this)"
-                class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm"><i class="fas fa-chart-pie w-5"></i>
                 Investissements</div>
+            <div onclick="showSection('logs', this)" class="sidebar-item flex items-center gap-4 px-4 py-3 text-sm">
+                <i class="fas fa-history w-5"></i> Journal d'Activité
+            </div>
 
             <p class="text-[10px] uppercase font-bold text-slate-500 mt-8 mb-4 px-2 tracking-widest">Saisies Rapides</p>
             <button onclick="openProformaNormal()"
@@ -342,10 +344,25 @@
                     </button>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3 lg:gap-4">
                 <div
-                    class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                    class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 hidden sm:block">
                     LIVE CLOUD SYNC</div>
+                
+                <div class="relative">
+                    <button onclick="toggleUserMenu()" id="user-initials" class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold text-xs flex items-center justify-center shadow-lg shadow-blue-500/20 hover:scale-105 transition-transform">
+                        --
+                    </button>
+                    <div id="user-dropdown" class="absolute right-0 mt-2 w-48 glass border border-slate-700/50 rounded-xl shadow-2xl hidden z-[100] p-2">
+                        <div class="px-3 py-2 border-b border-slate-700/50 mb-2">
+                            <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Connecté(e) comme</p>
+                            <p class="text-sm font-bold text-white truncate" id="user-fullname">Utilisateur</p>
+                        </div>
+                        <button onclick="logout()" class="w-full text-left px-3 py-2 text-xs font-bold text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors flex items-center gap-2">
+                            <i class="fas fa-sign-out-alt"></i> Se déconnecter
+                        </button>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -589,6 +606,41 @@
                         </thead>
                         <tbody id="invest-table-body"></tbody>
                     </table>
+                </div>
+            </section>
+
+            <!-- SECTION LOGS (NOUVEAU) -->
+            <section id="section-logs" class="hidden h-full flex flex-col p-4 lg:p-8">
+                <div class="glass rounded-2xl p-6 border border-slate-800 shadow-xl flex-1 flex flex-col overflow-hidden">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700">
+                                <i class="fas fa-history text-slate-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg text-white">Journal d'Activité</h3>
+                                <p class="text-xs text-slate-400">Historique complet des actions effectuées</p>
+                            </div>
+                        </div>
+                        <button onclick="exportTableToExcel('logs-table', 'Journal_Activite')" class="bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-600 hover:text-white transition-all flex items-center gap-2">
+                            <i class="fas fa-file-excel"></i> Exporter
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto flex-1 custom-scroll">
+                        <table class="w-full text-left border-collapse min-w-[800px]" id="logs-table">
+                            <thead>
+                                <tr class="border-b border-slate-800/50">
+                                    <th class="py-4 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider sticky top-0 bg-slate-900/90 backdrop-blur-md z-10 w-48">Date & Heure</th>
+                                    <th class="py-4 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider sticky top-0 bg-slate-900/90 backdrop-blur-md z-10 w-40">Utilisateur</th>
+                                    <th class="py-4 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider sticky top-0 bg-slate-900/90 backdrop-blur-md z-10 w-48">Type d'Action</th>
+                                    <th class="py-4 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider sticky top-0 bg-slate-900/90 backdrop-blur-md z-10">Détails</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-tbody" class="divide-y divide-slate-800/30">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
         </div>
@@ -1303,6 +1355,7 @@
 
                 if (typeof renderInvestmentsTable === 'function') renderInvestmentsTable(data.investments);
                 if (typeof renderStocksTable === 'function') renderStocksTable(data.stocks);
+                if (typeof renderLogsTable === 'function') renderLogsTable(data.logs);
 
                 showLoading(false);
                 delete window[cb];
@@ -2428,6 +2481,45 @@
             periodSelect.value = currentVal || 'Mai';
         }
 
+        // --- RENDER LOGS TABLE ---
+        function renderLogsTable(logs) {
+            const tbody = document.getElementById('logs-tbody');
+            if (!tbody) return;
+            
+            if (!logs || logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-500 text-sm">Aucun historique disponible.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            logs.forEach(log => {
+                let actionBadge = `<span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">${log.action}</span>`;
+                
+                if (log.action.includes('Statut')) actionBadge = `<span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20"><i class="fas fa-sync-alt mr-1"></i> ${log.action}</span>`;
+                else if (log.action.includes('Achat') || log.action.includes('Dépense')) actionBadge = `<span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-400 border border-rose-500/20"><i class="fas fa-shopping-cart mr-1"></i> ${log.action}</span>`;
+                else if (log.action.includes('Facture') || log.action.includes('Proforma')) actionBadge = `<span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20"><i class="fas fa-file-invoice mr-1"></i> ${log.action}</span>`;
+                else if (log.action.includes('Cash')) actionBadge = `<span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fas fa-money-bill-wave mr-1"></i> ${log.action}</span>`;
+                else if (log.action.includes('Suppression')) actionBadge = `<span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-red-500/10 text-red-500 border border-red-500/20"><i class="fas fa-trash mr-1"></i> ${log.action}</span>`;
+                
+                html += `
+                    <tr class="hover:bg-slate-800/30 transition-colors group">
+                        <td class="py-3 px-4 text-xs text-slate-400 font-medium whitespace-nowrap">${log.date}</td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] font-bold border border-indigo-500/30">
+                                    ${String(log.user).substring(0, 2).toUpperCase()}
+                                </div>
+                                <span class="text-sm font-bold text-white">${log.user}</span>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">${actionBadge}</td>
+                        <td class="py-3 px-4 text-xs text-slate-300 font-medium">${log.details}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
         // LOGIN SYSTEM & FETCH INTERCEPTOR
         const originalFetch = window.fetch;
         window.fetch = async function() {
@@ -2476,10 +2568,19 @@
             const p = localStorage.getItem('erp_password');
             if(u && p) {
                 document.getElementById('login-overlay').style.display = 'none';
+                const elInitials = document.getElementById('user-initials');
+                const elFullname = document.getElementById('user-fullname');
+                if(elInitials) elInitials.textContent = u.substring(0, 2).toUpperCase();
+                if(elFullname) elFullname.textContent = u;
                 fetchData();
             } else {
                 document.getElementById('login-overlay').style.display = 'flex';
             }
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('user-dropdown');
+            if(menu) menu.classList.toggle('hidden');
         }
 
         window.onload = () => {
