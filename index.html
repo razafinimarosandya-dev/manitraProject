@@ -195,6 +195,55 @@
 
 <body class="flex h-screen overflow-hidden">
 
+    <!-- OVERLAY DE LOGIN -->
+    <div id="login-overlay" class="fixed inset-0 bg-slate-950 backdrop-blur-xl z-[300] flex items-center justify-center">
+        <div class="glass w-full max-w-sm rounded-3xl p-8 border border-blue-500/20 shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-20 -left-20 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-20 -right-20 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl"></div>
+            
+            <div class="relative z-10">
+                <div class="text-center mb-8">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 mb-4 shadow-inner shadow-blue-500/20">
+                        <i class="fas fa-fingerprint text-2xl text-blue-400"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white tracking-wide">Accès Sécurisé</h2>
+                    <p class="text-xs text-slate-400 mt-2 uppercase tracking-widest font-semibold">ERP TOTAL CONTROL V6</p>
+                </div>
+                
+                <form id="login-form" onsubmit="handleLogin(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-slate-500 mb-2 pl-1 tracking-wider">Identifiant</label>
+                        <div class="relative">
+                            <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            <input id="login-username" type="text" required
+                                class="w-full bg-slate-900/80 p-4 pl-11 rounded-2xl border border-slate-700/50 outline-none focus:border-blue-500/50 focus:bg-slate-900 text-sm font-medium transition-all shadow-inner"
+                                placeholder="Votre prénom...">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-slate-500 mb-2 pl-1 tracking-wider">Mot de passe</label>
+                        <div class="relative">
+                            <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            <input id="login-password" type="password" required
+                                class="w-full bg-slate-900/80 p-4 pl-11 rounded-2xl border border-slate-700/50 outline-none focus:border-blue-500/50 focus:bg-slate-900 text-sm font-medium transition-all shadow-inner"
+                                placeholder="••••••••">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" id="login-btn"
+                        class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 py-4 rounded-2xl font-bold text-sm text-white shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all relative overflow-hidden group">
+                        <span class="relative z-10 flex items-center justify-center gap-2">
+                            <span>Se Connecter</span>
+                            <i class="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+                        </span>
+                    </button>
+                    <p id="login-error" class="text-xs text-rose-400 text-center font-semibold mt-4 hidden">Identifiant ou mot de passe incorrect.</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <datalist id="collab-list"></datalist>
 
     <!-- OVERLAY DE CHARGEMENT -->
@@ -1206,6 +1255,10 @@
             const month = document.getElementById('period-selector').value;
             const cb = "cb_all_" + Date.now();
             window[cb] = function (data) {
+                if (data.error === "Unauthorized") {
+                    logout();
+                    return;
+                }
                 globalDataCache = data;
 
                 // 1. Dashboard
@@ -1256,7 +1309,9 @@
             };
             const year = document.getElementById('year-selector') ? document.getElementById('year-selector').value : new Date().getFullYear();
             const s = document.createElement("script");
-            s.src = API_URL + "?action=getAllData&month=" + month + "&year=" + year + "&callback=" + cb;
+            const u = encodeURIComponent(localStorage.getItem('erp_username') || "");
+            const p = encodeURIComponent(localStorage.getItem('erp_password') || "");
+            s.src = API_URL + "?action=getAllData&month=" + month + "&year=" + year + "&username=" + u + "&password=" + p + "&callback=" + cb;
             document.body.appendChild(s);
         }
 
@@ -2373,13 +2428,67 @@
             periodSelect.value = currentVal || 'Mai';
         }
 
+        // LOGIN SYSTEM & FETCH INTERCEPTOR
+        const originalFetch = window.fetch;
+        window.fetch = async function() {
+            if (arguments[0] === API_URL && arguments[1] && arguments[1].method === 'POST') {
+                try {
+                    let body = JSON.parse(arguments[1].body);
+                    body.username = localStorage.getItem('erp_username') || "";
+                    body.password = localStorage.getItem('erp_password') || "";
+                    arguments[1].body = JSON.stringify(body);
+                } catch(e) {}
+                
+                const response = await originalFetch.apply(this, arguments);
+                const clone = response.clone();
+                try {
+                    const data = await clone.json();
+                    if (data.error === "Unauthorized") {
+                        logout();
+                        throw new Error("Unauthorized");
+                    }
+                } catch(e) {}
+                return response;
+            }
+            return originalFetch.apply(this, arguments);
+        };
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('login-username').value.trim();
+            const p = document.getElementById('login-password').value.trim();
+            if(!u || !p) return;
+            localStorage.setItem('erp_username', u);
+            localStorage.setItem('erp_password', p);
+            document.getElementById('login-error').classList.add('hidden');
+            checkAuth();
+        }
+
+        function logout() {
+            localStorage.removeItem('erp_username');
+            localStorage.removeItem('erp_password');
+            document.getElementById('login-error').classList.remove('hidden');
+            document.getElementById('login-overlay').style.display = 'flex';
+        }
+
+        function checkAuth() {
+            const u = localStorage.getItem('erp_username');
+            const p = localStorage.getItem('erp_password');
+            if(u && p) {
+                document.getElementById('login-overlay').style.display = 'none';
+                fetchData();
+            } else {
+                document.getElementById('login-overlay').style.display = 'flex';
+            }
+        }
+
         window.onload = () => {
             const savedTheme = localStorage.getItem('theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
             const icon = document.getElementById('theme-icon');
             if (icon) icon.className = savedTheme === 'dark' ? 'fas fa-sun text-yellow text-sm' : 'fas fa-moon text-teal text-sm';
             updatePeriodSelector();
-            fetchData();
+            checkAuth(); // This replaces the direct fetchData() call
         };
     </script>
 </body>
