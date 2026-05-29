@@ -271,6 +271,14 @@
                 <h2 id="section-title" class="text-base lg:text-lg font-bold truncate max-w-[150px] sm:max-w-none">
                     Tableau de Bord</h2>
                 <div class="flex items-center gap-2">
+                    <select id="year-selector" onchange="updatePeriodSelector(); fetchData()"
+                        class="rounded-lg text-[10px] px-3 py-1.5 outline-none font-bold uppercase tracking-wider cursor-pointer shadow-sm bg-indigo-500/10 text-indigo-400 mr-2">
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026" selected>2026</option>
+                        <option value="2027">2027</option>
+                    </select>
                     <select id="period-selector" onchange="fetchData()"
                         class="rounded-lg text-[10px] px-3 py-1.5 outline-none font-bold uppercase tracking-wider cursor-pointer shadow-sm">
                         <option value="Janvier">Janvier 2026</option>
@@ -1246,8 +1254,9 @@
                 showLoading(false);
                 delete window[cb];
             };
+            const year = document.getElementById('year-selector') ? document.getElementById('year-selector').value : new Date().getFullYear();
             const s = document.createElement("script");
-            s.src = API_URL + "?action=getAllData&month=" + month + "&callback=" + cb;
+            s.src = API_URL + "?action=getAllData&month=" + month + "&year=" + year + "&callback=" + cb;
             document.body.appendChild(s);
         }
 
@@ -1538,9 +1547,10 @@
             }
 
             const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "...";
+            const year = document.getElementById('year-selector') ? document.getElementById('year-selector').value : new Date().getFullYear();
             const formData = {
                 action: "addExpense",
-                month: monthAchat,
+                month: monthAchat + " " + year,
                 data: rowsData
             };
             try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(formData) }); closeModal('expense'); fetchData(); } catch (err) { alert("Erreur"); } finally { btn.innerHTML = "Enregistrer l'Achat"; }
@@ -2341,11 +2351,34 @@
             XLSX.writeFile(wb, filename + "_" + new Date().toISOString().split('T')[0] + ".xlsx");
         }
 
+        function updatePeriodSelector() {
+            const year = document.getElementById('year-selector') ? document.getElementById('year-selector').value : new Date().getFullYear();
+            const periodSelect = document.getElementById('period-selector');
+            if (!periodSelect) return;
+            const currentVal = periodSelect.value;
+            periodSelect.innerHTML = `
+                <option value="Janvier">Janvier ${year}</option>
+                <option value="Février">Février ${year}</option>
+                <option value="Mars">Mars ${year}</option>
+                <option value="Avril">Avril ${year}</option>
+                <option value="Mai">Mai ${year}</option>
+                <option value="Juin">Juin ${year}</option>
+                <option value="Juillet">Juillet ${year}</option>
+                <option value="Août">Août ${year}</option>
+                <option value="Septembre">Septembre ${year}</option>
+                <option value="Octobre">Octobre ${year}</option>
+                <option value="Novembre">Novembre ${year}</option>
+                <option value="Décembre">Décembre ${year}</option>
+            `;
+            periodSelect.value = currentVal || 'Mai';
+        }
+
         window.onload = () => {
             const savedTheme = localStorage.getItem('theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
             const icon = document.getElementById('theme-icon');
             if (icon) icon.className = savedTheme === 'dark' ? 'fas fa-sun text-yellow text-sm' : 'fas fa-moon text-teal text-sm';
+            updatePeriodSelector();
             fetchData();
         };
     </script>
