@@ -1373,7 +1373,7 @@
             initGlobalData();
         }
 
-        function doJSONPFetch(action, callbackFunc) {
+        function doJSONPFetch(action, callbackFunc, extraParams = "") {
             const cb = "cb_" + action + "_" + Date.now() + Math.floor(Math.random()*1000);
             window[cb] = function(data) {
                 if (data && data.error === "Unauthorized") {
@@ -1388,7 +1388,7 @@
             const year = document.getElementById('year-selector') ? document.getElementById('year-selector').value : new Date().getFullYear();
             
             const s = document.createElement("script");
-            s.src = API_URL + "?action=" + action + "&year=" + year + "&username=" + u + "&password=" + p + "&callback=" + cb;
+            s.src = API_URL + "?action=" + action + "&year=" + year + "&username=" + u + "&password=" + p + extraParams + "&callback=" + cb;
             document.body.appendChild(s);
         }
 
@@ -2119,8 +2119,11 @@
             openModal('project-detail-drill');
             const cont = document.getElementById('project-detail-content-drill');
             cont.innerHTML = "<div class='flex justify-center p-10'><i class='fas fa-spinner animate-spin text-2xl text-blue-500'></i></div>";
-            const cb = "cb_pd_" + Date.now();
-            window[cb] = function (data) {
+            doJSONPFetch("getProjectDetail", function (data) {
+                if (!data || !data.invoices) {
+                    cont.innerHTML = "<div class='p-10 text-center text-rose-400 font-bold'>Erreur de chargement des détails.</div>";
+                    return;
+                }
                 const inv = data.invoices[0] || [id, new Date(), "Client Inconnu", 0, 0, 0, "Statut", "Projet Inconnu", ""];
                 let totalRevenus = parseFloat(inv[5]) || 0;
                 let totalCouts = 0;
@@ -2178,11 +2181,7 @@
                     <span class="text-slate-400 font-bold uppercase text-xs">Marge Nette du Projet</span>
                     <span class="text-2xl font-bold ${totalRevenus - totalCouts >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${(totalRevenus - totalCouts).toLocaleString()} Ar</span>
                 </div>`;
-                delete window[cb];
-            };
-            const s = document.createElement("script");
-            s.src = API_URL + "?action=getProjectDetail&id=" + id + "&callback=" + cb;
-            document.body.appendChild(s);
+            }, "&id=" + id);
         }
 
         function fetchStocks() {
