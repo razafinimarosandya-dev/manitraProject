@@ -2055,7 +2055,15 @@
 
         function resetExpenseForm() {
             const form = document.querySelector('#modal-expense form');
-            if (form) form.reset();
+            if (form) {
+                form.reset();
+                const d = new Date();
+                const months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+                const dateInput = form.querySelector('input[type="date"]');
+                const monthSelect = form.querySelector('select');
+                if (dateInput) dateInput.value = d.toISOString().split('T')[0];
+                if (monthSelect) monthSelect.value = months[d.getMonth()];
+            }
             const container = document.getElementById('expense-lines');
             if (container) {
                 container.innerHTML = `
@@ -2742,6 +2750,23 @@
             document.documentElement.setAttribute('data-theme', savedTheme);
             const icon = document.getElementById('theme-icon');
             if (icon) icon.className = savedTheme === 'dark' ? 'fas fa-sun text-yellow text-sm' : 'fas fa-moon text-teal text-sm';
+            
+            // Sélection automatique du mois et de l'année en cours
+            const d = new Date();
+            const currentYear = d.getFullYear().toString();
+            const months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+            const currentMonth = months[d.getMonth()];
+            
+            const yearSelect = document.getElementById('year-selector');
+            if (yearSelect && Array.from(yearSelect.options).some(opt => opt.value === currentYear)) {
+                yearSelect.value = currentYear;
+            }
+            
+            const periodSelect = document.getElementById('period-selector');
+            if (periodSelect) {
+                periodSelect.value = currentMonth;
+            }
+
             updatePeriodSelector();
             checkAuth(); // This replaces the direct fetchData() call
         };
